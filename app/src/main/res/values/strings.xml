@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">My Bookshelf</string>
+    <string name="DROPBOX_APP_KEY">fh2si4dchz272b1</string>
+
+    <!-- Permission -->
+    <string name="PERMISSION_ERROR">パーミッションエラー</string>
+
+
+
+    <string name="navigation_title_shelf">本棚</string>
+    <string name="navigation_title_search">検索・追加</string>
+    <string name="navigation_title_new">新刊</string>
+    <string name="navigation_title_settings">設定</string>
+
+    <string name="menu_action_search">検索</string>
+
+
+
+    <string name="settings_title_export_import">エクスポート／インポート</string>
+    <string name="settings_button_export_csv">CSVファイルにエクスポート</string>
+    <string name="settings_button_import_csv">CSVファイルからインポート</string>
+    <string name="settings_title_dropbox">Dropbox連携</string>
+    <string name="settings_button_log_in_dropbox">ログイン</string>
+    <string name="settings_button_log_out_dropbox">ログアウト</string>
+    <string name="settings_button_backup">バックアップ</string>
+    <string name="settings_button_restore">リストア</string>
+
+    <!-- Toast -->
+    <string name="toast_failed">エラーが発生しました</string>
+    <string name="toast_success_export">エクスポートしました</string>
+    <string name="toast_success_import">インポートしました</string>
+    <string name="toast_success_backup">バックアップしました</string>
+    <string name="toast_success_restore">リストアしました</string>
+
+    <!-- Progress -->
+    <string name="progress_backup">アップロード中…</string>
+    <string name="progress_restore">ダウンロード中…</string>
+    <string name="progress_export">エクスポート中…</string>
+    <string name="progress_import">インポート中…</string>
+    <string name="progress_unit">件</string>
+
+    <!-- Dialog-->
+    <string name="dialog_button_positive">はい</string>
+    <string name="dialog_button_negative">キャンセル</string>
+    <string name="dialog_title_logout">ログアウト</string>
+    <string name="dialog_message_logout">Dropboxからログアウトしますか？</string>
+
+    <string name="search_input_hint">タイトルまたは著者</string>
+
+    <!-- Search Item Spinner -->
+    <string-array name="spinner_search">
+        <item>タイトル</item>
+        <item>著者</item>
+    </string-array>
+
+
+</resources>

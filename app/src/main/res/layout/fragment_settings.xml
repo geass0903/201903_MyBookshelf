@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/fragment_settings_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@color/colorLineMargin" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/settings_title_export_import"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@color/colorLineMargin" />
+            </LinearLayout>
+            <Button
+                android:id="@+id/settings_button_export"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/shape_button"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/settings_button_export_csv"/>
+            <Button
+                android:id="@+id/settings_button_import"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/shape_button"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/settings_button_import_csv"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@color/colorLineMargin" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/settings_title_dropbox"
+                    />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="2dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@color/colorLineMargin" />
+            </LinearLayout>
+            <Button
+                android:id="@+id/settings_button_log_in_dropbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/shape_button"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/settings_button_log_in_dropbox" />
+            <Button
+                android:id="@+id/settings_button_log_out_dropbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/shape_button_logout"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/settings_button_log_out_dropbox" />
+            <Button
+                android:id="@+id/settings_button_backup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/shape_button"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/settings_button_backup" />
+            <Button
+                android:id="@+id/settings_button_restore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/shape_button"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/settings_button_restore" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/fragment_settings_progress_view"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/shape_dialog"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/fragment_settings_progress_text_title"
+            android:layout_margin="@dimen/margin_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="#FF000000"
+            android:textSize="@dimen/textSize_large" />
+        <TextView
+            android:id="@+id/fragment_settings_progress_text_progress"
+            android:layout_margin="@dimen/margin_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textColor="#FF000000"
+            android:textSize="@dimen/textSize_large" />
+        <ProgressBar
+            android:layout_margin="@dimen/margin_large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            style="?android:attr/progressBarStyleLarge" />
+    </LinearLayout>
+
+</RelativeLayout>
+
+
