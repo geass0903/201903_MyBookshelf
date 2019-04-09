@@ -25,6 +25,8 @@ public class ShelfFragment extends BaseFragment {
     private static final boolean D = true;
     private static final String TAG = ShelfFragment.class.getSimpleName();
 
+    private ShelfViewAdapter adapter;
+
     private MyBookshelfApplicationData mData;
     private Context mContext;
 
@@ -111,8 +113,28 @@ public class ShelfFragment extends BaseFragment {
         }
         c.close();
 
-        ShelfViewAdapter adapter = new ShelfViewAdapter(dataset);
+        adapter = new ShelfViewAdapter(dataset);
+        adapter.setClickListener(listener);
         recyclerView.setAdapter(adapter);
     }
+
+
+
+    private ShelfViewAdapter.Listener listener = new ShelfViewAdapter.Listener() {
+        @Override
+        public void onItemClick(int position) {
+            ShelfRowData data = adapter.get(position);
+            String title = data.getTitle();
+            if(D) Log.d(TAG,"Click: " + title);
+        }
+
+        @Override
+        public boolean onItemLongClick(int position) {
+            ShelfRowData data = adapter.get(position);
+            String title = data.getTitle();
+            if(D) Log.d(TAG,"LongClick: " + title);
+            return true;
+        }
+    };
 
 }
