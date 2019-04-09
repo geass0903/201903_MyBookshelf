@@ -12,35 +12,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
-    public static final int ITEM_VIEW_TYPE_NEXT_LOAD    = 0;
-    public static final int ITEM_VIEW_TYPE_LOADING      = 1;
-    public static final int ITEM_VIEW_TYPE_ITEM         = 2;
-
+    private static final int ITEM_VIEW_TYPE_NEXT_LOAD    = 0;
+    private static final int ITEM_VIEW_TYPE_LOADING      = 1;
+    private static final int ITEM_VIEW_TYPE_ITEM         = 2;
 
     private List<BookData> list;
 
     private RecyclerView mRecyclerView;
     private OnBookClickListener mListener;
 
-
-
-
-
-    void setClickListener(OnBookClickListener listener){
-        this.mListener = listener;
-    }
-
-
-    @Override
-    public int getItemViewType(int position) {
-
-        if(position == list.size() + 1){
-            return ITEM_VIEW_TYPE_NEXT_LOAD;
-        }
-
-        return ITEM_VIEW_TYPE_ITEM;
-
-    }
+    private boolean dispLoadNext = false;
+    private boolean isLoading = false;
 
 
     BooksViewAdapter(List<BookData> list) {
@@ -59,6 +41,26 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         mRecyclerView = null;
     }
 
+    @Override
+    public int getItemCount() {
+        if(dispLoadNext){
+            return list.size() + 1;
+        }else{
+            return list.size();
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if(isFooter(position)){ // exist Footer
+            if(isLoading){
+                return ITEM_VIEW_TYPE_LOADING;
+            }else {
+                return ITEM_VIEW_TYPE_NEXT_LOAD;
+            }
+        }
+        return ITEM_VIEW_TYPE_ITEM;
+    }
 
     @NonNull
     @Override
@@ -71,7 +73,7 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             return new ShelfLoadViewHolder(inflate);
         }
         if(viewType == ITEM_VIEW_TYPE_LOADING){
-            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_shelf,viewGroup,false);
+            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_loading,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
             return new ShelfLoadingViewHolder(inflate);
@@ -80,29 +82,87 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         inflate.setOnClickListener(this);
         inflate.setOnLongClickListener(this);
         return new BooksViewHolder(inflate);
-
     }
-
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(holder.getItemViewType() == ITEM_VIEW_TYPE_ITEM && holder instanceof BooksViewHolder){
-            BooksViewHolder viewHolder = (BooksViewHolder)holder;
-            viewHolder.draweeView.setImageURI(getImageUri(list.get(position).getImage()));
-            viewHolder.titleView.setText(list.get(position).getTitle());
-            viewHolder.authorView.setText(list.get(position).getAuthor());
-            viewHolder.publisherView.setText(list.get(position).getPublisher());
+        if(position != list.size()) {
+            if (holder.getItemViewType() == ITEM_VIEW_TYPE_ITEM && holder instanceof BooksViewHolder) {
+                BooksViewHolder viewHolder = (BooksViewHolder) holder;
+                viewHolder.draweeView.setImageURI(getImageUri(list.get(position).getImage()));
+                viewHolder.titleView.setText(list.get(position).getTitle());
+                viewHolder.authorView.setText(list.get(position).getAuthor());
+                viewHolder.publisherView.setText(list.get(position).getPublisher());
+            }
+        }
+    }
+
+    void setClickListener(OnBookClickListener listener){
+        this.mListener = listener;
+    }
+
+    void setLoadNext(){
+        dispLoadNext = true;
+        notifyItemInserted(list.size());
+    }
+
+    void startLoadNext(){
+        dispLoadNext = true;
+        isLoading = true;
+        notifyItemChanged(list.size());
+    }
+
+    void finishLoadNext(){
+        dispLoadNext = false;
+        isLoading = false;
+        notifyItemRemoved(list.size());
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(mRecyclerView != null && mListener != null){
+            BookData data = null;
+            int position = mRecyclerView.getChildAdapterPosition(view);
+            if(!isFooter(position)){
+                data = list.get(position);
+            }
+            mListener.onBookClick(this, position, data);
         }
     }
 
     @Override
-    public int getItemCount() {
-        return list.size();
+    public boolean onLongClick(View view){
+        if(mRecyclerView != null && mListener != null){
+            BookData data = null;
+            int position = mRecyclerView.getChildAdapterPosition(view);
+            if(!isFooter(position)){
+                data = list.get(position);
+            }
+            mListener.onBookLongClick(this, position, data);
+            return true;
+        }
+        return false;
     }
 
+    private boolean isFooter(int position) {
+        return position == list.size();
+    }
 
-    BookData get(int position){
-        return this.list.get(position);
+    public class ShelfLoadViewHolder extends RecyclerView.ViewHolder {
+        ShelfLoadViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    public class ShelfLoadingViewHolder extends RecyclerView.ViewHolder {
+        ShelfLoadingViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    interface OnBookClickListener{
+        void onBookClick(BooksViewAdapter adapter, int position, BookData data);
+        void onBookLongClick(BooksViewAdapter adapter, int position, BookData data);
     }
 
     private Uri getImageUri(String url){
@@ -121,43 +181,19 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return Uri.parse(arr[0]);
     }
 
-    @Override
-    public void onClick(View view) {
-        if(mRecyclerView != null && mListener != null){
-            int position = mRecyclerView.getChildAdapterPosition(view);
-            BookData data = list.get(position);
-            mListener.onBookClick(this, position, data);
-        }
+    void addBooksData(List<BookData> books){
+        int size = list.size();
+        int add_size = books.size();
+        list.addAll(books);
+        notifyItemRangeInserted(size,add_size);
     }
 
+    void clearBooksData(){
+        list.clear();
+        dispLoadNext = false;
+        isLoading = false;
+        notifyDataSetChanged();
 
-    @Override
-    public boolean onLongClick(View view){
-        if(mRecyclerView != null && mListener != null){
-            int position = mRecyclerView.getChildAdapterPosition(view);
-            BookData data = list.get(position);
-            mListener.onBookLongClick(this, position, data);
-            return true;
-        }
-        return false;
-    }
-
-    interface OnBookClickListener{
-        void onBookClick(BooksViewAdapter adapter, int position, BookData data);
-        void onBookLongClick(BooksViewAdapter adapter, int position, BookData data);
-    }
-
-
-    public class ShelfLoadViewHolder extends RecyclerView.ViewHolder {
-        ShelfLoadViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-    }
-
-    public class ShelfLoadingViewHolder extends RecyclerView.ViewHolder {
-        ShelfLoadingViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
     }
 
 
