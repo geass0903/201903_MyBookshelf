@@ -4,25 +4,21 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -39,15 +35,18 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class SearchFragment extends BaseFragment {
+public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnBookClickListener{
     private static final boolean D = true;
     private static final String TAG = SearchFragment.class.getSimpleName();
 
     private MyBookshelfApplicationData mData;
     private Context mContext;
+    private BooksViewAdapter adapter;
 
     private Spinner mSpinner;
     private EditText mEditText;
@@ -164,7 +163,7 @@ public class SearchFragment extends BaseFragment {
 
 
     private void SetShelfRowData(RecyclerView recyclerView) {
-        List<ShelfRowData> dataset = new ArrayList<>();
+        List<BookData> dataset = new ArrayList<>();
 
 
 //        MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(mContext.getApplicationContext());
@@ -181,7 +180,7 @@ public class SearchFragment extends BaseFragment {
         boolean mov = c.moveToFirst();
 
         while (mov) {
-            ShelfRowData data = new ShelfRowData();
+            BookData data = new BookData();
             data.setImage(c.getString(c.getColumnIndex("images")));
             data.setTitle(c.getString(c.getColumnIndex("title")));
             data.setAuthor(c.getString(c.getColumnIndex("author")));
@@ -191,7 +190,7 @@ public class SearchFragment extends BaseFragment {
         }
         c.close();
 
-        ShelfViewAdapter adapter = new ShelfViewAdapter(dataset);
+        BooksViewAdapter adapter = new BooksViewAdapter(dataset);
         recyclerView.setAdapter(adapter);
     }
 
@@ -212,6 +211,7 @@ public class SearchFragment extends BaseFragment {
 
 
                 if(json.has("Items")) {
+                    List<BookData> dataset = new ArrayList<>();
                     JSONArray jsonArray = json.getJSONArray("Items");
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject data = jsonArray.getJSONObject(i);
@@ -223,10 +223,22 @@ public class SearchFragment extends BaseFragment {
                         String author = data.getString("titleKana");
                         if(D) Log.d(TAG,"author: " + author);
 
+                        String imageurl = data.getString("largeImageUrl");
+                        if(D) Log.d(TAG,"author: " + imageurl);
+
+                        BookData book = new BookData();
+                        book.setImage(imageurl);
+                        book.setTitle(title);
+                        book.setAuthor(author);
+                        book.setPublisher("publisher");
+                        dataset.add(book);
+
 
                     }
 
-
+                    adapter = new BooksViewAdapter(dataset);
+                    adapter.setClickListener(this);
+                    mRecyclerView.setAdapter(adapter);
 
 
                 }
@@ -250,6 +262,15 @@ public class SearchFragment extends BaseFragment {
 
     }
 
+    @Override
+    public void onBookClick(BooksViewAdapter adapter, int position, BookData data) {
+
+    }
+
+    @Override
+    public void onBookLongClick(BooksViewAdapter adapter, int position, BookData data) {
+
+    }
 
 
     private static class AsyncSearch extends AsyncTask<Void, Void, Boolean> {
@@ -330,6 +351,22 @@ public class SearchFragment extends BaseFragment {
 
         }
 
+    }
+
+    private Uri getImageUri(String url){
+        String REGEX_CSV_COMMA = ",";
+        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
+        String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
+
+        Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
+        Matcher matcher = sdqPattern.matcher(url);
+        url = matcher.replaceAll("");
+        Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
+        matcher = sbPattern.matcher(url);
+        url = matcher.replaceAll("");
+        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
+        String[] arr = cPattern.split(url, -1);
+        return Uri.parse(arr[0]);
     }
 
 

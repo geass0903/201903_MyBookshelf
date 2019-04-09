@@ -1,7 +1,7 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 
-class ShelfRowData {
+class BookData {
     private String image;
     private String title;
     private String author;

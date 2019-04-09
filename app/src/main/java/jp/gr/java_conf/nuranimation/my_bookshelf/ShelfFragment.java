@@ -21,11 +21,11 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShelfFragment extends BaseFragment {
+public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBookClickListener {
     private static final boolean D = true;
     private static final String TAG = ShelfFragment.class.getSimpleName();
 
-    private ShelfViewAdapter adapter;
+    private BooksViewAdapter adapter;
 
     private MyBookshelfApplicationData mData;
     private Context mContext;
@@ -86,7 +86,7 @@ public class ShelfFragment extends BaseFragment {
     }
 
     private void SetShelfRowData(RecyclerView recyclerView) {
-        List<ShelfRowData> dataset = new ArrayList<>();
+        List<BookData> dataset = new ArrayList<>();
 
         SQLiteDatabase db = mData.getDataBase();
 
@@ -103,7 +103,7 @@ public class ShelfFragment extends BaseFragment {
         boolean mov = c.moveToFirst();
 
         while (mov) {
-            ShelfRowData data = new ShelfRowData();
+            BookData data = new BookData();
             data.setImage(c.getString(c.getColumnIndex("images")));
             data.setTitle(c.getString(c.getColumnIndex("title")));
             data.setAuthor(c.getString(c.getColumnIndex("author")));
@@ -113,28 +113,23 @@ public class ShelfFragment extends BaseFragment {
         }
         c.close();
 
-        adapter = new ShelfViewAdapter(dataset);
-        adapter.setClickListener(listener);
+        adapter = new BooksViewAdapter(dataset);
+        adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
     }
 
 
 
-    private ShelfViewAdapter.Listener listener = new ShelfViewAdapter.Listener() {
-        @Override
-        public void onItemClick(int position) {
-            ShelfRowData data = adapter.get(position);
-            String title = data.getTitle();
-            if(D) Log.d(TAG,"Click: " + title);
-        }
 
-        @Override
-        public boolean onItemLongClick(int position) {
-            ShelfRowData data = adapter.get(position);
-            String title = data.getTitle();
-            if(D) Log.d(TAG,"LongClick: " + title);
-            return true;
-        }
-    };
+    @Override
+    public void onBookClick(BooksViewAdapter adapter, int position, BookData data) {
+        String title = data.getTitle();
+        if(D) Log.d(TAG,"Click: " + title);
+    }
 
+    @Override
+    public void onBookLongClick(BooksViewAdapter adapter, int position, BookData data) {
+        String title = data.getTitle();
+        if(D) Log.d(TAG,"LongClick: " + title);
+    }
 }
