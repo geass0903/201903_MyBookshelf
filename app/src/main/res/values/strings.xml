@@ -47,6 +47,10 @@
 
     <string name="search_input_hint">タイトルまたは著者</string>
 
+
+    <string name="row_load_next">次の20件を表示</string>
+
+
     <!-- Search Item Spinner -->
     <string-array name="spinner_search">
         <item>タイトル</item>
