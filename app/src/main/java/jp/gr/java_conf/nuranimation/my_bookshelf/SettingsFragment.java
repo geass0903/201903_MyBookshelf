@@ -27,8 +27,8 @@ import java.lang.ref.WeakReference;
 
 
 public class SettingsFragment extends BaseFragment implements BaseDialogFragment.OnBaseDialogListener{
+    public static final String TAG = SettingsFragment.class.getSimpleName();
     private static final boolean D = true;
-    private static final String TAG = SettingsFragment.class.getSimpleName();
     private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
     private static final String FILE_NAME = "backup.csv";
     private static final int REQUEST_CODE_LOG_OUT = 100;

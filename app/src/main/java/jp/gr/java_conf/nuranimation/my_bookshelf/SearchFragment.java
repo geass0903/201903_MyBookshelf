@@ -5,18 +5,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.transition.Slide;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.Spinner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,27 +35,37 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnBookClickListener{
     private static final boolean D = true;
-    private static final String TAG = SearchFragment.class.getSimpleName();
+    public static final String TAG = SearchFragment.class.getSimpleName();
 
     private MyBookshelfApplicationData mData;
-    private Context mContext;
-    private BooksViewAdapter adapter;
-    private List<BookData> dataset = new ArrayList<>();
+    private BooksViewAdapter mBooksViewAdapter;
 
-    private Spinner mSpinner;
-    private EditText mEditText;
-
+    private SearchView mSearchView;
     private RecyclerView mRecyclerView;
+    private List<BookData> mBooksListSearch = new ArrayList<>();
 
     String ARG_SEARCH_WORD;
-    int ARG_SEARCH_PAGE = 1;
+    int ARG_SEARCH_PAGE;
 
 
     @Override
     public void onAttach (Context context) {
         super.onAttach(context);
-        mContext = context;
         mData = (MyBookshelfApplicationData) context.getApplicationContext();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(D) Log.d(TAG,"onPause()");
+//        mData.setSearchWord(ARG_SEARCH_WORD);
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(D) Log.d(TAG,"onResume()");
+//        ARG_SEARCH_WORD = mData.getSearchWord();
+//        mSearchView.setQuery(mData.getSearchWord(),false);
     }
 
     @Override
@@ -67,88 +76,52 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Toolbar toolbar = view.findViewById(R.id.fragment_search_toolbar);
-        toolbar.setTitle(R.string.navigation_title_search);
-        toolbar.inflateMenu(R.menu.menu_search);
+    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
+        if(D) Log.d(TAG,"onViewCreated");
+        initSearchView(view);
+        initRecyclerView(view);
+        if(D) Log.d(TAG,"dataset size" + mData.getmBooksListSearch().size());
+    }
 
-        mSpinner = view.findViewById(R.id.fragment_search_spinner_item);
-        mEditText = view.findViewById(R.id.fragment_search_input_item);
-        mEditText.setOnKeyListener(onKeyListener);
-
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()){
-                    case R.id.menu_search_action_search:
-                        int position = mSpinner.getSelectedItemPosition();
-                        String keyword = mEditText.getText().toString();
-                        String search_type;
-                        switch (position){
-                            case 0:
-                                search_type = "&title=";
-                                break;
-                            case 1:
-                                search_type = "&author=";
-                                break;
-                            default:
-                                search_type = "&title=";
-                                break;
-                        }
-                        if(D) Log.d(TAG,"Search: " + search_type + " = " + keyword);
-                        closeKeyBoard();
-                        adapter.clearBooksData();
-                        ARG_SEARCH_WORD = search_type + URLEncoder.encode(keyword);
-                        ARG_SEARCH_PAGE = 1;
-                        AsyncSearchTask(ARG_SEARCH_WORD, ARG_SEARCH_PAGE);
-                        break;
-                }
-                return false;
-            }
-        });
+    private void initRecyclerView(View view){
+        if(mBooksViewAdapter == null) {
+            mBooksViewAdapter = new BooksViewAdapter(mBooksListSearch);
+        }
+        mBooksViewAdapter.setClickListener(this);
 
         mRecyclerView = view.findViewById(R.id.fragment_search_recyclerview);
         LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
-        adapter = new BooksViewAdapter(dataset);
-        adapter.setClickListener(this);
-        mRecyclerView.setAdapter(adapter);
-
-
-//        adapter.setLoadNext();
-
-
-
-
-//        SetShelfRowData(recyclerView);
-
+        mRecyclerView.setAdapter(mBooksViewAdapter);
     }
 
-
-    public void AsyncSearchTask(String search, int page) {
-        new AsyncSearch(this,search,page).execute();
-    }
-
-    View.OnKeyListener onKeyListener = new View.OnKeyListener() {
-        @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && keyCode == KeyEvent.KEYCODE_ENTER) {
-                //ソフトキーボードを閉じる
-                closeKeyBoard();
-                return true;
+    private void initSearchView(View view){
+        mSearchView = view.findViewById(R.id.searchView);
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setQueryHint(getString(R.string.search_input_hint));
+        mSearchView.setSubmitButtonEnabled(false);
+        mSearchView.setQuery(mData.getSearchWord(),false);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String searchWord) {
+                mSearchView.clearFocus();
+                if(!searchWord.equals("")){
+                    if(D) Log.d(TAG,"Search: " + searchWord);
+                    mBooksViewAdapter.clearBooksData();
+                    ARG_SEARCH_WORD = searchWord;
+                    ARG_SEARCH_PAGE = 1;
+                    //                   new AsyncSearch(,ARG_SEARCH_WORD,ARG_SEARCH_PAGE).onPreExecute();
+                    AsyncSearchTask(ARG_SEARCH_WORD, ARG_SEARCH_PAGE);
+                }
+                return false;
             }
-            return false;
-        }
-    };
-
-    private void closeKeyBoard(){
-        if(getActivity() != null && getView() != null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getView().getWindowToken(), 0);
-        }
+            @Override
+            public boolean onQueryTextChange(String word) {
+                ARG_SEARCH_WORD = word;
+                return false;
+            }
+        });
     }
-
 
 
     public void callback(boolean result, JSONObject json){
@@ -159,11 +132,7 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
         String imageUrl = null;
 
         int count = 0;
-        int first = 0;
         int last = 0;
-
-        int size = dataset.size();
-        int add_size;
 
 
         if(result) {
@@ -201,51 +170,29 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
                         if (D) Log.d(TAG, "count: " + count);
                     }
 
-                    if(json.has("first")) {
-                        first = json.getInt("first");
-                        if (D) Log.d(TAG, "first: " + first);
-                    }
-
                     if(json.has("last")) {
                         last = json.getInt("last");
                         if (D) Log.d(TAG, "last: " + last);
                     }
 
-                    add_size = last - first + 1;
-                    if (D) Log.d(TAG, "add_size: " + add_size);
-
-
-
                     if(ARG_SEARCH_PAGE > 1){
-                        adapter.finishLoadNext();
+                        mBooksViewAdapter.finishLoadNext();
                     }
 
-                    adapter.addBooksData(dataset);
+                    mBooksViewAdapter.addBooksData(dataset);
                     if(count - last > 0){
-                        adapter.setLoadNext();
-                        add_size++;
+                        mBooksViewAdapter.setLoadNext();
                     }
-//                    adapter.notifyItemRemoved(1);
+//                    mBooksViewAdapter.notifyItemRemoved(1);
 
-//                    adapter = new BooksViewAdapter(dataset);
-//                    adapter.setLoadNext();
-//                    adapter.addButtonLoad();
-//                    adapter.setClickListener(this);
-//                    mRecyclerView.setAdapter(adapter);
+//                    mBooksViewAdapter = new BooksViewAdapter(dataset);
+//                    mBooksViewAdapter.setLoadNext();
+//                    mBooksViewAdapter.addButtonLoad();
+//                    mBooksViewAdapter.setClickListener(this);
+//                    mRecyclerView.setAdapter(mBooksViewAdapter);
 
 
                 }
-
-
-
-
-
-
-
-                /*
-                "count":40,"page":1,"first":1,"last":30,"hits":30,"carrier":0,"pageCount":2,
-
-                 */
 
 
             }catch (JSONException e){
@@ -258,10 +205,23 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
     @Override
     public void onBookClick(BooksViewAdapter adapter, int position, BookData data) {
         if(position != adapter.getItemCount() && data != null){
-            String title = data.getTitle();
-            if(D) Log.d(TAG,"Click: " + title);
+            FragmentManager fragmentManager = getFragmentManager();
+            if(fragmentManager != null){
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                BookDetailFragment fragment = new BookDetailFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString(BookDetailFragment.ARG_KEY_IMAGE,data.getImage());
+                bundle.putString(BookDetailFragment.ARG_KEY_TITLE,data.getTitle());
+                bundle.putString(BookDetailFragment.ARG_KEY_AUTHOR,data.getAuthor());
+                fragment.setArguments(bundle);
+                Slide slide = new Slide();
+                slide.setSlideEdge(Gravity.END);
+                fragment.setEnterTransition(slide);
+                fragmentTransaction.replace(R.id.contents_container, fragment,BookDetailFragment.TAG);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
         }else{
-            // Footer
             adapter.startLoadNext();
             ARG_SEARCH_PAGE++;
             AsyncSearchTask(ARG_SEARCH_WORD, ARG_SEARCH_PAGE);
@@ -278,15 +238,21 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
     }
 
 
+
+    public void AsyncSearchTask(String search, int page) {
+        new AsyncSearch(this,search,page).execute();
+    }
+
+
     private static class AsyncSearch extends AsyncTask<Void, Void, Boolean> {
         private final WeakReference<SearchFragment> mFragmentReference;
-        final String search;
+        final String keyword;
         final int page;
         JSONObject json;
 
-        private AsyncSearch(SearchFragment fragment, String search,int page){
+        private AsyncSearch(SearchFragment fragment, String keyword, int page){
             this.mFragmentReference = new WeakReference<>(fragment);
-            this.search = search;
+            this.keyword = keyword;
             this.page = page;
         }
 
@@ -300,13 +266,19 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
             boolean isSuccess = false;
             HttpsURLConnection connection = null;
             try{
-                String urlBase = "https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?applicationId=1028251347039610250";
+                String urlBase = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId=1028251347039610250";
+                String urlFormat = "&format=" + "json";
                 String urlFormatVersion = "&formatVersion=" + "2";
+                String urlGenre = "&booksGenreId=" + "001"; // Books
                 String urlHits = "&hits=20";
+                String urlPage = "&page=" + String.valueOf(page);
+                String urlStockFlag = "&outOfStockFlag=" + "1";
+                String urlField = "&field=" + "0";
                 String urlSort = "&sort=" + URLEncoder.encode("-releaseDate","UTF-8");
-                String urlPage = "&page=" + page;
-                String urlStockFlag = "&outOfStockFlag=" + 1;
-                String urlString = urlBase + urlFormatVersion + urlHits + urlSort + urlPage + urlStockFlag + search;
+                String urlKeyword = "&keyword=" + URLEncoder.encode(keyword);
+
+                String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits
+                        + urlPage + urlStockFlag + urlField + urlSort + urlKeyword;
                 URL url = new URL(urlString);
                 connection = (HttpsURLConnection)url.openConnection();
                 connection.setRequestMethod("GET");

@@ -22,6 +22,8 @@ public enum FragmentEvent {
     },
 
 
+
+
     EVENT1 {
         @Override
         public void apply(MainActivity activity){

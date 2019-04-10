@@ -1,48 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/fragment_search_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/fragment_search_toolbar"
+            android:background="@color/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_scrollFlags="scroll|enterAlways" >
+            <android.support.v7.widget.SearchView
+                android:id="@+id/searchView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-                <Spinner
-                    android:id="@+id/fragment_search_spinner_item"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/spinner_search"
-                    android:spinnerMode="dropdown" />
-                <EditText
-                    tools:targetApi="O"
-                    android:id="@+id/fragment_search_input_item"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:hint="@string/search_input_hint"
-                    android:autofillHints="@string/search_input_hint"
-                    android:inputType="text"
-                    android:textSize="@dimen/textSize_normal"/>
-            </android.support.v7.widget.Toolbar>
-        </android.support.design.widget.AppBarLayout>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/fragment_search_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-    </android.support.design.widget.CoordinatorLayout>
+                android:layout_height="wrap_content"/>
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/fragment_search_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
 </LinearLayout>

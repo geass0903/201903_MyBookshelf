@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class NewFragment extends BaseFragment {
-    private static final String TAG = NewFragment.class.getSimpleName();
+    public static final String TAG = NewFragment.class.getSimpleName();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

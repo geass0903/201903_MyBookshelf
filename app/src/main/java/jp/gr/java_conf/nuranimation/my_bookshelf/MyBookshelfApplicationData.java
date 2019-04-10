@@ -6,11 +6,18 @@ import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MyBookshelfApplicationData extends Application {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 
     SQLiteDatabase mDatabase;
+    List<BookData> mBooksListShelf;
+    List<BookData> mBooksListSearch;
+    String ARG_SEARCH_WORD;
+    int ARG_SEARCH_PAGE;
 
     @Override
     public void onCreate(){
@@ -20,6 +27,11 @@ public class MyBookshelfApplicationData extends Application {
         registerActivityLifecycleCallbacks(new LifecycleHandler());
         MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(getApplicationContext());
         mDatabase = helper.getReadableDatabase();
+
+        mBooksListShelf = new ArrayList<>();
+        mBooksListSearch = new ArrayList<>();
+        ARG_SEARCH_WORD = "";
+        ARG_SEARCH_PAGE = 1;
     }
 
     @Override
@@ -27,6 +39,8 @@ public class MyBookshelfApplicationData extends Application {
         super.onTerminate();
         if(D) Log.d(TAG,"onTerminate");
         mDatabase.close();
+        mBooksListShelf = null;
+        mBooksListSearch = null;
     }
 
 
@@ -34,5 +48,28 @@ public class MyBookshelfApplicationData extends Application {
         return mDatabase;
     }
 
+    public List<BookData> getmBooksListShelf(){
+        return mBooksListShelf;
+    }
+
+    public List<BookData> getmBooksListSearch(){
+        return mBooksListSearch;
+    }
+
+    public void setSearchWord(String word){
+        ARG_SEARCH_WORD = word;
+    }
+
+    public String getSearchWord(){
+        return ARG_SEARCH_WORD;
+    }
+
+    public void setSearchPage(int page){
+        ARG_SEARCH_PAGE = page;
+    }
+
+    public int getSearchPage(){
+        return ARG_SEARCH_PAGE;
+    }
 
 }

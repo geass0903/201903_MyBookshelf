@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBookClickListener {
+    public static final String TAG = ShelfFragment.class.getSimpleName();
     private static final boolean D = true;
-    private static final String TAG = ShelfFragment.class.getSimpleName();
 
     private BooksViewAdapter adapter;
 
@@ -64,7 +64,7 @@ public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBo
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()){
                     case R.id.menu_shelf_action_search:
-                        if(D) Log.d(TAG,"menu shelf action search");
+                        if(D) Log.d(TAG,"menu shelf action keyword");
                         break;
                 }
                 return false;
