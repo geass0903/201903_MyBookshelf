@@ -100,10 +100,12 @@ public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBo
 
 
         Cursor c = db.rawQuery(sql, null);
+
         boolean mov = c.moveToFirst();
 
         while (mov) {
             BookData data = new BookData();
+            data.setIsbn(c.getString(c.getColumnIndex("isbn")));
             data.setImage(c.getString(c.getColumnIndex("images")));
             data.setTitle(c.getString(c.getColumnIndex("title")));
             data.setAuthor(c.getString(c.getColumnIndex("author")));
@@ -113,7 +115,8 @@ public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBo
         }
         c.close();
 
-        adapter = new BooksViewAdapter(dataset);
+        adapter = new BooksViewAdapter(dataset,true);
+        adapter.setContext(mContext);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
     }

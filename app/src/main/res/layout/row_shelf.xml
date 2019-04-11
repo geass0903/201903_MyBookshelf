@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,7 +15,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:orientation="horizontal">
 
         <com.facebook.drawee.view.SimpleDraweeView
@@ -21,47 +23,76 @@
             android:layout_height="100dp"
             android:layout_width="100dp"
             fresco:actualImageScaleType="fitCenter"
-            fresco:placeholderImage="@drawable/ic_image_black_24dp" />
+            fresco:placeholderImage="@drawable/ic_vector_image_24dp" />
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent" >
 
             <TextView
                 android:id="@+id/shelf_row_title"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"
-                android:textSize="@dimen/textSize_large"/>
-
-            <LinearLayout
-                android:orientation="horizontal"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:textSize="@dimen/textSize_large" />
+            <TextView
+                android:id="@+id/shelf_row_author"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="0.5" >
-                <TextView
-                    android:id="@+id/shelf_row_author"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/textSize_normal" />
+            <TextView
+                android:id="@+id/shelf_row_publisher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/textSize_normal" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RatingBar
+                    style="@style/CustomRating"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:id="@+id/shelf_row_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/textSize_normal" />
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="wrap_content" />
+                    android:numStars="5"
+                    android:stepSize="0.5"
+                    android:isIndicator="true"
+                    android:rating="0" />
+
+                <ImageView
+                    android:layout_alignParentBottom="true"
+                    android:layout_toLeftOf="@id/shelf_row_readStatus"
+                    android:layout_toStartOf="@id/shelf_row_readStatus"
+                    android:background="#FF0000"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp" />
+
                 <TextView
-                    android:id="@+id/shelf_row_publisher"
+                    android:id="@+id/shelf_row_readStatus"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/textSize_normal" />
-            </LinearLayout>
+                    android:text="@string/row_load_next" />
+
+
+            </RelativeLayout>
+
+
+
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorLineMargin" />
-
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorLineMargin" />
 
 </LinearLayout>

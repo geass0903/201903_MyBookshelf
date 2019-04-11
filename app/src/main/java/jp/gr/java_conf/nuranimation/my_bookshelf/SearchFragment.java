@@ -85,7 +85,8 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
 
     private void initRecyclerView(View view){
         if(mBooksViewAdapter == null) {
-            mBooksViewAdapter = new BooksViewAdapter(mBooksListSearch);
+            mBooksViewAdapter = new BooksViewAdapter(mBooksListSearch,false);
+            mBooksViewAdapter.setContext(getContext());
         }
         mBooksViewAdapter.setClickListener(this);
 
@@ -127,9 +128,6 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
     public void callback(boolean result, JSONObject json){
         List<BookData> dataset = new ArrayList<>();
 
-        String title = null;
-        String author = null;
-        String imageUrl = null;
 
         int count = 0;
         int last = 0;
@@ -142,25 +140,28 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject data = jsonArray.getJSONObject(i);
                         if(D) Log.d(TAG,"sb: " + data.toString());
-
-                        if(data.has("title")) {
-                            title = data.getString("title");
-                            if (D) Log.d(TAG, "title: " + title);
-                        }
-                        if(data.has("author")) {
-                            author = data.getString("author");
-                            if (D) Log.d(TAG, "author: " + author);
-                        }
-                        if(data.has("largeImageUrl")){
-                            imageUrl = data.getString("largeImageUrl");
-                            if(D) Log.d(TAG,"author: " + imageUrl);
-                        }
-
                         BookData book = new BookData();
-                        book.setImage(imageUrl);
+
+                        String isbn = getParam(data,"isbn");
+                        book.setIsbn(isbn);
+                        String title = getParam(data,"title");
                         book.setTitle(title);
+                        String author = getParam(data,"author");
                         book.setAuthor(author);
-                        book.setPublisher("publisher");
+                        String imageUrl = getParam(data,"largeImageUrl");
+                        book.setImage(imageUrl);
+                        String publisher = getParam(data,"publisherName");
+                        book.setPublisher(publisher);
+                        String salesDate = getParam(data,"salesDate");
+                        book.setSalesDate(salesDate);
+                        String itemPrice = getParam(data,"itemPrice");
+                        book.setItemPrice(itemPrice);
+                        String rakutenUrl = getParam(data,"rakutenUrl");
+                        book.setRakutenUrl(rakutenUrl);
+
+                        book.setRegisteredFlag(false);
+//                        boolean registeredFlag;
+
                         dataset.add(book);
                     }
 
@@ -183,14 +184,6 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
                     if(count - last > 0){
                         mBooksViewAdapter.setLoadNext();
                     }
-//                    mBooksViewAdapter.notifyItemRemoved(1);
-
-//                    mBooksViewAdapter = new BooksViewAdapter(dataset);
-//                    mBooksViewAdapter.setLoadNext();
-//                    mBooksViewAdapter.addButtonLoad();
-//                    mBooksViewAdapter.setClickListener(this);
-//                    mRecyclerView.setAdapter(mBooksViewAdapter);
-
 
                 }
 
@@ -201,6 +194,23 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
         }
 
     }
+
+
+    String getParam(JSONObject json, String keyword){
+        try {
+            if (json.has(keyword)) {
+                String param = json.getString(keyword);
+                if(D) Log.d(TAG,keyword + ": " + param);
+                return param;
+            }
+        }catch (JSONException e){
+            if(D) Log.d(TAG,"JSONException");
+            return "";
+        }
+        return "";
+    }
+
+
 
     @Override
     public void onBookClick(BooksViewAdapter adapter, int position, BookData data) {

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_shelf_action_search"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_vector_search_white_24dp"
         android:title="@string/menu_action_search"
         app:showAsAction="always"
         />
