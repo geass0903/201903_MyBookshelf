@@ -88,7 +88,8 @@ public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBo
     private void SetShelfRowData(RecyclerView recyclerView) {
         List<BookData> dataset = new ArrayList<>();
 
-        SQLiteDatabase db = mData.getDataBase();
+
+        SQLiteDatabase db = mData.getDatabaseHelper().getReadableDatabase();
 
 //        MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(mContext.getApplicationContext());
 //        SQLiteDatabase db = helper.getReadableDatabase();

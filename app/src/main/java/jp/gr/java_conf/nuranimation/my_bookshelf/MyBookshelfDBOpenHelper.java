@@ -4,14 +4,29 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.nfc.Tag;
 
 public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
+    public static final String TAG = MyBookshelfDBOpenHelper.class.getSimpleName();
+
     private static final String DB_NAME = "jp.gr.java_conf.nuranimation.MyBookshelf.db";
     private static final int DB_VERSION = 1;
     private static final String DROP_TABLE_SHELF = "drop table MY_BOOKSHELF;";
 
+    private static final String TABLE_MY_BOOKSHELF = "MY_BOOKSHELF";
+    private static final String TABLE_AUTHOR = "AUTHOR";
+
+    private static final String BOOKSHELF_KEY_ISBN = "isbn";
+    private static final String BOOKSHELF_KEY_TITLE = "title";
+    private static final String BOOKSHELF_KEY_AUTHOR = "author";
+//    private static final String BOOKSHELF_KEY_ISBN = "isbn";
+//    private static final String BOOKSHELF_KEY_ISBN = "isbn";
+//    private static final String BOOKSHELF_KEY_ISBN = "isbn";
+
+
     public MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
+
     }
 
 
@@ -52,13 +67,13 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean deleteDB(SQLiteDatabase db){
+    boolean deleteDB(SQLiteDatabase db){
         db.execSQL(DROP_TABLE_SHELF);
         onCreate(db);
         return true;
     }
 
-    public void insertData(SQLiteDatabase db, ContentValues values){
+    void insertData(SQLiteDatabase db, ContentValues values){
         db.insert("MY_BOOKSHELF",null,values);
     }
 

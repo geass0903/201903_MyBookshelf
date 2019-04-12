@@ -13,7 +13,7 @@ public class MyBookshelfApplicationData extends Application {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 
-    SQLiteDatabase mDatabase;
+    MyBookshelfDBOpenHelper mDatabaseHelper;
     List<BookData> mBooksListShelf;
     List<BookData> mBooksListSearch;
     String ARG_SEARCH_WORD;
@@ -25,9 +25,7 @@ public class MyBookshelfApplicationData extends Application {
         if(D) Log.d(TAG,"onCreate");
         Fresco.initialize(this);
         registerActivityLifecycleCallbacks(new LifecycleHandler());
-        MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(getApplicationContext());
-        mDatabase = helper.getReadableDatabase();
-
+        mDatabaseHelper = new MyBookshelfDBOpenHelper(getApplicationContext());
         mBooksListShelf = new ArrayList<>();
         mBooksListSearch = new ArrayList<>();
         ARG_SEARCH_WORD = "";
@@ -38,14 +36,12 @@ public class MyBookshelfApplicationData extends Application {
     public void onTerminate(){
         super.onTerminate();
         if(D) Log.d(TAG,"onTerminate");
-        mDatabase.close();
         mBooksListShelf = null;
         mBooksListSearch = null;
     }
 
-
-    public SQLiteDatabase getDataBase(){
-        return mDatabase;
+    public MyBookshelfDBOpenHelper getDatabaseHelper(){
+        return mDatabaseHelper;
     }
 
     public List<BookData> getmBooksListShelf(){
