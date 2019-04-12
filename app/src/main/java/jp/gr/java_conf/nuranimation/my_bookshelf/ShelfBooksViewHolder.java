@@ -7,14 +7,14 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
-class BooksViewHolder extends RecyclerView.ViewHolder {
+class ShelfBooksViewHolder extends RecyclerView.ViewHolder {
 
     TextView titleView;
     TextView authorView;
     TextView publisherView;
     SimpleDraweeView draweeView;
 
-    BooksViewHolder(@NonNull View itemView) {
+    ShelfBooksViewHolder(@NonNull View itemView) {
         super(itemView);
 
         draweeView = itemView.findViewById(R.id.shelf_row_book_image);

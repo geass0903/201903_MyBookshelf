@@ -5,17 +5,25 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,129 +31,189 @@ class FileManager {
     private static final boolean D = true;
     private static final String TAG = FileManager.class.getSimpleName();
 
+    static final String DROPBOX_APP_DIR_PATH = "/MyBookshelf/";
+    static final String APP_DIR_PATH = "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
+    static final String FILENAME_BOOKSHELF = "backup_bookshelf.csv";
+    static final String FILENAME_AUTHORS   = "backup_authors.csv";
+
     private Context mContext;
+    private MyBookshelfApplicationData mData;
     private Handler mHandler;
 
     FileManager(Context context){
         mContext = context;
+        mData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
     void setHandler(Handler handler){
         mHandler = handler;
     }
 
-    boolean export_csv(String dirPath, String filename){
-        MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(mContext.getApplicationContext());
-        SQLiteDatabase db = helper.getReadableDatabase();
+    int export_csv(){
+        int error = ErrorStatus.Error_NO_ERROR;
+        int count = 0;
+        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
 
-        long recodeCount = DatabaseUtils.queryNumEntries(db, "MY_BOOKSHELF");
-        Log.d(TAG, "recodeCount : " + recodeCount);
-
-        long count = 0;
-
+        File extDir = Environment.getExternalStorageDirectory();
+        String dirPath = extDir.getPath() + APP_DIR_PATH;
         File dir = new File(dirPath);
         if(!dir.exists()){
             boolean success = dir.mkdirs();
             if(D) Log.d(TAG,"mkdirs(): " + success);
         }
+
         try {
-            FileWriter fileWriter = new FileWriter(dirPath+"2"+filename,false);
+            List<BookData> books = helper.getMyShelf();
+            int recodeCount = books.size();
+            if(D) Log.d(TAG,"recodeCount : " + recodeCount);
 
-            String sql = "SELECT * FROM MY_BOOKSHELF";
+            File file_bookshelf = new File(dirPath + "alt_" + FILENAME_BOOKSHELF);
+            OutputStream os_bookshelf = new FileOutputStream(file_bookshelf);
+            OutputStreamWriter osr_bookshelf = new OutputStreamWriter(os_bookshelf, Charset.forName("UTF-8"));
+            BufferedWriter bw_bookshelf = new BufferedWriter(osr_bookshelf);
 
-            Cursor c = db.rawQuery(sql,null);
-            boolean mov = c.moveToFirst();
-
-            while(mov){
-                String isbn  = c.getString(c.getColumnIndex("isbn"));
-                String title = c.getString(c.getColumnIndex("title"));
-                String str = isbn + "," + title + "\r\n";
-                fileWriter.write(str);
-
+            String idx = "isbn,title,author\r\n";
+            bw_bookshelf.write(idx);
+            for(BookData book : books){
+                String isbn = book.getIsbn();
+                String title = book.getTitle();
+                String author = book.getAuthor();
+                String str_book = isbn + "," + title + "," + author + "\r\n";
+                bw_bookshelf.write(str_book);
                 count++;
                 String progress = count + "/" + recodeCount;
                 mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
-
-                mov = c.moveToNext();
             }
-            c.close();
+            bw_bookshelf.close();
 
-            fileWriter.close();
+            List<String> authors = helper.getAuthors();
+            recodeCount = authors.size();
+            if(D) Log.d(TAG,"recodeCount : " + recodeCount);
+            count = 0;
+
+            File file_authors = new File(dirPath + "alt_" + FILENAME_AUTHORS);
+            OutputStream os_authors = new FileOutputStream(file_authors);
+            OutputStreamWriter osr_authors = new OutputStreamWriter(os_authors, Charset.forName("UTF-8"));
+            BufferedWriter bw_authors = new BufferedWriter(osr_authors);
+
+            for(String author : authors) {
+                bw_authors.write(author+ "\r\n");
+                count++;
+                String progress = count + "/" + recodeCount;
+                mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+            }
+            bw_authors.close();
         } catch (IOException e){
-            return false;
+            if (D) Log.d(TAG, "IO Exception");
+            error = ErrorStatus.Error_IO_ERROR;
         }
-        return true;
+        return error;
     }
 
-    boolean import_csv(String dirPath, String filename) {
-        boolean isSuccess = false;
+    int import_csv() {
+        int size = 0;
+        int count = 0;
+        int error = ErrorStatus.Error_NO_ERROR;
 
-        File file = new File(dirPath + filename);
-        if (!file.exists()) {
-            if (D) Log.d(TAG, "File not found");
-            return false;
+        File extDir = Environment.getExternalStorageDirectory();
+        String dirPath = extDir.getPath() + APP_DIR_PATH;
+        File file_bookshelf = new File(dirPath + FILENAME_BOOKSHELF);
+        if (!file_bookshelf.exists()){
+            if (D) Log.d(TAG, "file_bookshelf not found");
+            error = ErrorStatus.Error_FILE_BOOKSHLF_NOT_FOUND;
+            return error;
         }
 
-        MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(mContext.getApplicationContext());
-        SQLiteDatabase db = helper.getWritableDatabase();
-        helper.deleteDB(db);
-        db.beginTransaction();
-        try {
-            int size = 0;
-            int count = 0;
+        File file_authors = new File(dirPath + FILENAME_AUTHORS);
+        if (!file_authors.exists()){
+            if (D) Log.d(TAG, "file_authors not found");
+            error = ErrorStatus.Error_FILE_AUTHORS_NOT_FOUND;
+            return error;
+        }
 
+        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
+        helper.getWritableDatabase().beginTransaction();
+
+        try {
+            // insert BookData from CSV
+            helper.deleteTABLE_SHELF();
             // count line
-            InputStream input = new FileInputStream(file);
-            InputStreamReader inputStreamReader = new InputStreamReader(input);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            bufferedReader.readLine(); // skip first line
-            while ((bufferedReader.readLine()) != null) {
+            InputStream pre_is_bookshelf = new FileInputStream(file_bookshelf);
+            InputStreamReader pre_isr_bookshelf = new InputStreamReader(pre_is_bookshelf, Charset.forName("UTF-8"));
+            BufferedReader pre_br_bookshelf = new BufferedReader(pre_isr_bookshelf);
+            pre_br_bookshelf.readLine(); // skip first line
+            while ((pre_br_bookshelf.readLine()) != null) {
                 size++;
             }
-            bufferedReader.close();
+            pre_br_bookshelf.close();
             if (D) Log.d(TAG, "size: " + size);
-
             // import csv
-            InputStream input2 = new FileInputStream(file);
-            InputStreamReader inputStreamReader2 = new InputStreamReader(input2);
-            BufferedReader bufferedReader2 = new BufferedReader(inputStreamReader2);
-            String str = bufferedReader2.readLine();
-            String[] index = str.split(",");
-            if(index.length == 40){
-                while ((str = bufferedReader2.readLine()) != null) {
-                    if (D) Log.d(TAG, "str: " + str);
-                    String[] split = splitLineWithComma(str);
+            InputStream is_bookshelf = new FileInputStream(file_bookshelf);
+            InputStreamReader isr_bookshelf = new InputStreamReader(is_bookshelf, Charset.forName("UTF-8"));
+            BufferedReader br_bookshelf = new BufferedReader(isr_bookshelf);
+            String str_line_bookshelf = br_bookshelf.readLine();
+            String[] idx_bookshelf = str_line_bookshelf.split(",");
 
-                    ContentValues insert = import_Readee_CSV(split);
-                    helper.insertData(db,insert);
+            if(idx_bookshelf.length == 40){
+                while ((str_line_bookshelf = br_bookshelf.readLine()) != null) {
+                    if (D) Log.d(TAG, "str: " + str_line_bookshelf);
+                    String[] split = splitLineWithComma(str_line_bookshelf);
+                    BookData book = convertReadeeToBookData(split);
+                    helper.registerBook(book);
                     count++;
                     String progress = count + "/" + size;
                     mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
                 }
             }
-            if(index.length == 20){
-                while ((str = bufferedReader2.readLine()) != null) {
-                    if (D) Log.d(TAG, "str: " + str);
-                    String[] split = splitLineWithComma(str);
+            if(idx_bookshelf.length == 20){
+                while ((str_line_bookshelf = br_bookshelf.readLine()) != null) {
+                    if (D) Log.d(TAG, "str: " + str_line_bookshelf);
+                    String[] split = splitLineWithComma(str_line_bookshelf);
                     import_MYBOOKSHELF_CSV(split);
                     count++;
                     String progress = count + "/" + size;
                     mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
                 }
             }
-            bufferedReader2.close();
-            db.setTransactionSuccessful();
-            isSuccess = true;
+            br_bookshelf.close();
+
+            size = 0;
+            count = 0;
+            // insert Author from CSV file
+            helper.deleteTABLE_AUTHOR();
+            // count line
+            InputStream pre_is_authors = new FileInputStream(file_authors);
+            InputStreamReader pre_isr_authors = new InputStreamReader(pre_is_authors);
+            BufferedReader pre_br_authors = new BufferedReader(pre_isr_authors);
+            while ((pre_br_authors.readLine()) != null) {
+                size++;
+            }
+            pre_br_authors.close();
+            if (D) Log.d(TAG, "size: " + size);
+            // import csv
+            InputStream is_authors = new FileInputStream(file_authors);
+            InputStreamReader isr_authors = new InputStreamReader(is_authors);
+            BufferedReader br_authors = new BufferedReader(isr_authors);
+            String str_line_authors;
+            while ((str_line_authors = br_authors.readLine()) != null) {
+                helper.registerAuthor(str_line_authors);
+                count++;
+                String progress = count + "/" + size;
+                mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+            }
+            br_authors.close();
+
+            helper.getWritableDatabase().setTransactionSuccessful();
         } catch (FileNotFoundException e) {
             if(D) Log.e(TAG,"Error");
+            error = ErrorStatus.Error_FILE_NOT_FOUND;
         } catch (IOException e) {
             if(D) Log.e(TAG,"Error");
-        } catch (Exception e) {
-            if (D) Log.e(TAG, "Error");
+            error = ErrorStatus.Error_IO_ERROR;
         } finally {
-            db.endTransaction();
+            helper.getWritableDatabase().endTransaction();
         }
-        return isSuccess;
+        return error;
     }
 
 
@@ -154,17 +222,31 @@ class FileManager {
     }
 
 
+    private BookData convertReadeeToBookData (String[] split){
+        BookData bookData = new BookData();
+        bookData.setIsbn(split[1]);
+        bookData.setTitle(split[3]);
+        bookData.setAuthor(split[8]);
+        bookData.setPublisher(split[9]);
+        bookData.setSalesDate(split[11]);
+        bookData.setItemPrice(split[12]);
+        bookData.setRakutenUrl(split[13]);
+        bookData.setImage(split[17]);
+        bookData.setRating(split[18]);
+        bookData.setReadStatus(split[19]);
+        bookData.setTags(split[23]);
+        bookData.setFinishReadDate(split[26]);
+        bookData.setRegisterDate(split[39]);
+        return bookData;
+    }
+
+
     private ContentValues import_Readee_CSV(String[] split) {
         ContentValues insertValues = new ContentValues();
         insertValues.put("isbn", split[1]);// ISBN
         insertValues.put("title", split[3]);// タイトル
-        insertValues.put("subTitle", split[4]);// サブタイトル
-        insertValues.put("seriesName", split[5]);// シリーズ名
-        insertValues.put("contents", split[6]);// 多巻物収録内容
-        insertValues.put("genreId", split[7]);// ジャンルID
         insertValues.put("author", split[8]); // 著者
         insertValues.put("publisherName", split[9]);// 出版社
-        insertValues.put("size", split[10]); // 書籍のサイズ
         insertValues.put("releaseDate", split[11]);// 発売日
         insertValues.put("price", split[12]);// 定価
         insertValues.put("rakutenUrl", split[13]);// URL
@@ -172,11 +254,7 @@ class FileManager {
         insertValues.put("rating", split[18]); // レーティング
         insertValues.put("readStatus", split[19]);// ステータス
         insertValues.put("tags", split[23]);// タグ
-        insertValues.put("memo", split[24]);// メモ
         insertValues.put("finishReadDate", split[26]); // 読了日
-        insertValues.put("itemCaption", split[29]);// 商品説明文
-        insertValues.put("titleKana", split[30]); // タイトルカナ
-        insertValues.put("authorkana", split[31]);// 著者カナ
         insertValues.put("registerDate", split[39]);// 登録日
 
         return insertValues;

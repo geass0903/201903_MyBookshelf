@@ -10,11 +10,11 @@ class BookData {
     private String salesDate;
     private String itemPrice;
     private String rakutenUrl;
+    private String rating;
     private String readStatus;
     private String tags;
     private String finishReadDate;
     private String registerDate;
-    private boolean registeredFlag;
 
 
     void setIsbn(String isbn){
@@ -57,67 +57,67 @@ class BookData {
         return publisher;
     }
 
-    public String getSalesDate() {
+    String getSalesDate() {
         return salesDate;
     }
 
-    public void setSalesDate(String salesDate) {
+    void setSalesDate(String salesDate) {
         this.salesDate = salesDate;
     }
 
-    public String getItemPrice() {
+    String getItemPrice() {
         return itemPrice;
     }
 
-    public void setItemPrice(String itemPrice) {
+    void setItemPrice(String itemPrice) {
         this.itemPrice = itemPrice;
     }
 
-    public String getRakutenUrl() {
+    String getRakutenUrl() {
         return rakutenUrl;
     }
 
-    public void setRakutenUrl(String rakutenUrl) {
+    void setRakutenUrl(String rakutenUrl) {
         this.rakutenUrl = rakutenUrl;
     }
 
-    public String getReadStatus() {
+    String getReadStatus() {
         return readStatus;
     }
 
-    public void setReadStatus(String readStatus) {
+    void setReadStatus(String readStatus) {
         this.readStatus = readStatus;
     }
 
-    public String getTags() {
+    String getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    void setTags(String tags) {
         this.tags = tags;
     }
 
-    public String getFinishReadDate() {
+    String getFinishReadDate() {
         return finishReadDate;
     }
 
-    public void setFinishReadDate(String finishReadDate) {
+    void setFinishReadDate(String finishReadDate) {
         this.finishReadDate = finishReadDate;
     }
 
-    public String getRegisterDate() {
+    String getRegisterDate() {
         return registerDate;
     }
 
-    public void setRegisterDate(String registerDate) {
+    void setRegisterDate(String registerDate) {
         this.registerDate = registerDate;
     }
 
-    public boolean isRegisteredFlag() {
-        return registeredFlag;
+    String getRating() {
+        return rating;
     }
 
-    public void setRegisteredFlag(boolean registeredFlag) {
-        this.registeredFlag = registeredFlag;
+    void setRating(String rating) {
+        this.rating = rating;
     }
 }

@@ -1,9 +1,6 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,14 +15,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBookClickListener {
+public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter.OnBookClickListener {
     public static final String TAG = ShelfFragment.class.getSimpleName();
     private static final boolean D = true;
 
-    private BooksViewAdapter adapter;
+    private ShelfBooksViewAdapter adapter;
 
     private MyBookshelfApplicationData mData;
     private Context mContext;
@@ -86,37 +82,22 @@ public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBo
     }
 
     private void SetShelfRowData(RecyclerView recyclerView) {
-        List<BookData> dataset = new ArrayList<>();
+        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
 
+        List<BookData> books = helper.getMyShelf();
 
-        SQLiteDatabase db = mData.getDatabaseHelper().getReadableDatabase();
-
-//        MyBookshelfDBOpenHelper helper = new MyBookshelfDBOpenHelper(mContext.getApplicationContext());
-//        SQLiteDatabase db = helper.getReadableDatabase();
-
-        long recodeCount = DatabaseUtils.queryNumEntries(db, "MY_BOOKSHELF");
+        int recodeCount = books.size();
         if(D) Log.d(TAG, "recodeCount : " + recodeCount);
 
-        String sql = "SELECT * FROM MY_BOOKSHELF";
 
 
-        Cursor c = db.rawQuery(sql, null);
-
-        boolean mov = c.moveToFirst();
-
-        while (mov) {
-            BookData data = new BookData();
-            data.setIsbn(c.getString(c.getColumnIndex("isbn")));
-            data.setImage(c.getString(c.getColumnIndex("images")));
-            data.setTitle(c.getString(c.getColumnIndex("title")));
-            data.setAuthor(c.getString(c.getColumnIndex("author")));
-            data.setPublisher(c.getString(c.getColumnIndex("publisherName")));
-            dataset.add(data);
-            mov = c.moveToNext();
+        for(BookData book : books){
+            if(D) Log.d(TAG,"author: " + book.getAuthor());
+            helper.registerAuthor(book.getAuthor());
         }
-        c.close();
 
-        adapter = new BooksViewAdapter(dataset,true);
+
+        adapter = new ShelfBooksViewAdapter(books,true);
         adapter.setContext(mContext);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
@@ -126,13 +107,13 @@ public class ShelfFragment extends BaseFragment implements BooksViewAdapter.OnBo
 
 
     @Override
-    public void onBookClick(BooksViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
         String title = data.getTitle();
         if(D) Log.d(TAG,"Click: " + title);
     }
 
     @Override
-    public void onBookLongClick(BooksViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
         String title = data.getTitle();
         if(D) Log.d(TAG,"LongClick: " + title);
     }

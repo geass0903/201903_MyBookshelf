@@ -33,12 +33,12 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnBookClickListener{
+public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapter.OnBookClickListener{
     private static final boolean D = true;
     public static final String TAG = SearchFragment.class.getSimpleName();
 
     private MyBookshelfApplicationData mData;
-    private BooksViewAdapter mBooksViewAdapter;
+    private ShelfBooksViewAdapter mBooksViewAdapter;
 
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
@@ -85,7 +85,7 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
 
     private void initRecyclerView(View view){
         if(mBooksViewAdapter == null) {
-            mBooksViewAdapter = new BooksViewAdapter(mBooksListSearch,false);
+            mBooksViewAdapter = new ShelfBooksViewAdapter(mBooksListSearch,false);
             mBooksViewAdapter.setContext(getContext());
         }
         mBooksViewAdapter.setClickListener(this);
@@ -158,8 +158,6 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
                         book.setItemPrice(itemPrice);
                         String rakutenUrl = getParam(data,"rakutenUrl");
                         book.setRakutenUrl(rakutenUrl);
-
-                        book.setRegisteredFlag(false);
 //                        boolean registeredFlag;
 
                         dataset.add(book);
@@ -213,7 +211,7 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
 
 
     @Override
-    public void onBookClick(BooksViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
         if(position != adapter.getItemCount() && data != null){
             FragmentManager fragmentManager = getFragmentManager();
             if(fragmentManager != null){
@@ -240,7 +238,7 @@ public class SearchFragment extends BaseFragment implements BooksViewAdapter.OnB
     }
 
     @Override
-    public void onBookLongClick(BooksViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
         if(position != adapter.getItemCount() && data != null){
             String title = data.getTitle();
             if(D) Log.d(TAG,"LongClick: " + title);

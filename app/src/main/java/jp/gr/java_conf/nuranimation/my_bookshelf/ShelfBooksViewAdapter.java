@@ -11,29 +11,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
-    public static final String TAG = BooksViewAdapter.class.getSimpleName();
+public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+    public static final String TAG = ShelfBooksViewAdapter.class.getSimpleName();
     private static final boolean D = true;
 
     private static final int ITEM_VIEW_TYPE_NEXT_LOAD    = 0;
@@ -52,7 +46,7 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private File downloadDir;
 
 
-    BooksViewAdapter(List<BookData> list,boolean download) {
+    ShelfBooksViewAdapter(List<BookData> list, boolean download) {
         this.list = list;
         this.downloadFlg = download;
 
@@ -123,14 +117,14 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_shelf,viewGroup,false);
         inflate.setOnClickListener(this);
         inflate.setOnLongClickListener(this);
-        return new BooksViewHolder(inflate);
+        return new ShelfBooksViewHolder(inflate);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if(position != list.size()) {
-            if (holder.getItemViewType() == ITEM_VIEW_TYPE_ITEM && holder instanceof BooksViewHolder) {
-                BooksViewHolder viewHolder = (BooksViewHolder) holder;
+            if (holder.getItemViewType() == ITEM_VIEW_TYPE_ITEM && holder instanceof ShelfBooksViewHolder) {
+                ShelfBooksViewHolder viewHolder = (ShelfBooksViewHolder) holder;
                 viewHolder.draweeView.setImageURI(getUri(list.get(position)));
                 viewHolder.titleView.setText(list.get(position).getTitle());
                 viewHolder.authorView.setText(list.get(position).getAuthor());
@@ -203,8 +197,8 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     interface OnBookClickListener{
-        void onBookClick(BooksViewAdapter adapter, int position, BookData data);
-        void onBookLongClick(BooksViewAdapter adapter, int position, BookData data);
+        void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data);
+        void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data);
     }
 
     private Uri getUri(BookData book){
@@ -265,11 +259,11 @@ public class BooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
 
     private static class AsyncDownload extends AsyncTask<Void, Void, Boolean> {
-        private final WeakReference<BooksViewAdapter> mReference;
+        private final WeakReference<ShelfBooksViewAdapter> mReference;
         final Uri uri;
         final File file;
 
-        private AsyncDownload(BooksViewAdapter adapter, Uri uri, File file){
+        private AsyncDownload(ShelfBooksViewAdapter adapter, Uri uri, File file){
             this.mReference = new WeakReference<>(adapter);
             this.uri = uri;
             this.file = file;

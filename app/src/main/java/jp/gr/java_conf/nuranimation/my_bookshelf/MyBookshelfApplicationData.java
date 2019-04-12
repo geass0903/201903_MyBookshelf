@@ -13,7 +13,10 @@ public class MyBookshelfApplicationData extends Application {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 
-    MyBookshelfDBOpenHelper mDatabaseHelper;
+
+
+
+    private MyBookshelfDBOpenHelper mDatabaseHelper;
     List<BookData> mBooksListShelf;
     List<BookData> mBooksListSearch;
     String ARG_SEARCH_WORD;
@@ -36,6 +39,11 @@ public class MyBookshelfApplicationData extends Application {
     public void onTerminate(){
         super.onTerminate();
         if(D) Log.d(TAG,"onTerminate");
+        SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
+        if(db != null && db.isOpen()){
+            db.close();
+        }
+        mDatabaseHelper = null;
         mBooksListShelf = null;
         mBooksListSearch = null;
     }

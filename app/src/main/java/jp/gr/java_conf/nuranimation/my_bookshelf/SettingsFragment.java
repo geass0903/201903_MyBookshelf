@@ -297,10 +297,12 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
     private static class AsyncCSV extends AsyncTask<Void, Void, Boolean>{
         private final WeakReference<SettingsFragment> mFragmentReference;
         private ButtonAction action;
+        private int error;
 
         private AsyncCSV(SettingsFragment fragment, ButtonAction buttonAction){
             this.mFragmentReference = new WeakReference<>(fragment);
             this.action = buttonAction;
+            this.error = ErrorStatus.Error_NO_ERROR;
         }
 
         @Override
@@ -329,35 +331,31 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            boolean isSuccess = false;
             SettingsFragment fragment = mFragmentReference.get();
-            File file = Environment.getExternalStorageDirectory();
-            String dirPath = file.getPath() + "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
-            String filename = FILE_NAME;
 
             switch (action) {
                 case EXPORT_CSV:
-                    isSuccess = fragment.mFileManager.export_csv(dirPath,filename);
+                    error = fragment.mFileManager.export_csv();
                     break;
                 case IMPORT_CSV:
-                    isSuccess = fragment.mFileManager.import_csv(dirPath,filename);
+                    error = fragment.mFileManager.import_csv();
                     break;
                 case BACKUP_DROPBOX:
-                    isSuccess = fragment.mFileManager.export_csv(dirPath,filename);
-                    if(isSuccess) {
-                        isSuccess = fragment.mDropboxManager.backup(dirPath,filename);
+                    error= fragment.mFileManager.export_csv();
+                    if(error == ErrorStatus.Error_NO_ERROR) {
+                        error = fragment.mDropboxManager.backup();
                     }
                     break;
                 case RESTORE_DROPBOX:
-                    isSuccess = fragment.mDropboxManager.restore(dirPath,filename);
-                    if(isSuccess){
-                        isSuccess = fragment.mFileManager.import_csv(dirPath,filename);
+                    error = fragment.mDropboxManager.restore();
+                    if(error == ErrorStatus.Error_NO_ERROR){
+                        error = fragment.mFileManager.import_csv();
                     }
                     break;
                 default:
                     break;
             }
-            return isSuccess;
+            return error == ErrorStatus.Error_NO_ERROR;
         }
 
         @Override
