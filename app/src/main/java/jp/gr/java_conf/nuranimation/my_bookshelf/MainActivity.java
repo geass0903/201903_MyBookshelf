@@ -8,12 +8,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.transition.Slide;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -163,43 +165,40 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             Fragment fragment;
             FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
+
+            // remove BookDetailFragment
+            fragment = getSupportFragmentManager().findFragmentByTag(BookDetailFragment.TAG);
+            if(fragment instanceof BookDetailFragment){
+                mFragmentTransaction.remove(fragment);
+            }
             switch (item.getItemId()) {
                 case R.id.navigation_shelf:
                     fragment = getSupportFragmentManager().findFragmentByTag(ShelfFragment.TAG);
                     if(!(fragment instanceof ShelfFragment)){
                         mFragmentTransaction.replace(R.id.contents_container, new ShelfFragment(),ShelfFragment.TAG);
-                        mFragmentTransaction.commit();
                     }
-                    return true;
+                    break;
                 case R.id.navigation_search:
-                    fragment = getSupportFragmentManager().findFragmentByTag(BookDetailFragment.TAG);
-                    if(fragment instanceof BookDetailFragment){
-                        getSupportFragmentManager().popBackStack();
-                        return true;
-                    }
                     fragment = getSupportFragmentManager().findFragmentByTag(SearchFragment.TAG);
                     if(!(fragment instanceof SearchFragment)){
                         mFragmentTransaction.replace(R.id.contents_container, new SearchFragment(),SearchFragment.TAG);
-                        mFragmentTransaction.commit();
                     }
-                    return true;
+                    break;
                 case R.id.navigation_new:
                     fragment = getSupportFragmentManager().findFragmentByTag(NewFragment.TAG);
                     if(!(fragment instanceof NewFragment)){
                         mFragmentTransaction.replace(R.id.contents_container, new NewFragment(),NewFragment.TAG);
-                        mFragmentTransaction.commit();
                     }
-                    return true;
+                    break;
                 case R.id.navigation_settings:
                     fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.TAG);
                     if(!(fragment instanceof SettingsFragment)){
                         mFragmentTransaction.replace(R.id.contents_container, new SettingsFragment(),SettingsFragment.TAG);
-                        mFragmentTransaction.commit();
                     }
-
-                    return true;
+                    break;
             }
-            return false;
+            mFragmentTransaction.commit();
+            return true;
         }
     };
 

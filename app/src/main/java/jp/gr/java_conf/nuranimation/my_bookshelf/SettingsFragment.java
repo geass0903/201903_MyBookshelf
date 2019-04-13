@@ -155,7 +155,9 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
     public void callback(ButtonAction action, boolean result) {
         mTextView_Progress.setText("");
         mLinearLayout_Progress.setVisibility(View.GONE);
-        mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
+        if(mFragmentListener != null) {
+            mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
+        }
         if(result){
             switch (action) {
                 case EXPORT_CSV:

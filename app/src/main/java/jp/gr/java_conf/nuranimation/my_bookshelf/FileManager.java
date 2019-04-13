@@ -204,6 +204,7 @@ class FileManager {
             br_authors.close();
 
             helper.getWritableDatabase().setTransactionSuccessful();
+            mData.updateBooksListShelf();
         } catch (FileNotFoundException e) {
             if(D) Log.e(TAG,"Error");
             error = ErrorStatus.Error_FILE_NOT_FOUND;

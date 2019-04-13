@@ -13,13 +13,12 @@ public class MyBookshelfApplicationData extends Application {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 
-
-
-
     private MyBookshelfDBOpenHelper mDatabaseHelper;
     List<BookData> mBooksListShelf;
     List<BookData> mBooksListSearch;
-    String ARG_SEARCH_WORD;
+    List<BookData> mBooksListNew;
+    String ARG_SEARCH_KEYWORD;
+    String ARG_TMP_KEYWORD;
     int ARG_SEARCH_PAGE;
 
     @Override
@@ -29,50 +28,84 @@ public class MyBookshelfApplicationData extends Application {
         Fresco.initialize(this);
         registerActivityLifecycleCallbacks(new LifecycleHandler());
         mDatabaseHelper = new MyBookshelfDBOpenHelper(getApplicationContext());
-        mBooksListShelf = new ArrayList<>();
-        mBooksListSearch = new ArrayList<>();
-        ARG_SEARCH_WORD = "";
-        ARG_SEARCH_PAGE = 1;
+        initData();
     }
 
     @Override
     public void onTerminate(){
         super.onTerminate();
         if(D) Log.d(TAG,"onTerminate");
+        clearData();
+    }
+
+
+    public void initData(){
+        mBooksListShelf = mDatabaseHelper.getMyShelf();
+        mBooksListNew = mDatabaseHelper.getNewBooks();
+        mBooksListSearch = new ArrayList<>();
+        ARG_SEARCH_KEYWORD = "";
+        ARG_TMP_KEYWORD = "";
+        ARG_SEARCH_PAGE = 1;
+    }
+
+    public void clearData(){
         SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
         if(db != null && db.isOpen()){
             db.close();
         }
         mDatabaseHelper = null;
-        mBooksListShelf = null;
-        mBooksListSearch = null;
+        mBooksListShelf.clear();
+        mBooksListNew.clear();
+        mBooksListSearch.clear();
     }
+
 
     public MyBookshelfDBOpenHelper getDatabaseHelper(){
         return mDatabaseHelper;
     }
 
-    public List<BookData> getmBooksListShelf(){
+
+    public List<BookData> getBooksListShelf(){
         return mBooksListShelf;
     }
 
-    public List<BookData> getmBooksListSearch(){
+    public void updateBooksListShelf(){
+        mBooksListShelf = mDatabaseHelper.getMyShelf();
+    }
+
+    public List<BookData> getBooksListNew(){
+        return mBooksListNew;
+    }
+
+    public void updateBooksListNew(){
+        mBooksListNew = mDatabaseHelper.getNewBooks();
+    }
+
+    public List<BookData> getBooksListSearch(){
         return mBooksListSearch;
     }
 
-    public void setSearchWord(String word){
-        ARG_SEARCH_WORD = word;
+    public void saveSearchKeyword(String keyword){
+        ARG_SEARCH_KEYWORD = keyword;
     }
 
-    public String getSearchWord(){
-        return ARG_SEARCH_WORD;
+    public String loadSearchKeyword(){
+        return ARG_SEARCH_KEYWORD;
     }
 
-    public void setSearchPage(int page){
+    public void saveTmpKeyword(String keyword){
+        ARG_TMP_KEYWORD = keyword;
+    }
+
+    public String loadTmpKeyword(){
+        return ARG_TMP_KEYWORD;
+    }
+
+    public void saveSearchPage(int page){
         ARG_SEARCH_PAGE = page;
     }
 
-    public int getSearchPage(){
+    public int loadSearchPage(){
         return ARG_SEARCH_PAGE;
     }
 

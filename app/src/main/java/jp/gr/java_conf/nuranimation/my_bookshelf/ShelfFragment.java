@@ -82,21 +82,15 @@ public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter
     }
 
     private void SetShelfRowData(RecyclerView recyclerView) {
-        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
-
-        List<BookData> books = helper.getMyShelf();
-
+        List<BookData> books = mData.getBooksListShelf();
         int recodeCount = books.size();
         if(D) Log.d(TAG, "recodeCount : " + recodeCount);
-
-
-
+/*
         for(BookData book : books){
             if(D) Log.d(TAG,"author: " + book.getAuthor());
             helper.registerAuthor(book.getAuthor());
         }
-
-
+*/
         adapter = new ShelfBooksViewAdapter(books,true);
         adapter.setContext(mContext);
         adapter.setClickListener(this);

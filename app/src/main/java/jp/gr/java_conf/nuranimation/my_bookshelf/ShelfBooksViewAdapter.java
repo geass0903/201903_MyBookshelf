@@ -30,9 +30,10 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public static final String TAG = ShelfBooksViewAdapter.class.getSimpleName();
     private static final boolean D = true;
 
-    private static final int ITEM_VIEW_TYPE_NEXT_LOAD    = 0;
-    private static final int ITEM_VIEW_TYPE_LOADING      = 1;
-    private static final int ITEM_VIEW_TYPE_ITEM         = 2;
+    static final int VIEW_TYPE_BOOK         = 1;
+    static final int VIEW_TYPE_BUTTON_LOAD  = 2;
+    static final int VIEW_TYPE_LOADING      = 3;
+
 
     private List<BookData> list;
 
@@ -40,8 +41,6 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private RecyclerView mRecyclerView;
     private OnBookClickListener mListener;
 
-    private boolean dispLoadNext = false;
-    private boolean isLoading = false;
     private boolean downloadFlg = false;
     private File downloadDir;
 
@@ -49,9 +48,6 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     ShelfBooksViewAdapter(List<BookData> list, boolean download) {
         this.list = list;
         this.downloadFlg = download;
-
-
-//        downloadDir = mContext.getFilesDir();
         File dir = Environment.getExternalStorageDirectory();
         String dirPath = dir.getPath() + "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/BookImage";
         downloadDir = new File(dirPath);
@@ -79,36 +75,25 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public int getItemCount() {
-        if(dispLoadNext){
-            return list.size() + 1;
-        }else{
-            return list.size();
-        }
+        return list.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if(isFooter(position)){ // exist Footer
-            if(isLoading){
-                return ITEM_VIEW_TYPE_LOADING;
-            }else {
-                return ITEM_VIEW_TYPE_NEXT_LOAD;
-            }
-        }
-        return ITEM_VIEW_TYPE_ITEM;
+        return list.get(position).getView_type();
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType){
         View inflate;
-        if(viewType == ITEM_VIEW_TYPE_NEXT_LOAD){
+        if(viewType == VIEW_TYPE_BUTTON_LOAD){
             inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_button,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
             return new ShelfLoadViewHolder(inflate);
         }
-        if(viewType == ITEM_VIEW_TYPE_LOADING){
+        if(viewType == VIEW_TYPE_LOADING){
             inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_loading,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
@@ -122,14 +107,12 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(position != list.size()) {
-            if (holder.getItemViewType() == ITEM_VIEW_TYPE_ITEM && holder instanceof ShelfBooksViewHolder) {
-                ShelfBooksViewHolder viewHolder = (ShelfBooksViewHolder) holder;
-                viewHolder.draweeView.setImageURI(getUri(list.get(position)));
-                viewHolder.titleView.setText(list.get(position).getTitle());
-                viewHolder.authorView.setText(list.get(position).getAuthor());
-                viewHolder.publisherView.setText(list.get(position).getPublisher());
-            }
+        if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof ShelfBooksViewHolder){
+            ShelfBooksViewHolder viewHolder = (ShelfBooksViewHolder) holder;
+            viewHolder.draweeView.setImageURI(getUri(list.get(position)));
+            viewHolder.titleView.setText(list.get(position).getTitle());
+            viewHolder.authorView.setText(list.get(position).getAuthor());
+            viewHolder.publisherView.setText(list.get(position).getPublisher());
         }
     }
 
@@ -137,29 +120,13 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         this.mListener = listener;
     }
 
-    void setLoadNext(){
-        dispLoadNext = true;
-        notifyItemInserted(list.size());
-    }
-
-    void startLoadNext(){
-        dispLoadNext = true;
-        isLoading = true;
-        notifyItemChanged(list.size());
-    }
-
-    void finishLoadNext(){
-        dispLoadNext = false;
-        isLoading = false;
-        notifyItemRemoved(list.size());
-    }
 
     @Override
     public void onClick(View view) {
         if(mRecyclerView != null && mListener != null){
             BookData data = null;
             int position = mRecyclerView.getChildAdapterPosition(view);
-            if(!isFooter(position)){
+            if(list.get(position).getView_type() == VIEW_TYPE_BOOK) {
                 data = list.get(position);
             }
             mListener.onBookClick(this, position, data);
@@ -171,17 +138,13 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if(mRecyclerView != null && mListener != null){
             BookData data = null;
             int position = mRecyclerView.getChildAdapterPosition(view);
-            if(!isFooter(position)){
+            if(list.get(position).getView_type() == VIEW_TYPE_BOOK) {
                 data = list.get(position);
             }
             mListener.onBookLongClick(this, position, data);
             return true;
         }
         return false;
-    }
-
-    private boolean isFooter(int position) {
-        return position == list.size();
     }
 
     public class ShelfLoadViewHolder extends RecyclerView.ViewHolder {
@@ -247,14 +210,28 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     void clearBooksData(){
         list.clear();
-        dispLoadNext = false;
-        isLoading = false;
         notifyDataSetChanged();
-
-
 
     }
 
+
+    void setFooter(BookData footer){
+        if(list.size() > 0) {
+            int lastPosition = list.size() - 1;
+            // delete old footer
+            if (list.get(lastPosition).getView_type() != VIEW_TYPE_BOOK) {
+                if (D) Log.d(TAG, "remove footer type: " + list.get(lastPosition).getView_type());
+                list.remove(lastPosition);
+                notifyItemRemoved(lastPosition);
+            }
+            // add new footer
+            if (footer != null) {
+                if (D) Log.d(TAG, "add footer type: " + footer.getView_type());
+                list.add(footer);
+                notifyItemInserted(lastPosition);
+            }
+        }
+    }
 
 
 

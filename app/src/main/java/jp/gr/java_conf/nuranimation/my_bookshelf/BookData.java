@@ -2,6 +2,7 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 
 class BookData {
+    private int view_type;
     private String isbn;
     private String image;
     private String title;
@@ -16,6 +17,12 @@ class BookData {
     private String finishReadDate;
     private String registerDate;
 
+    void setView_type(int type){
+        this.view_type = type;
+    }
+    int getView_type(){
+       return view_type;
+    }
 
     void setIsbn(String isbn){
         this.isbn = isbn;

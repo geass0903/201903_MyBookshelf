@@ -3,6 +3,7 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.transition.Slide;
@@ -16,6 +17,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,17 +38,14 @@ import javax.net.ssl.HttpsURLConnection;
 public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapter.OnBookClickListener{
     private static final boolean D = true;
     public static final String TAG = SearchFragment.class.getSimpleName();
-
     private MyBookshelfApplicationData mData;
+    private Handler mHandler = new Handler();
+
     private ShelfBooksViewAdapter mBooksViewAdapter;
 
     private SearchView mSearchView;
-    private RecyclerView mRecyclerView;
-    private List<BookData> mBooksListSearch = new ArrayList<>();
 
-    String ARG_SEARCH_WORD;
-    int ARG_SEARCH_PAGE;
-
+    private LinearLayout mLinearLayout_Progress;
 
     @Override
     public void onAttach (Context context) {
@@ -58,14 +57,11 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
     public void onPause() {
         super.onPause();
         if(D) Log.d(TAG,"onPause()");
-//        mData.setSearchWord(ARG_SEARCH_WORD);
     }
     @Override
     public void onResume() {
         super.onResume();
         if(D) Log.d(TAG,"onResume()");
-//        ARG_SEARCH_WORD = mData.getSearchWord();
-//        mSearchView.setQuery(mData.getSearchWord(),false);
     }
 
     @Override
@@ -78,19 +74,20 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         if(D) Log.d(TAG,"onViewCreated");
+        initBooksViewAdapter();
         initSearchView(view);
         initRecyclerView(view);
-        if(D) Log.d(TAG,"dataset size" + mData.getmBooksListSearch().size());
+        mLinearLayout_Progress = view.findViewById(R.id.fragment_search_progress_view);
+    }
+
+    private void initBooksViewAdapter(){
+        mBooksViewAdapter = new ShelfBooksViewAdapter(mData.getBooksListSearch(),false);
+        mBooksViewAdapter.setContext(getContext());
+        mBooksViewAdapter.setClickListener(this);
     }
 
     private void initRecyclerView(View view){
-        if(mBooksViewAdapter == null) {
-            mBooksViewAdapter = new ShelfBooksViewAdapter(mBooksListSearch,false);
-            mBooksViewAdapter.setContext(getContext());
-        }
-        mBooksViewAdapter.setClickListener(this);
-
-        mRecyclerView = view.findViewById(R.id.fragment_search_recyclerview);
+        RecyclerView mRecyclerView = view.findViewById(R.id.fragment_search_recyclerview);
         LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mBooksViewAdapter);
@@ -101,7 +98,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
         mSearchView.setIconifiedByDefault(false);
         mSearchView.setQueryHint(getString(R.string.search_input_hint));
         mSearchView.setSubmitButtonEnabled(false);
-        mSearchView.setQuery(mData.getSearchWord(),false);
+        mSearchView.setQuery(mData.loadTmpKeyword(),false);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String searchWord) {
@@ -109,89 +106,101 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                 if(!searchWord.equals("")){
                     if(D) Log.d(TAG,"Search: " + searchWord);
                     mBooksViewAdapter.clearBooksData();
-                    ARG_SEARCH_WORD = searchWord;
-                    ARG_SEARCH_PAGE = 1;
-                    //                   new AsyncSearch(,ARG_SEARCH_WORD,ARG_SEARCH_PAGE).onPreExecute();
-                    AsyncSearchTask(ARG_SEARCH_WORD, ARG_SEARCH_PAGE);
+                    mData.saveSearchKeyword(searchWord);
+                    mData.saveSearchPage(1);
+                    AsyncSearchTask(searchWord, 1);
                 }
                 return false;
             }
             @Override
             public boolean onQueryTextChange(String word) {
-                ARG_SEARCH_WORD = word;
+                mData.saveTmpKeyword(word);
                 return false;
             }
         });
     }
 
 
-    public void callback(boolean result, JSONObject json){
-        List<BookData> dataset = new ArrayList<>();
-
-
-        int count = 0;
-        int last = 0;
-
-
-        if(result) {
-            try {
-                if(json.has("Items")) {
-                    JSONArray jsonArray = json.getJSONArray("Items");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject data = jsonArray.getJSONObject(i);
-                        if(D) Log.d(TAG,"sb: " + data.toString());
-                        BookData book = new BookData();
-
-                        String isbn = getParam(data,"isbn");
-                        book.setIsbn(isbn);
-                        String title = getParam(data,"title");
-                        book.setTitle(title);
-                        String author = getParam(data,"author");
-                        book.setAuthor(author);
-                        String imageUrl = getParam(data,"largeImageUrl");
-                        book.setImage(imageUrl);
-                        String publisher = getParam(data,"publisherName");
-                        book.setPublisher(publisher);
-                        String salesDate = getParam(data,"salesDate");
-                        book.setSalesDate(salesDate);
-                        String itemPrice = getParam(data,"itemPrice");
-                        book.setItemPrice(itemPrice);
-                        String rakutenUrl = getParam(data,"rakutenUrl");
-                        book.setRakutenUrl(rakutenUrl);
-//                        boolean registeredFlag;
-
-                        dataset.add(book);
-                    }
-
-
-                    if(json.has("count")) {
-                        count = json.getInt("count");
-                        if (D) Log.d(TAG, "count: " + count);
-                    }
-
-                    if(json.has("last")) {
-                        last = json.getInt("last");
-                        if (D) Log.d(TAG, "last: " + last);
-                    }
-
-                    if(ARG_SEARCH_PAGE > 1){
-                        mBooksViewAdapter.finishLoadNext();
-                    }
-
-                    mBooksViewAdapter.addBooksData(dataset);
-                    if(count - last > 0){
-                        mBooksViewAdapter.setLoadNext();
-                    }
-
+    public void callback(final boolean result, final JSONObject json){
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mLinearLayout_Progress.setVisibility(View.GONE);
+                if(mFragmentListener != null) {
+                    mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
                 }
 
+                List<BookData> dataset = new ArrayList<>();
 
-            }catch (JSONException e){
-                e.printStackTrace();
+
+                int count = 0;
+                int last = 0;
+
+                mBooksViewAdapter.setFooter(null);
+
+                if(result) {
+                    try {
+                        if(json.has("Items")) {
+                            JSONArray jsonArray = json.getJSONArray("Items");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject data = jsonArray.getJSONObject(i);
+                                if(D) Log.d(TAG,"sb: " + data.toString());
+                                BookData book = new BookData();
+                                book.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BOOK);
+
+                                String isbn = getParam(data,"isbn");
+                                book.setIsbn(isbn);
+                                String title = getParam(data,"title");
+                                book.setTitle(title);
+                                String author = getParam(data,"author");
+                                book.setAuthor(author);
+                                String imageUrl = getParam(data,"largeImageUrl");
+                                book.setImage(imageUrl);
+                                String publisher = getParam(data,"publisherName");
+                                book.setPublisher(publisher);
+                                String salesDate = getParam(data,"salesDate");
+                                book.setSalesDate(salesDate);
+                                String itemPrice = getParam(data,"itemPrice");
+                                book.setItemPrice(itemPrice);
+                                String rakutenUrl = getParam(data,"rakutenUrl");
+                                book.setRakutenUrl(rakutenUrl);
+
+                                dataset.add(book);
+                            }
+
+
+                            if(json.has("count")) {
+                                count = json.getInt("count");
+                                if (D) Log.d(TAG, "count: " + count);
+                            }
+
+                            if(json.has("last")) {
+                                last = json.getInt("last");
+                                if (D) Log.d(TAG, "last: " + last);
+                            }
+
+                            mBooksViewAdapter.addBooksData(dataset);
+
+                            if(count - last > 0){
+                                BookData footer = new BookData();
+                                footer.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+                                mBooksViewAdapter.setFooter(footer);
+//                        mBooksViewAdapter.setLoadNext();
+                            }else{
+                                mBooksViewAdapter.setFooter(null);
+                            }
+
+                        }
+
+
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
-
+        },1500);
     }
+
 
 
     String getParam(JSONObject json, String keyword){
@@ -212,7 +221,8 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
 
     @Override
     public void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
-        if(position != adapter.getItemCount() && data != null){
+        int view_type = adapter.getItemViewType(position);
+        if(view_type == ShelfBooksViewAdapter.VIEW_TYPE_BOOK){
             FragmentManager fragmentManager = getFragmentManager();
             if(fragmentManager != null){
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -221,19 +231,30 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                 bundle.putString(BookDetailFragment.ARG_KEY_IMAGE,data.getImage());
                 bundle.putString(BookDetailFragment.ARG_KEY_TITLE,data.getTitle());
                 bundle.putString(BookDetailFragment.ARG_KEY_AUTHOR,data.getAuthor());
+
+
                 fragment.setArguments(bundle);
                 Slide slide = new Slide();
                 slide.setSlideEdge(Gravity.END);
                 fragment.setEnterTransition(slide);
-                fragmentTransaction.replace(R.id.contents_container, fragment,BookDetailFragment.TAG);
+//                fragmentTransaction.replace(R.id.contents_container, fragment,BookDetailFragment.TAG);
+                fragmentTransaction.add(R.id.contents_container, fragment,BookDetailFragment.TAG);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             }
         }else{
-            adapter.startLoadNext();
-            ARG_SEARCH_PAGE++;
-            AsyncSearchTask(ARG_SEARCH_WORD, ARG_SEARCH_PAGE);
+            if(view_type == ShelfBooksViewAdapter.VIEW_TYPE_BUTTON_LOAD){
+                BookData footer = new BookData();
+                footer.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_LOADING);
+                adapter.setFooter(footer);
+//                adapter.startLoadNext();
+                String search = mData.loadSearchKeyword();
+                int search_page = mData.loadSearchPage() + 1;
+                mData.saveSearchPage(search_page);
+                AsyncSearchTask(search,search_page);
+            }
         }
+
 
     }
 
@@ -258,7 +279,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
         final int page;
         JSONObject json;
 
-        private AsyncSearch(SearchFragment fragment, String keyword, int page){
+        private AsyncSearch(SearchFragment fragment, String keyword, int page) {
             this.mFragmentReference = new WeakReference<>(fragment);
             this.keyword = keyword;
             this.page = page;
@@ -266,14 +287,20 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
 
         @Override
         protected void onPreExecute() {
-
+            if(page == 1) {
+                SearchFragment fragment = mFragmentReference.get();
+                if (fragment.mFragmentListener != null) {
+                    fragment.mFragmentListener.onFragmentEvent(FragmentEvent.DISP_MASK);
+                }
+                fragment.mLinearLayout_Progress.setVisibility(View.VISIBLE);
+            }
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             boolean isSuccess = false;
             HttpsURLConnection connection = null;
-            try{
+            try {
                 String urlBase = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId=1028251347039610250";
                 String urlFormat = "&format=" + "json";
                 String urlFormatVersion = "&formatVersion=" + "2";
@@ -282,36 +309,36 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                 String urlPage = "&page=" + String.valueOf(page);
                 String urlStockFlag = "&outOfStockFlag=" + "1";
                 String urlField = "&field=" + "0";
-                String urlSort = "&sort=" + URLEncoder.encode("-releaseDate","UTF-8");
+                String urlSort = "&sort=" + URLEncoder.encode("-releaseDate", "UTF-8");
                 String urlKeyword = "&keyword=" + URLEncoder.encode(keyword);
 
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits
                         + urlPage + urlStockFlag + urlField + urlSort + urlKeyword;
                 URL url = new URL(urlString);
-                connection = (HttpsURLConnection)url.openConnection();
+                connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setInstanceFollowRedirects(false);
                 connection.connect();
 
                 int status = connection.getResponseCode();
-                if(status == HttpURLConnection.HTTP_OK){
+                if (status == HttpURLConnection.HTTP_OK) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     StringBuilder sb = new StringBuilder();
                     String line;
-                    while( (line = reader.readLine()) != null){
+                    while ((line = reader.readLine()) != null) {
                         sb.append(line);
                     }
                     reader.close();
 
-                    if(D) Log.d(TAG,"sb: " + sb.toString());
+                    if (D) Log.d(TAG, "sb: " + sb.toString());
                     json = new JSONObject(sb.toString());
                     isSuccess = true;
                 }
-            } catch (IOException | JSONException e){
-                if(D) Log.d(TAG,"Error");
+            } catch (IOException | JSONException e) {
+                if (D) Log.d(TAG, "Error");
                 e.printStackTrace();
             } finally {
-                if(connection != null){
+                if (connection != null) {
                     connection.disconnect();
                 }
             }
@@ -323,6 +350,5 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
             mFragmentReference.get().callback(result, json);
         }
     }
-
 
 }
