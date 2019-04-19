@@ -186,7 +186,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
     void registerAuthor(String author){
         if(!author.equals("")) {
-            author = author.replaceAll("[　 ]","");
+            author = author.replaceAll("[\\x20\\u3000]","");
             SQLiteDatabase db = this.getWritableDatabase();
             String sql = "select * from " + TABLE_AUTHOR + " where " + AUTHOR_KEY_AUTHOR + " = ?;";
             Cursor c = db.rawQuery(sql, new String[]{author});

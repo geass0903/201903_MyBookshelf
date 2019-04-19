@@ -113,6 +113,7 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             viewHolder.titleView.setText(list.get(position).getTitle());
             viewHolder.authorView.setText(list.get(position).getAuthor());
             viewHolder.publisherView.setText(list.get(position).getPublisher());
+            viewHolder.salesDate.setText(list.get(position).getSalesDate());
         }
     }
 

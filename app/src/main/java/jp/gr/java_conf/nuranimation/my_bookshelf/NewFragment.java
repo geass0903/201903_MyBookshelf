@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -47,12 +48,19 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
     private Handler mHandler = new Handler();
     int size = 0;
 
+    private Calendar cal_baseDate;
+    private Calendar cal_salesDate;
+    private MyBookshelfDBOpenHelper mDBOpenHelper;
+
+    private String search_author;
+
     @Override
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
         mContext = context;
         mData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mDBOpenHelper = mData.getDatabaseHelper();
     }
 
     @Override
@@ -81,19 +89,20 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.menu_new_action_renew:
-                        if (D) Log.d(TAG, "menu new action renew");
                         if(authors_list.size() > 0){
+                            mDBOpenHelper.deleteTABLE_NEW_BOOKS();
                             mLinearLayout_Progress.setVisibility(View.VISIBLE);
                             if(mFragmentListener != null) {
                                 mFragmentListener.onFragmentEvent(FragmentEvent.DISP_MASK);
                             }
+                            cal_baseDate = Calendar.getInstance();
+                            cal_baseDate.add(Calendar.DAY_OF_MONTH,-14);
+                            cal_salesDate = Calendar.getInstance();
                             String text = "0" + "/" + size;
                             mTextView_Progress.setText(text);
-                            String search = authors_list.get(0);
+                            search_author = authors_list.get(0);
                             authors_list.remove(0);
-                            MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
-                            helper.getWritableDatabase().beginTransaction();
-                            AsyncSearchTask(search,1);
+                            AsyncSearchTask(search_author,1);
                         }
                         break;
                 }
@@ -130,7 +139,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                 int last = 0;
 
                 mBooksViewAdapter.setFooter(null);
-
+                mDBOpenHelper.getWritableDatabase().beginTransaction();
                 if(result) {
                     try {
                         if(json.has("Items")) {
@@ -158,11 +167,18 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                                 String rakutenUrl = getParam(data,"rakutenUrl");
                                 book.setRakutenUrl(rakutenUrl);
 
-                                MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
-                                helper.addNewBook(book);
+                                if(checkNewBook(book)){
+
+                                    if(D) Log.d(TAG,"Add Book title: " + book.getTitle());
+                                    if(D) Log.d(TAG,"Add Book author: " + book.getAuthor());
+                                    if(D) Log.d(TAG,"Add Book search: " + search_author);
+                                    mDBOpenHelper.addNewBook(book);
+                                }
 
 //                                dataset.add(book);
                             }
+
+
 
 /*
                             if(json.has("count")) {
@@ -195,25 +211,75 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                         e.printStackTrace();
                     }
                 }
+                mDBOpenHelper.getWritableDatabase().setTransactionSuccessful();
+                mDBOpenHelper.getWritableDatabase().endTransaction();
                 if(authors_list.size() > 0){
                     int now = size - authors_list.size();
                     String text = now + "/" + size;
                     mTextView_Progress.setText(text);
-                    String search = authors_list.get(0);
+
+                    search_author = authors_list.get(0);
                     authors_list.remove(0);
-                    AsyncSearchTask(search,1);
+                    AsyncSearchTask(search_author,1);
                 }else{
-                    MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
-                    helper.getWritableDatabase().setTransactionSuccessful();
-                    helper.getWritableDatabase().endTransaction();
+                    mData.updateBooksListNew();
                     mLinearLayout_Progress.setVisibility(View.GONE);
                     if(mFragmentListener != null) {
                         mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
                     }
                 }
             }
-        },1500);
+        },1200);
     }
+
+    boolean checkNewBook(BookData book){
+        if (checkAuthor(book)) {
+            return checkSalesDate(book);
+        }
+        return false;
+    }
+
+
+    boolean checkAuthor(BookData book){
+        String book_author = book.getAuthor();
+        book_author = book_author.replaceAll("[\\x20\\u3000]","");
+        return book_author.contains(search_author);
+    }
+
+    boolean checkSalesDate(BookData book){
+        String salesDate = book.getSalesDate();
+        int year;
+        int month;
+        int day;
+        int startIdx;
+        int endIdx;
+
+        startIdx = salesDate.indexOf("年");
+        if(startIdx != -1){
+            year = Integer.parseInt(salesDate.substring(0,startIdx));
+            if(D) Log.d(TAG,"year: " + year);
+            endIdx = startIdx+1;
+            startIdx = salesDate.indexOf("月",endIdx);
+            if(startIdx != -1){
+                month = Integer.parseInt(salesDate.substring(endIdx,startIdx));
+                if(D) Log.d(TAG,"month: " + month);
+                endIdx = startIdx+1;
+                startIdx = salesDate.indexOf("日",endIdx);
+                if(startIdx != -1){
+                    day = Integer.parseInt(salesDate.substring(endIdx,startIdx));
+                    if(D) Log.d(TAG,"day: " + day);
+                    cal_salesDate.set(year,month-1,day);
+                }else{
+                    cal_salesDate.set(year,month-1,cal_salesDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }
+                if(D) Log.d(TAG,"nowDate: " + cal_baseDate.getTime());
+                if(D) Log.d(TAG,"salesDate: " + cal_salesDate.getTime());
+                return cal_salesDate.compareTo(cal_baseDate) >= 0;
+            }
+        }
+        return false;
+    }
+
 
 
 

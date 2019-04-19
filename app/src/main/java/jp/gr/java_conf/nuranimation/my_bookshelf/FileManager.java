@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UTFDataFormatException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -138,7 +140,7 @@ class FileManager {
             // insert BookData from CSV
             helper.deleteTABLE_SHELF();
             // count line
-            InputStream pre_is_bookshelf = new FileInputStream(file_bookshelf);
+            InputStream pre_is_bookshelf = getStreamSkipBOM(new FileInputStream(file_bookshelf),Charset.forName("UTF-8"));
             InputStreamReader pre_isr_bookshelf = new InputStreamReader(pre_is_bookshelf, Charset.forName("UTF-8"));
             BufferedReader pre_br_bookshelf = new BufferedReader(pre_isr_bookshelf);
             pre_br_bookshelf.readLine(); // skip first line
@@ -148,7 +150,7 @@ class FileManager {
             pre_br_bookshelf.close();
             if (D) Log.d(TAG, "size: " + size);
             // import csv
-            InputStream is_bookshelf = new FileInputStream(file_bookshelf);
+            InputStream is_bookshelf = getStreamSkipBOM(new FileInputStream(file_bookshelf),Charset.forName("UTF-8"));
             InputStreamReader isr_bookshelf = new InputStreamReader(is_bookshelf, Charset.forName("UTF-8"));
             BufferedReader br_bookshelf = new BufferedReader(isr_bookshelf);
             String str_line_bookshelf = br_bookshelf.readLine();
@@ -287,6 +289,26 @@ class FileManager {
             e.printStackTrace();
         }
         return arr;
+    }
+
+
+
+    public InputStream getStreamSkipBOM(InputStream is, Charset charSet) throws IOException{
+        if( !(charSet == Charset.forName("UTF-8")) ){
+            return is;
+        }
+        if( !is.markSupported() ){
+            is = new BufferedInputStream(is);
+        }
+        is.mark(3);
+        if( is.available() >= 3 ){
+            byte b[] = {0,0,0};
+            int bytes = is.read(b,0,3);
+            if(bytes == 3 &&  b[0]!=(byte)0xEF  || b[1]!=(byte)0xBB || b[2]!= (byte)0xBF ){
+                is.reset();
+            }
+        }
+        return is;
     }
 
 }

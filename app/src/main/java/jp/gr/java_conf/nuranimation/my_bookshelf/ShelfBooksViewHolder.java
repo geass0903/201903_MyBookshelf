@@ -12,6 +12,7 @@ class ShelfBooksViewHolder extends RecyclerView.ViewHolder {
     TextView titleView;
     TextView authorView;
     TextView publisherView;
+    TextView salesDate;
     SimpleDraweeView draweeView;
 
     ShelfBooksViewHolder(@NonNull View itemView) {
@@ -21,6 +22,7 @@ class ShelfBooksViewHolder extends RecyclerView.ViewHolder {
         titleView = itemView.findViewById(R.id.shelf_row_title);
         authorView = itemView.findViewById(R.id.shelf_row_author);
         publisherView = itemView.findViewById(R.id.shelf_row_publisher);
+        salesDate = itemView.findViewById(R.id.shelf_row_sales_date);
     }
 
 }
