@@ -172,7 +172,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     List<String> getAuthors(){
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "select * from " + TABLE_AUTHOR + ";";
+//        String sql = "select * from " + TABLE_AUTHOR + ";";
+        String sql = "select * from " + TABLE_AUTHOR + " order by " + AUTHOR_KEY_AUTHOR + " asc" + ";";
         Cursor c = db.rawQuery(sql, null);
         boolean mov = c.moveToFirst();
         while (mov) {

@@ -93,7 +93,7 @@ class FileManager {
             if(D) Log.d(TAG,"recodeCount : " + recodeCount);
             count = 0;
 
-            File file_authors = new File(dirPath + "alt_" + FILENAME_AUTHORS);
+            File file_authors = new File(dirPath + FILENAME_AUTHORS);
             OutputStream os_authors = new FileOutputStream(file_authors);
             OutputStreamWriter osr_authors = new OutputStreamWriter(os_authors, Charset.forName("UTF-8"));
             BufferedWriter bw_authors = new BufferedWriter(osr_authors);
