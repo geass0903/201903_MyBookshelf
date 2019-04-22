@@ -2,6 +2,8 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -9,7 +11,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyBookshelfApplicationData extends Application {
+public class MyBookshelfApplicationData extends MultiDexApplication {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 

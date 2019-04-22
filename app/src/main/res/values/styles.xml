@@ -23,4 +23,6 @@
         <item name="android:thumb">@null</item>
         <item name="android:isIndicator">false</item>
     </style>
+
+    
 </resources>

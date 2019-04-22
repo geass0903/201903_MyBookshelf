@@ -8,14 +8,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.transition.Slide;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -221,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE);
             } else {
                 // Error
-                Toast.makeText(this, getString(R.string.PERMISSION_ERROR), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.Permission_Error), Toast.LENGTH_SHORT).show();
                 finish();
             }
         }

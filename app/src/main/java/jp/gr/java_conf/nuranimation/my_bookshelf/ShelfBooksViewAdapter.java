@@ -88,18 +88,18 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType){
         View inflate;
         if(viewType == VIEW_TYPE_BUTTON_LOAD){
-            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_button,viewGroup,false);
+            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_load_next,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
             return new ShelfLoadViewHolder(inflate);
         }
         if(viewType == VIEW_TYPE_LOADING){
-            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_loading,viewGroup,false);
+            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_loading,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
             return new ShelfLoadingViewHolder(inflate);
         }
-        inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_shelf,viewGroup,false);
+        inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_shelf_book,viewGroup,false);
         inflate.setOnClickListener(this);
         inflate.setOnLongClickListener(this);
         return new ShelfBooksViewHolder(inflate);
@@ -109,11 +109,11 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof ShelfBooksViewHolder){
             ShelfBooksViewHolder viewHolder = (ShelfBooksViewHolder) holder;
-            viewHolder.draweeView.setImageURI(getUri(list.get(position)));
-            viewHolder.titleView.setText(list.get(position).getTitle());
-            viewHolder.authorView.setText(list.get(position).getAuthor());
-            viewHolder.publisherView.setText(list.get(position).getPublisher());
-            viewHolder.salesDate.setText(list.get(position).getSalesDate());
+            viewHolder.draweeView_Image.setImageURI(getUri(list.get(position)));
+            viewHolder.textView_Title.setText(list.get(position).getTitle());
+            viewHolder.textView_Author.setText(list.get(position).getAuthor());
+            viewHolder.textView_Publisher.setText(list.get(position).getPublisher());
+            viewHolder.textView_SalesDate.setText(list.get(position).getSalesDate());
         }
     }
 
@@ -212,7 +212,6 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     void clearBooksData(){
         list.clear();
         notifyDataSetChanged();
-
     }
 
 

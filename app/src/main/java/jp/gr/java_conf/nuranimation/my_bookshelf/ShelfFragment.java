@@ -46,7 +46,7 @@ public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Toolbar toolbar = view.findViewById(R.id.fragment_shelf_toolbar);
-        toolbar.setTitle(R.string.navigation_title_shelf);
+        toolbar.setTitle(R.string.navigation_item_Shelf);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

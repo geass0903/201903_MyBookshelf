@@ -21,115 +21,169 @@
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
         </android.support.design.widget.AppBarLayout>
 
-        <LinearLayout
+        <ScrollView
+            android:fillViewport="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
             <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="5dp"
-                    android:background="@color/colorLineMargin" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/settings_title_export_import"
-                    />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="5dp"
-                    android:background="@color/colorLineMargin" />
-            </LinearLayout>
-            <Button
-                android:id="@+id/settings_button_export"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_button"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/settings_button_export_csv"/>
-            <Button
-                android:id="@+id/settings_button_import"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_button"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/settings_button_import_csv"/>
-        </LinearLayout>
+                android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="5dp"
-                    android:background="@color/colorLineMargin" />
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Sort Shelf -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/settings_title_dropbox"
-                    />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="5dp"
-                    android:background="@color/colorLineMargin" />
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:text="@string/settings_Label_sort_Shelf"
+                            />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                    </LinearLayout>
+                    <Spinner
+                        android:id="@+id/fragment_settings_spinner_Shelf"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/shape_button"
+                        android:layout_margin="5dp"
+                        android:spinnerMode="dialog" />
+                </LinearLayout>
+                <!-- end Sort Shelf -->
+
+                <!-- Export/Import -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:text="@string/settings_title_export_import"
+                            />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                    </LinearLayout>
+                    <Button
+                        android:id="@+id/settings_button_export"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/shape_button"
+                        android:textColor="#FFFFFFFF"
+                        android:text="@string/settings_button_export_csv"/>
+                    <Button
+                        android:id="@+id/settings_button_import"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/shape_button"
+                        android:textColor="#FFFFFFFF"
+                        android:text="@string/settings_button_import_csv"/>
+                </LinearLayout>
+                <!-- end Export/Import -->
+                <!-- Dropbox Backup/Restore-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:text="@string/settings_title_dropbox"
+                            />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                    </LinearLayout>
+                    <Button
+                        android:id="@+id/settings_button_log_in_dropbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/shape_button"
+                        android:textColor="#FFFFFFFF"
+                        android:text="@string/settings_button_log_in_dropbox" />
+                    <Button
+                        android:id="@+id/settings_button_log_out_dropbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/shape_button_logout"
+                        android:textColor="#FFFFFFFF"
+                        android:text="@string/settings_button_log_out_dropbox" />
+                    <Button
+                        android:id="@+id/settings_button_backup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/shape_button"
+                        android:textColor="#FFFFFFFF"
+                        android:text="@string/settings_button_backup" />
+                    <Button
+                        android:id="@+id/settings_button_restore"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/shape_button"
+                        android:textColor="#FFFFFFFF"
+                        android:text="@string/settings_button_restore" />
+                </LinearLayout>
+                <!-- end Dropbox Backup/Restore-->
             </LinearLayout>
-            <Button
-                android:id="@+id/settings_button_log_in_dropbox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_button"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/settings_button_log_in_dropbox" />
-            <Button
-                android:id="@+id/settings_button_log_out_dropbox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_button_logout"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/settings_button_log_out_dropbox" />
-            <Button
-                android:id="@+id/settings_button_backup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_button"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/settings_button_backup" />
-            <Button
-                android:id="@+id/settings_button_restore"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_button"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/settings_button_restore" />
-        </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 

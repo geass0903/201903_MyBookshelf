@@ -81,7 +81,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
         mTextView_Progress = view.findViewById(R.id.fragment_new_progress_text_progress);
 
         Toolbar toolbar = view.findViewById(R.id.fragment_new_toolbar);
-        toolbar.setTitle(R.string.navigation_title_new);
+        toolbar.setTitle(R.string.navigation_item_NewBooks);
 
         toolbar.inflateMenu(R.menu.menu_new);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -160,7 +160,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                                 book.setImage(imageUrl);
                                 String publisher = getParam(data,"publisherName");
                                 book.setPublisher(publisher);
-                                String salesDate = getParam(data,"salesDate");
+                                String salesDate = getParam(data,"textView_SalesDate");
                                 book.setSalesDate(salesDate);
                                 String itemPrice = getParam(data,"itemPrice");
                                 book.setItemPrice(itemPrice);
@@ -273,7 +273,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                     cal_salesDate.set(year,month-1,cal_salesDate.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }
                 if(D) Log.d(TAG,"nowDate: " + cal_baseDate.getTime());
-                if(D) Log.d(TAG,"salesDate: " + cal_salesDate.getTime());
+                if(D) Log.d(TAG,"textView_SalesDate: " + cal_salesDate.getTime());
                 return cal_salesDate.compareTo(cal_baseDate) >= 0;
             }
         }

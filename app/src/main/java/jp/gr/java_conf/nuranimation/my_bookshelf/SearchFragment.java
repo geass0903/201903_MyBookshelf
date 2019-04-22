@@ -158,7 +158,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                                 book.setImage(imageUrl);
                                 String publisher = getParam(data,"publisherName");
                                 book.setPublisher(publisher);
-                                String salesDate = getParam(data,"salesDate");
+                                String salesDate = getParam(data,"textView_SalesDate");
                                 book.setSalesDate(salesDate);
                                 String itemPrice = getParam(data,"itemPrice");
                                 book.setItemPrice(itemPrice);

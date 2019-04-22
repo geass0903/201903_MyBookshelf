@@ -9,20 +9,20 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 class ShelfBooksViewHolder extends RecyclerView.ViewHolder {
 
-    TextView titleView;
-    TextView authorView;
-    TextView publisherView;
-    TextView salesDate;
-    SimpleDraweeView draweeView;
+    TextView textView_Title;
+    TextView textView_Author;
+    TextView textView_Publisher;
+    TextView textView_SalesDate;
+    SimpleDraweeView draweeView_Image;
 
     ShelfBooksViewHolder(@NonNull View itemView) {
         super(itemView);
 
-        draweeView = itemView.findViewById(R.id.shelf_row_book_image);
-        titleView = itemView.findViewById(R.id.shelf_row_title);
-        authorView = itemView.findViewById(R.id.shelf_row_author);
-        publisherView = itemView.findViewById(R.id.shelf_row_publisher);
-        salesDate = itemView.findViewById(R.id.shelf_row_sales_date);
+        draweeView_Image = itemView.findViewById(R.id.item_Shelf_Book_Image);
+        textView_Title = itemView.findViewById(R.id.item_Shelf_Book_Title);
+        textView_Author = itemView.findViewById(R.id.item_Shelf_Book_Author);
+        textView_Publisher = itemView.findViewById(R.id.item_Shelf_Book_Publisher);
+        textView_SalesDate = itemView.findViewById(R.id.item_Shelf_Book_SalesDate);
     }
 
 }

@@ -6,7 +6,6 @@
     android:background="?android:attr/selectableItemBackground" >
 
     <ProgressBar
-        android:layout_margin="@dimen/margin_large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="false"

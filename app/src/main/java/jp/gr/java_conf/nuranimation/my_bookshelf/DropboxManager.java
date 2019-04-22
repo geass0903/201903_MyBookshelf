@@ -39,7 +39,7 @@ class DropboxManager {
     }
 
     void startAuthenticate(){
-        Auth.startOAuth2Authentication(mContext,mContext.getString(R.string.DROPBOX_APP_KEY));
+        Auth.startOAuth2Authentication(mContext,mContext.getString(R.string.Dropbox_App_Key));
     }
 
     String getAccessToken(){
@@ -48,23 +48,23 @@ class DropboxManager {
 
 
     int backup() {
-        int error = ErrorStatus.Error_NO_ERROR;
+        int error = ErrorStatus.No_Error;
         try {
             File extDir = Environment.getExternalStorageDirectory();
-            String dirPath = extDir.getPath() + FileManager.APP_DIR_PATH;
-            String FILENAME_BOOKSHELF = FileManager.FILENAME_BOOKSHELF;
-            String FILENAME_AUTHORS = FileManager.FILENAME_AUTHORS;
+            String dirPath = extDir.getPath() + FileManager.Application_DirectoryPath;
+            String FILENAME_BOOKSHELF = FileManager.FileName_Bookshelf;
+            String FILENAME_AUTHORS = FileManager.FileName_Authors;
 
             File file_books = new File(dirPath + FILENAME_BOOKSHELF);
             if (!file_books.exists()) {
                 if (D) Log.e(TAG, "file_books not found");
-                error = ErrorStatus.Error_FILE_BOOKSHLF_NOT_FOUND;
+                error = ErrorStatus.Error_File_Bookshelf_not_found;
                 return error;
             }
             File file_authors = new File(dirPath + FILENAME_AUTHORS);
             if (!file_authors.exists()) {
                 if (D) Log.e(TAG, "file_authors not found");
-                error = ErrorStatus.Error_FILE_AUTHORS_NOT_FOUND;
+                error = ErrorStatus.Error_File_Authors_not_found;
                 return error;
             }
             InputStream input_bookshelf = new FileInputStream(file_books);
@@ -73,52 +73,52 @@ class DropboxManager {
             mClient.files().uploadBuilder("/MyBookshelf/" + FILENAME_AUTHORS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_authors);
         } catch (Exception e) {
             if (D) Log.e(TAG, "Upload Error: " + e);
-            error = ErrorStatus.Error_UPLOAD_ERROR;
+            error = ErrorStatus.Error_Upload_failed;
             return error;
         }
         return error;
     }
 
     int restore(){
-        int error = ErrorStatus.Error_NO_ERROR;
+        int error = ErrorStatus.No_Error;
         try{
-            String FILENAME_BOOKSHELF = FileManager.FILENAME_BOOKSHELF;
-            String FILENAME_AUTHORS   = FileManager.FILENAME_AUTHORS;
-            SearchResult searchResult_bookshelf = mClient.files().search(FileManager.DROPBOX_APP_DIR_PATH,FILENAME_BOOKSHELF);
+            String FILENAME_BOOKSHELF = FileManager.FileName_Bookshelf;
+            String FILENAME_AUTHORS   = FileManager.FileName_Authors;
+            SearchResult searchResult_bookshelf = mClient.files().search(FileManager.Dropbox_App_DirectoryPath,FILENAME_BOOKSHELF);
             List<SearchMatch> matches_bookshelf = searchResult_bookshelf.getMatches();
             Metadata metadataBookshelf = null;
             for(SearchMatch match : matches_bookshelf){
                 metadataBookshelf = match.getMetadata();
                 if(D) Log.d(TAG,"metadataBookshelf: " + metadataBookshelf.getPathLower());
-                if(metadataBookshelf.getPathLower().equals(FileManager.DROPBOX_APP_DIR_PATH + FILENAME_BOOKSHELF)){
+                if(metadataBookshelf.getPathLower().equals(FileManager.Dropbox_App_DirectoryPath + FILENAME_BOOKSHELF)){
                     metadataBookshelf = match.getMetadata();
                     break;
                 }
             }
             if(metadataBookshelf == null){
                 if(D) Log.d(TAG,"metadataBookshelf not found");
-                error = ErrorStatus.Error_FILE_BOOKSHLF_NOT_FOUND;
+                error = ErrorStatus.Error_File_Bookshelf_not_found;
                 return error;
             }
-            SearchResult searchResult_authors = mClient.files().search(FileManager.DROPBOX_APP_DIR_PATH,FILENAME_AUTHORS);
+            SearchResult searchResult_authors = mClient.files().search(FileManager.Dropbox_App_DirectoryPath,FILENAME_AUTHORS);
             List<SearchMatch> matches_authors = searchResult_authors.getMatches();
             Metadata metadataAuthors = null;
             for(SearchMatch match : matches_authors){
                 metadataAuthors = match.getMetadata();
                 if(D) Log.e(TAG,"metadataAuthors: " + metadataAuthors.getPathLower());
-                if(metadataAuthors.getPathLower().equals(FileManager.DROPBOX_APP_DIR_PATH + FILENAME_AUTHORS)){
+                if(metadataAuthors.getPathLower().equals(FileManager.Dropbox_App_DirectoryPath + FILENAME_AUTHORS)){
                     metadataAuthors = match.getMetadata();
                     break;
                 }
             }
             if(metadataAuthors == null){
                 if(D) Log.e(TAG,"metadataAuthors not found");
-                error = ErrorStatus.Error_FILE_AUTHORS_NOT_FOUND;
+                error = ErrorStatus.Error_File_Authors_not_found;
                 return error;
             }
 
             File extDir = Environment.getExternalStorageDirectory();
-            String dirPath = extDir.getPath() + FileManager.APP_DIR_PATH;
+            String dirPath = extDir.getPath() + FileManager.Application_DirectoryPath;
 
             File dir = new File(dirPath);
             if(!dir.exists()){
@@ -135,7 +135,7 @@ class DropboxManager {
 
         } catch (Exception e){
             if(D) Log.e(TAG,"Download Error: " + e);
-            error = ErrorStatus.Error_DOWNLOAD_ERROR;
+            error = ErrorStatus.Error_Download_failed;
             return error;
         }
         return error;

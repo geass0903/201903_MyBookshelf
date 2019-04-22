@@ -3,9 +3,11 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -19,11 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SettingsFragment extends BaseFragment implements BaseDialogFragment.OnBaseDialogListener{
@@ -86,7 +90,7 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Toolbar toolbar = view.findViewById(R.id.fragment_settings_toolbar);
-        toolbar.setTitle(R.string.navigation_title_settings);
+        toolbar.setTitle(R.string.navigation_item_Settings);
         toolbar.setNavigationOnClickListener(toolbarClickListener);
 
         view.findViewById(R.id.settings_button_export).setOnClickListener(button_exportListener);
@@ -104,6 +108,14 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
         mTextView_Title = view.findViewById(R.id.fragment_settings_progress_text_title);
         mTextView_Progress = view.findViewById(R.id.fragment_settings_progress_text_progress);
         mLinearLayout_Progress = view.findViewById(R.id.fragment_settings_progress_view);
+
+        Spinner spinner = view.findViewById(R.id.fragment_settings_spinner_Shelf);
+
+//        Spinner_KeyValuePairArrayAdapter arrayAdapter = new Spinner_KeyValuePairArrayAdapter(this.mContext,android.R.layout.simple_spinner_item, getSpinnerList_Sort_Shelf());
+        Spinner_KeyValuePairArrayAdapter arrayAdapter = new Spinner_KeyValuePairArrayAdapter(this.mContext,R.layout.item_spinner, getSpinnerList_Sort_Shelf());
+        arrayAdapter.setDropDownViewResource(R.layout.item_spinner_drop_down);
+
+        spinner.setAdapter(arrayAdapter);
 
     }
 
@@ -304,7 +316,7 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
         private AsyncCSV(SettingsFragment fragment, ButtonAction buttonAction){
             this.mFragmentReference = new WeakReference<>(fragment);
             this.action = buttonAction;
-            this.error = ErrorStatus.Error_NO_ERROR;
+            this.error = ErrorStatus.No_Error;
         }
 
         @Override
@@ -344,20 +356,20 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
                     break;
                 case BACKUP_DROPBOX:
                     error= fragment.mFileManager.export_csv();
-                    if(error == ErrorStatus.Error_NO_ERROR) {
+                    if(error == ErrorStatus.No_Error) {
                         error = fragment.mDropboxManager.backup();
                     }
                     break;
                 case RESTORE_DROPBOX:
                     error = fragment.mDropboxManager.restore();
-                    if(error == ErrorStatus.Error_NO_ERROR){
+                    if(error == ErrorStatus.No_Error){
                         error = fragment.mFileManager.import_csv();
                     }
                     break;
                 default:
                     break;
             }
-            return error == ErrorStatus.Error_NO_ERROR;
+            return error == ErrorStatus.No_Error;
         }
 
         @Override
@@ -389,6 +401,23 @@ public class SettingsFragment extends BaseFragment implements BaseDialogFragment
 
     }
 
+
+
+
+    private List<Spinner_KeyValuePair> getSpinnerList_Sort_Shelf(){
+        List<Spinner_KeyValuePair> list = new ArrayList<>();
+        Resources res = getResources();
+        TypedArray spinner1_data = res.obtainTypedArray(R.array.settings_sort_Shelf_spinner);
+        for (int i = 0; i < spinner1_data.length(); ++i) {
+            int id = spinner1_data.getResourceId(i, -1);
+            if (id > -1) {
+                String[] item = res.getStringArray(id);
+                list.add(new Spinner_KeyValuePair(Integer.valueOf(item[0]), item[1]));
+            }
+        }
+        spinner1_data.recycle();
+        return list;
+    }
 
 
 }

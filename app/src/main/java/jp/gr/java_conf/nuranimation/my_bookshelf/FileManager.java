@@ -1,10 +1,6 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
@@ -16,16 +12,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UTFDataFormatException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,17 +27,15 @@ class FileManager {
     private static final boolean D = true;
     private static final String TAG = FileManager.class.getSimpleName();
 
-    static final String DROPBOX_APP_DIR_PATH = "/MyBookshelf/";
-    static final String APP_DIR_PATH = "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
-    static final String FILENAME_BOOKSHELF = "backup_bookshelf.csv";
-    static final String FILENAME_AUTHORS   = "backup_authors.csv";
+    static final String Dropbox_App_DirectoryPath = "/MyBookshelf/";
+    static final String Application_DirectoryPath = "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
+    static final String FileName_Bookshelf = "backup_bookshelf.csv";
+    static final String FileName_Authors = "backup_authors.csv";
 
-    private Context mContext;
     private MyBookshelfApplicationData mData;
     private Handler mHandler;
 
     FileManager(Context context){
-        mContext = context;
         mData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
@@ -52,12 +44,12 @@ class FileManager {
     }
 
     int export_csv(){
-        int error = ErrorStatus.Error_NO_ERROR;
+        int error = ErrorStatus.No_Error;
         int count = 0;
         MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
 
         File extDir = Environment.getExternalStorageDirectory();
-        String dirPath = extDir.getPath() + APP_DIR_PATH;
+        String dirPath = extDir.getPath() + Application_DirectoryPath;
         File dir = new File(dirPath);
         if(!dir.exists()){
             boolean success = dir.mkdirs();
@@ -69,7 +61,7 @@ class FileManager {
             int recodeCount = books.size();
             if(D) Log.d(TAG,"recodeCount : " + recodeCount);
 
-            File file_bookshelf = new File(dirPath + "alt_" + FILENAME_BOOKSHELF);
+            File file_bookshelf = new File(dirPath + "alt_" + FileName_Bookshelf);
             OutputStream os_bookshelf = new FileOutputStream(file_bookshelf);
             OutputStreamWriter osr_bookshelf = new OutputStreamWriter(os_bookshelf, Charset.forName("UTF-8"));
             BufferedWriter bw_bookshelf = new BufferedWriter(osr_bookshelf);
@@ -93,7 +85,7 @@ class FileManager {
             if(D) Log.d(TAG,"recodeCount : " + recodeCount);
             count = 0;
 
-            File file_authors = new File(dirPath + FILENAME_AUTHORS);
+            File file_authors = new File(dirPath + FileName_Authors);
             OutputStream os_authors = new FileOutputStream(file_authors);
             OutputStreamWriter osr_authors = new OutputStreamWriter(os_authors, Charset.forName("UTF-8"));
             BufferedWriter bw_authors = new BufferedWriter(osr_authors);
@@ -107,7 +99,7 @@ class FileManager {
             bw_authors.close();
         } catch (IOException e){
             if (D) Log.d(TAG, "IO Exception");
-            error = ErrorStatus.Error_IO_ERROR;
+            error = ErrorStatus.Error_IO_Error;
         }
         return error;
     }
@@ -115,21 +107,21 @@ class FileManager {
     int import_csv() {
         int size = 0;
         int count = 0;
-        int error = ErrorStatus.Error_NO_ERROR;
+        int error = ErrorStatus.No_Error;
 
         File extDir = Environment.getExternalStorageDirectory();
-        String dirPath = extDir.getPath() + APP_DIR_PATH;
-        File file_bookshelf = new File(dirPath + FILENAME_BOOKSHELF);
+        String dirPath = extDir.getPath() + Application_DirectoryPath;
+        File file_bookshelf = new File(dirPath + FileName_Bookshelf);
         if (!file_bookshelf.exists()){
             if (D) Log.d(TAG, "file_bookshelf not found");
-            error = ErrorStatus.Error_FILE_BOOKSHLF_NOT_FOUND;
+            error = ErrorStatus.Error_File_Bookshelf_not_found;
             return error;
         }
 
-        File file_authors = new File(dirPath + FILENAME_AUTHORS);
+        File file_authors = new File(dirPath + FileName_Authors);
         if (!file_authors.exists()){
             if (D) Log.d(TAG, "file_authors not found");
-            error = ErrorStatus.Error_FILE_AUTHORS_NOT_FOUND;
+            error = ErrorStatus.Error_File_Authors_not_found;
             return error;
         }
 
@@ -209,10 +201,10 @@ class FileManager {
             mData.updateBooksListShelf();
         } catch (FileNotFoundException e) {
             if(D) Log.e(TAG,"Error");
-            error = ErrorStatus.Error_FILE_NOT_FOUND;
+            error = ErrorStatus.Error_File_not_found;
         } catch (IOException e) {
             if(D) Log.e(TAG,"Error");
-            error = ErrorStatus.Error_IO_ERROR;
+            error = ErrorStatus.Error_IO_Error;
         } finally {
             helper.getWritableDatabase().endTransaction();
         }
@@ -231,7 +223,7 @@ class FileManager {
         bookData.setTitle(split[3]);
         bookData.setAuthor(split[8]);
         bookData.setPublisher(split[9]);
-        bookData.setSalesDate(split[11]);
+        bookData.setSalesDate(convertSalesDate(split[11]));
         bookData.setItemPrice(split[12]);
         bookData.setRakutenUrl(split[13]);
         bookData.setImage(split[17]);
@@ -244,26 +236,14 @@ class FileManager {
     }
 
 
-    private ContentValues import_Readee_CSV(String[] split) {
-        ContentValues insertValues = new ContentValues();
-        insertValues.put("isbn", split[1]);// ISBN
-        insertValues.put("title", split[3]);// タイトル
-        insertValues.put("author", split[8]); // 著者
-        insertValues.put("publisherName", split[9]);// 出版社
-        insertValues.put("releaseDate", split[11]);// 発売日
-        insertValues.put("price", split[12]);// 定価
-        insertValues.put("rakutenUrl", split[13]);// URL
-        insertValues.put("images", split[17]);// 商品画像URL
-        insertValues.put("rating", split[18]); // レーティング
-        insertValues.put("readStatus", split[19]);// ステータス
-        insertValues.put("tags", split[23]);// タグ
-        insertValues.put("finishReadDate", split[26]); // 読了日
-        insertValues.put("registerDate", split[39]);// 登録日
 
-        return insertValues;
+    private String convertSalesDate(String date) {
+        String[] split = date.split("/");
+        if(split.length == 3) {
+            return String.format(Locale.JAPAN, "%s年%s月%s日", split[0], split[1], split[2]);
+        }
+        return date;
     }
-
-
 
     private static String[] splitLineWithComma(String line) {
         String REGEX_CSV_COMMA = ",(?=(([^\"]*\"){2})*[^\"]*$)";
@@ -293,7 +273,7 @@ class FileManager {
 
 
 
-    public InputStream getStreamSkipBOM(InputStream is, Charset charSet) throws IOException{
+    private InputStream getStreamSkipBOM(InputStream is, Charset charSet) throws IOException{
         if( !(charSet == Charset.forName("UTF-8")) ){
             return is;
         }
