@@ -4,7 +4,7 @@
     <item
         android:id="@+id/menu_new_action_renew"
         android:icon="@drawable/ic_vector_renew_white_24dp"
-        android:title="@string/menu_action_renew"
+        android:title="@string/Menu_Action_Reload"
         app:showAsAction="always"
         />
 </menu>

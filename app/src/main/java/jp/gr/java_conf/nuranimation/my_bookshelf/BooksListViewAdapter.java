@@ -1,10 +1,12 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,8 +28,8 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
-    public static final String TAG = ShelfBooksViewAdapter.class.getSimpleName();
+public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+    public static final String TAG = BooksListViewAdapter.class.getSimpleName();
     private static final boolean D = true;
 
     static final int VIEW_TYPE_BOOK         = 1;
@@ -45,7 +47,7 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private File downloadDir;
 
 
-    ShelfBooksViewAdapter(List<BookData> list, boolean download) {
+    BooksListViewAdapter(List<BookData> list, boolean download) {
         this.list = list;
         this.downloadFlg = download;
         File dir = Environment.getExternalStorageDirectory();
@@ -99,21 +101,25 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             inflate.setOnLongClickListener(this);
             return new ShelfLoadingViewHolder(inflate);
         }
-        inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_shelf_book,viewGroup,false);
+        inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_book,viewGroup,false);
         inflate.setOnClickListener(this);
         inflate.setOnLongClickListener(this);
-        return new ShelfBooksViewHolder(inflate);
+        return new BooksListViewHolder(inflate);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof ShelfBooksViewHolder){
-            ShelfBooksViewHolder viewHolder = (ShelfBooksViewHolder) holder;
+        if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksListViewHolder){
+            BooksListViewHolder viewHolder = (BooksListViewHolder) holder;
             viewHolder.draweeView_Image.setImageURI(getUri(list.get(position)));
             viewHolder.textView_Title.setText(list.get(position).getTitle());
             viewHolder.textView_Author.setText(list.get(position).getAuthor());
             viewHolder.textView_Publisher.setText(list.get(position).getPublisher());
             viewHolder.textView_SalesDate.setText(list.get(position).getSalesDate());
+            viewHolder.textView_ItemPrice.setText(list.get(position).getItemPrice());
+            viewHolder.ratingBar.setRating(getRating(list.get(position).getRating()));
+            viewHolder.textView_ReadStatus.setText(getReadStatus(list.get(position).getReadStatus()));
+            viewHolder.image_ReadStatus.setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
         }
     }
 
@@ -161,8 +167,8 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     interface OnBookClickListener{
-        void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data);
-        void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data);
+        void onBookClick(BooksListViewAdapter adapter, int position, BookData data);
+        void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data);
     }
 
     private Uri getUri(BookData book){
@@ -202,6 +208,66 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return Uri.parse(arr[0]);
     }
 
+    private float getRating(String value){
+        float rating = 0.0f;
+        try {
+            rating = Float.parseFloat(value);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return rating;
+    }
+
+    private String getReadStatus(String status){
+        String readStatus;
+        switch(status){
+            case "1":
+                readStatus = mContext.getString(R.string.Item_ReadStatus_Interested);
+                break;
+            case "2":
+                readStatus = mContext.getString(R.string.Item_ReadStatus_Unread);
+                break;
+            case "3":
+                readStatus = mContext.getString(R.string.Item_ReadStatus_Unread);
+                break;
+            case "4":
+                readStatus = mContext.getString(R.string.Item_ReadStatus_Read);
+                break;
+            case "5":
+                readStatus = mContext.getString(R.string.Item_ReadStatus_Unknown);
+                break;
+            default:
+                readStatus = mContext.getString(R.string.Item_ReadStatus_Unregistered);
+                break;
+        }
+        return readStatus;
+    }
+
+    private Drawable getReadStatusIcon(String status){
+        Drawable icon;
+        switch(status){
+            case "1":
+                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_interested_24dp,null);
+                break;
+            case "2":
+                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unread_24dp,null);
+                break;
+            case "3":
+                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unread_24dp,null);
+                break;
+            case "4":
+                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_read_24dp,null);
+                break;
+            case "5":
+                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unknown_24dp,null);
+                break;
+            default:
+                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unregistered_24dp,null);
+                break;
+        }
+        return icon;
+    }
+
     void addBooksData(List<BookData> books){
         int size = list.size();
         int add_size = books.size();
@@ -236,11 +302,11 @@ public class ShelfBooksViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
     private static class AsyncDownload extends AsyncTask<Void, Void, Boolean> {
-        private final WeakReference<ShelfBooksViewAdapter> mReference;
+        private final WeakReference<BooksListViewAdapter> mReference;
         final Uri uri;
         final File file;
 
-        private AsyncDownload(ShelfBooksViewAdapter adapter, Uri uri, File file){
+        private AsyncDownload(BooksListViewAdapter adapter, Uri uri, File file){
             this.mReference = new WeakReference<>(adapter);
             this.uri = uri;
             this.file = file;

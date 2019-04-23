@@ -45,7 +45,7 @@
             android:gravity="center_horizontal"
             android:textColor="#FF000000"
             android:textSize="@dimen/textSize_xlarge"
-            android:text="@string/progress_renew"/>
+            android:text="@string/Progress_Reload"/>
         <TextView
             android:id="@+id/fragment_new_progress_text_progress"
             android:layout_margin="@dimen/margin_large"

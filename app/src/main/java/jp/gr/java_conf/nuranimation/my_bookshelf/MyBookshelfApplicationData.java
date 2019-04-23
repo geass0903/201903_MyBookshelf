@@ -1,8 +1,6 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
-import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
@@ -16,12 +14,9 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
     private static final boolean D = true;
 
     private MyBookshelfDBOpenHelper mDatabaseHelper;
-    List<BookData> mBooksListShelf;
-    List<BookData> mBooksListSearch;
-    List<BookData> mBooksListNew;
-    String ARG_SEARCH_KEYWORD;
-    String ARG_TMP_KEYWORD;
-    int ARG_SEARCH_PAGE;
+    private MyBookshelfPreferenceManager mPreferenceManager;
+    private List<BookData> mList_Bookshelf;
+    private List<BookData> mList_NewBooks;
 
     @Override
     public void onCreate(){
@@ -29,6 +24,7 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         if(D) Log.d(TAG,"onCreate");
         Fresco.initialize(this);
         registerActivityLifecycleCallbacks(new LifecycleHandler());
+        mPreferenceManager = new MyBookshelfPreferenceManager(getApplicationContext());
         mDatabaseHelper = new MyBookshelfDBOpenHelper(getApplicationContext());
         initData();
     }
@@ -42,12 +38,8 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
 
 
     public void initData(){
-        mBooksListShelf = mDatabaseHelper.getMyShelf();
-        mBooksListNew = mDatabaseHelper.getNewBooks();
-        mBooksListSearch = new ArrayList<>();
-        ARG_SEARCH_KEYWORD = "";
-        ARG_TMP_KEYWORD = "";
-        ARG_SEARCH_PAGE = 1;
+        updateList_MyBookshelf();
+        updateList_NewBooks();
     }
 
     public void clearData(){
@@ -56,9 +48,8 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
             db.close();
         }
         mDatabaseHelper = null;
-        mBooksListShelf.clear();
-        mBooksListNew.clear();
-        mBooksListSearch.clear();
+        mList_Bookshelf.clear();
+        mList_NewBooks.clear();
     }
 
 
@@ -67,48 +58,49 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
     }
 
 
-    public List<BookData> getBooksListShelf(){
-        return mBooksListShelf;
+    public List<BookData> getList_MyBookshelf(){
+        return mList_Bookshelf;
     }
 
-    public void updateBooksListShelf(){
-        mBooksListShelf = mDatabaseHelper.getMyShelf();
+    public void updateList_MyBookshelf(){
+        mList_Bookshelf = mDatabaseHelper.getMyBookshelf();
     }
 
-    public List<BookData> getBooksListNew(){
-        return mBooksListNew;
+    public List<BookData> getList_NewBooks(){
+        return mList_NewBooks;
     }
 
-    public void updateBooksListNew(){
-        mBooksListNew = mDatabaseHelper.getNewBooks();
+    public void updateList_NewBooks(){
+        mList_NewBooks = mDatabaseHelper.getNewBooks();
     }
 
-    public List<BookData> getBooksListSearch(){
-        return mBooksListSearch;
+
+    @SuppressWarnings({"unused","SameParameterValue"})
+    boolean containsKey(String key){
+        return mPreferenceManager.containsKey(key);
+    }
+    @SuppressWarnings({"unused","SameParameterValue"})
+    void removeKey(String key){
+        mPreferenceManager.removeKey(key);
     }
 
-    public void saveSearchKeyword(String keyword){
-        ARG_SEARCH_KEYWORD = keyword;
+    @SuppressWarnings("unused")
+    public void putIntPreference(String key, int value){
+        mPreferenceManager.putInt(key,value);
+    }
+    @SuppressWarnings("unused")
+    public void putStringPreference(String key, String value){
+        mPreferenceManager.putString(key,value);
     }
 
-    public String loadSearchKeyword(){
-        return ARG_SEARCH_KEYWORD;
+    @SuppressWarnings("unused")
+    public int getIntPreference(String key,int defValue){
+        return mPreferenceManager.getInt(key,defValue);
     }
 
-    public void saveTmpKeyword(String keyword){
-        ARG_TMP_KEYWORD = keyword;
-    }
-
-    public String loadTmpKeyword(){
-        return ARG_TMP_KEYWORD;
-    }
-
-    public void saveSearchPage(int page){
-        ARG_SEARCH_PAGE = page;
-    }
-
-    public int loadSearchPage(){
-        return ARG_SEARCH_PAGE;
+    @SuppressWarnings("unused")
+    public String getStringPreference(String key,String defValue){
+        return mPreferenceManager.getString(key,defValue);
     }
 
 }

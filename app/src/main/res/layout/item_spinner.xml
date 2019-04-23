@@ -8,4 +8,4 @@
     android:gravity="center"
     android:padding="@dimen/padding_large"
     android:textColor="#FFFFFFFF"
-    android:textSize="@dimen/textSize_large" />
+    android:textSize="@dimen/textSize_normal" />

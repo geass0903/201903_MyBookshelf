@@ -17,11 +17,11 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter.OnBookClickListener {
+public class ShelfFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
     public static final String TAG = ShelfFragment.class.getSimpleName();
     private static final boolean D = true;
 
-    private ShelfBooksViewAdapter adapter;
+    private BooksListViewAdapter adapter;
 
     private MyBookshelfApplicationData mData;
     private Context mContext;
@@ -46,7 +46,7 @@ public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Toolbar toolbar = view.findViewById(R.id.fragment_shelf_toolbar);
-        toolbar.setTitle(R.string.navigation_item_Shelf);
+        toolbar.setTitle(R.string.Navigation_Item_Shelf);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,7 +82,7 @@ public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter
     }
 
     private void SetShelfRowData(RecyclerView recyclerView) {
-        List<BookData> books = mData.getBooksListShelf();
+        List<BookData> books = mData.getList_MyBookshelf();
         int recodeCount = books.size();
         if(D) Log.d(TAG, "recodeCount : " + recodeCount);
 /*
@@ -91,7 +91,7 @@ public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter
             helper.registerAuthor(book.getAuthor());
         }
 */
-        adapter = new ShelfBooksViewAdapter(books,true);
+        adapter = new BooksListViewAdapter(books,true);
         adapter.setContext(mContext);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
@@ -101,13 +101,13 @@ public class ShelfFragment extends BaseFragment implements ShelfBooksViewAdapter
 
 
     @Override
-    public void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
         String title = data.getTitle();
         if(D) Log.d(TAG,"Click: " + title);
     }
 
     @Override
-    public void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
         String title = data.getTitle();
         if(D) Log.d(TAG,"LongClick: " + title);
     }

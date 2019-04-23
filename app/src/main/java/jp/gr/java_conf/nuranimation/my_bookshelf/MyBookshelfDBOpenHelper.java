@@ -78,9 +78,14 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + BOOKSHELF_KEY_REGISTER_DATE    + " text"  // 登録日
             + ");";
 
+    private Context mContext;
+    private MyBookshelfApplicationData mData;
+
 
     MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
+        mContext = context;
+        mData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
     @Override
@@ -118,16 +123,17 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    List<BookData> getMyShelf(){
-        List<BookData> shelf = new ArrayList<>();
+    List<BookData> getMyBookshelf(){
+        List<BookData> bookshelf = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "select * from " + TABLE_MY_BOOKSHELF + ";";
+        String order = getOrder_Bookshelf();
+        String sql = "select * from " + TABLE_MY_BOOKSHELF + order + ";";
 
         Cursor c = db.rawQuery(sql, null);
         boolean mov = c.moveToFirst();
         while (mov) {
             BookData data = new BookData();
-            data.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BOOK);
+            data.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
             data.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
             data.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
             data.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
@@ -141,11 +147,11 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             data.setTags(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TAGS)));
             data.setFinishReadDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_FINISH_READ_DATE)));
             data.setRegisterDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_REGISTER_DATE)));
-            shelf.add(data);
+            bookshelf.add(data);
             mov = c.moveToNext();
         }
         c.close();
-        return shelf;
+        return bookshelf;
     }
 
     void registerBook(BookData book){
@@ -215,7 +221,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         boolean mov = c.moveToFirst();
         while (mov) {
             BookData data = new BookData();
-            data.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BOOK);
+            data.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
             data.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
             data.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
             data.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
@@ -266,6 +272,41 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
         c.close();
     }
+
+
+
+
+    private String getOrder_Bookshelf(){
+        String order = "";
+        String code = mData.getStringPreference(MyBookshelfPreferenceManager.Key_SortSetting_Bookshelf,mContext.getString(R.string.Code_SortSetting_Registered_Ascending));
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_Title_Ascending))){
+            order = " order by " + BOOKSHELF_KEY_TITLE + " asc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_Title_Descending))){
+            order = " order by " + BOOKSHELF_KEY_TITLE + " desc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_Author_Ascending))){
+            order = " order by " + BOOKSHELF_KEY_AUTHOR + " asc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_Author_Descending))){
+            order = " order by " + BOOKSHELF_KEY_AUTHOR + " desc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_SalesDate_Ascending))){
+            order = " order by " + BOOKSHELF_KEY_RELEASE_DATE + " asc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_SalesDate_Descending))){
+            order = " order by " + BOOKSHELF_KEY_RELEASE_DATE + " desc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_Registered_Ascending))){
+            order = " order by " + BOOKSHELF_KEY_REGISTER_DATE + " asc";
+        }
+        if(code.equals(mContext.getString(R.string.Code_SortSetting_Registered_Descending))){
+            order = " order by " + BOOKSHELF_KEY_REGISTER_DATE + " desc";
+        }
+        return order;
+    }
+
+
 
 }
 

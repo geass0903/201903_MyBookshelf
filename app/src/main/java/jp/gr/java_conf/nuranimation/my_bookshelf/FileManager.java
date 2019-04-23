@@ -57,7 +57,7 @@ class FileManager {
         }
 
         try {
-            List<BookData> books = helper.getMyShelf();
+            List<BookData> books = helper.getMyBookshelf();
             int recodeCount = books.size();
             if(D) Log.d(TAG,"recodeCount : " + recodeCount);
 
@@ -198,7 +198,7 @@ class FileManager {
             br_authors.close();
 
             helper.getWritableDatabase().setTransactionSuccessful();
-            mData.updateBooksListShelf();
+            mData.updateList_MyBookshelf();
         } catch (FileNotFoundException e) {
             if(D) Log.e(TAG,"Error");
             error = ErrorStatus.Error_File_not_found;

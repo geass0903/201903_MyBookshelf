@@ -50,7 +50,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_margin="5dp"
-                            android:text="@string/settings_Label_sort_Shelf"
+                            android:text="@string/Label_SortSetting_Shelf"
                             />
                         <View
                             android:layout_width="0dp"
@@ -61,7 +61,7 @@
                             android:background="@color/colorLineMargin" />
                     </LinearLayout>
                     <Spinner
-                        android:id="@+id/fragment_settings_spinner_Shelf"
+                        android:id="@+id/SettingsFragment_Spinner_SortSetting_Bookshelf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/shape_button"
@@ -69,6 +69,46 @@
                         android:spinnerMode="dialog" />
                 </LinearLayout>
                 <!-- end Sort Shelf -->
+
+                <!-- Sort Search Result -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:text="@string/Label_SortSetting_SearchResult"
+                            />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="2dp"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="5dp"
+                            android:background="@color/colorLineMargin" />
+                    </LinearLayout>
+                    <Spinner
+                        android:id="@+id/SettingsFragment_Spinner_SortSetting_SearchResult"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/shape_button"
+                        android:layout_margin="5dp"
+                        android:spinnerMode="dialog" />
+                </LinearLayout>
+                <!-- end Sort Search_Result -->
 
                 <!-- Export/Import -->
                 <LinearLayout

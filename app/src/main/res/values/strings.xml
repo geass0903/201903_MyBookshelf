@@ -7,57 +7,64 @@
     <string name="Permission_Error">パーミッションエラー</string>
 
     <!-- Navigation -->
-    <string name="navigation_item_Shelf">本棚</string>
-    <string name="navigation_item_Search">検索</string>
-    <string name="navigation_item_NewBooks">新刊</string>
-    <string name="navigation_item_Settings">設定</string>
+    <string name="Navigation_Item_Shelf">本棚</string>
+    <string name="Navigation_Item_Search">検索</string>
+    <string name="Navigation_Item_NewBooks">新刊</string>
+    <string name="Navigation_Item_Settings">設定</string>
 
     <!-- Menu -->
-    <string name="menu_action_Search">検索</string>
-    <string name="menu_action_renew">更新</string>
+    <string name="Menu_Action_Search">検索</string>
+    <string name="Menu_Action_Reload">更新</string>
 
     <!-- Toast -->
-    <string name="toast_failed">エラーが発生しました</string>
-    <string name="toast_success_export">エクスポートしました</string>
-    <string name="toast_success_import">インポートしました</string>
-    <string name="toast_success_backup">バックアップしました</string>
-    <string name="toast_success_restore">リストアしました</string>
+    <string name="Toast_Failed">エラーが発生しました</string>
+    <string name="Toast_Success_Export">エクスポートしました</string>
+    <string name="Toast_Success_Import">インポートしました</string>
+    <string name="Toast_Success_Backup">バックアップしました</string>
+    <string name="Toast_Success_Restore">リストアしました</string>
 
     <!-- Progress -->
-    <string name="progress_search">検索中…</string>
-    <string name="progress_renew">更新中…</string>
-    <string name="progress_backup">アップロード中…</string>
-    <string name="progress_restore">ダウンロード中…</string>
-    <string name="progress_export">エクスポート中…</string>
-    <string name="progress_import">インポート中…</string>
-    <string name="progress_unit">件</string>
+    <string name="Progress_Search">検索中…</string>
+    <string name="Progress_Reload">更新中…</string>
+    <string name="Progress_Backup">アップロード中…</string>
+    <string name="Progress_Restore">ダウンロード中…</string>
+    <string name="Progress_Export">エクスポート中…</string>
+    <string name="Progress_Import">インポート中…</string>
+    <string name="Progress_Unit">件</string>
 
     <!-- Dialog -->
-    <string name="dialog_button_positive">はい</string>
-    <string name="dialog_button_negative">キャンセル</string>
-    <string name="dialog_title_logout">ログアウト</string>
-    <string name="dialog_message_logout">Dropboxからログアウトしますか？</string>
+    <string name="Dialog_Button_Positive">はい</string>
+    <string name="Dialog_Button_Negative">キャンセル</string>
+    <string name="Dialog_Label_Logout">ログアウト</string>
+    <string name="Dialog_Message_Logout">Dropboxからログアウトしますか？</string>
 
     <!-- ReadStatus -->
-    <string name="item_ReadStatus_Unregistered">未登録</string>
-    <string name="item_ReadStatus_Unknown">未指定</string>
-    <string name="item_ReadStatus_Unread">未読</string>
-    <string name="item_ReadStatus_Read">既読</string>
-    <string name="item_ReadStatus_Interested">興味あり</string>
-
-
+    <string name="Item_ReadStatus_Unregistered">未登録</string>
+    <string name="Item_ReadStatus_Unknown">未指定</string>
+    <string name="Item_ReadStatus_Unread">未読</string>
+    <string name="Item_ReadStatus_Read">既読</string>
+    <string name="Item_ReadStatus_Interested">興味あり</string>
 
     <!-- Settings -->
-    <string name="settings_Label_sort_Shelf">本棚のソート設定</string>
-    <string name="settings_Label_sort_Search">検索結果のソート設定</string>
-    <string name="settings_sort_Title_Ascending">タイトル(昇順)</string>
-    <string name="settings_sort_Title_Descending">タイトル(降順)</string>
-    <string name="settings_sort_Author_Ascending">著者(昇順)</string>
-    <string name="settings_sort_Author_Descending">著者(降順)</string>
-    <string name="settings_sort_Registered_Ascending">登録日(昇順)</string>
-    <string name="settings_sort_Registered_Descending">登録日(降順)</string>
-    <string name="settings_sort_SalesDate_Ascending">発売日(昇順)</string>
-    <string name="settings_sort_SalesDate_Descending">発売日(降順)</string>
+    <string name="Label_SortSetting_Shelf">本棚のソート設定</string>
+    <string name="Label_SortSetting_SearchResult">検索結果のソート設定</string>
+    <string name="Label_SortSetting_Title_Ascending">タイトル(昇順)</string>
+    <string name="Label_SortSetting_Title_Descending">タイトル(降順)</string>
+    <string name="Label_SortSetting_Author_Ascending">著者(昇順)</string>
+    <string name="Label_SortSetting_Author_Descending">著者(降順)</string>
+    <string name="Label_SortSetting_Registered_Ascending">登録日(昇順)</string>
+    <string name="Label_SortSetting_Registered_Descending">登録日(降順)</string>
+    <string name="Label_SortSetting_SalesDate_Ascending">発売日(昇順)</string>
+    <string name="Label_SortSetting_SalesDate_Descending">発売日(降順)</string>
+    <string name="Code_SortSetting_Title_Ascending">Title_ASC</string>
+    <string name="Code_SortSetting_Title_Descending">Title_DESC</string>
+    <string name="Code_SortSetting_Author_Ascending">Author_ASC</string>
+    <string name="Code_SortSetting_Author_Descending">Author_DESC</string>
+    <string name="Code_SortSetting_Registered_Ascending">Registered_ASC</string>
+    <string name="Code_SortSetting_Registered_Descending">Registered_DESC</string>
+    <string name="Code_SortSetting_SalesDate_Ascending">SalesDate_ASC</string>
+    <string name="Code_SortSetting_SalesDate_Descending">SalesDate_DESC</string>
+
 
 
     <string name="settings_title_export_import">エクスポート／インポート</string>
@@ -70,9 +77,12 @@
     <string name="settings_button_restore">リストア</string>
 
 
+    <!-- Book -->
+    <string name="unit_ItemPrice_Yen">￥</string>
+    <string name="unit_ItemPrice_Tax">(税込)</string>
 
 
-
+    <!-- Search -->
     <string name="search_input_hint">タイトルまたは著者、ISBNなど</string>
 
 
@@ -82,62 +92,59 @@
 
 
     <!-- string array -->
-    <string-array name="settings_sort_Shelf_spinner_item_1">
-        <item name="key">1</item>
-        <item name="value">@string/settings_sort_Title_Ascending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_Title_ASC">
+        <item name="code">@string/Code_SortSetting_Title_Ascending</item>
+        <item name="label">@string/Label_SortSetting_Title_Ascending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_2">
-        <item name="key">2</item>
-        <item name="value">@string/settings_sort_Title_Descending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_Title_DESC">
+        <item name="code">@string/Code_SortSetting_Title_Descending</item>
+        <item name="label">@string/Label_SortSetting_Title_Descending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_3">
-        <item name="key">3</item>
-        <item name="value">@string/settings_sort_Author_Ascending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_Author_ASC">
+        <item name="code">@string/Code_SortSetting_Author_Ascending</item>
+        <item name="label">@string/Label_SortSetting_Author_Ascending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_4">
-        <item name="key">4</item>
-        <item name="value">@string/settings_sort_Author_Descending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_Author_DESC">
+        <item name="code">@string/Code_SortSetting_Author_Descending</item>
+        <item name="label">@string/Label_SortSetting_Author_Descending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_5">
-        <item name="key">5</item>
-        <item name="value">@string/settings_sort_SalesDate_Ascending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_SalesDate_ASC">
+        <item name="code">@string/Code_SortSetting_SalesDate_Ascending</item>
+        <item name="label">@string/Label_SortSetting_SalesDate_Ascending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_6">
-        <item name="key">6</item>
-        <item name="value">@string/settings_sort_SalesDate_Descending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_SalesDate_DESC">
+        <item name="code">@string/Code_SortSetting_SalesDate_Descending</item>
+        <item name="value">@string/Label_SortSetting_SalesDate_Descending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_7">
-        <item name="key">7</item>
-        <item name="value">@string/settings_sort_Registered_Ascending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_Registered_ASC">
+        <item name="code">@string/Code_SortSetting_Registered_Ascending</item>
+        <item name="value">@string/Label_SortSetting_Registered_Ascending</item>
     </string-array>
-    <string-array name="settings_sort_Shelf_spinner_item_8">
-        <item name="key">8</item>
-        <item name="value">@string/settings_sort_Registered_Descending</item>
+    <string-array name="Bookshelf_SortSetting_SpinnerItem_Registered_DESC">
+        <item name="code">@string/Code_SortSetting_Registered_Descending</item>
+        <item name="value">@string/Label_SortSetting_Registered_Descending</item>
     </string-array>
-
-    <string-array name="settings_sort_Search_spinner_item_1">
-        <item name="key">1</item>
-        <item name="value">@string/settings_sort_SalesDate_Ascending</item>
+    <string-array name="SearchResult_SortSetting_SpinnerItem_SalesDate_ASC">
+        <item name="code">@string/Code_SortSetting_SalesDate_Ascending</item>
+        <item name="label">@string/Label_SortSetting_SalesDate_Ascending</item>
     </string-array>
-    <string-array name="settings_sort_Search_spinner_item_2">
-        <item name="key">2</item>
-        <item name="value">@string/settings_sort_SalesDate_Descending</item>
+    <string-array name="SearchResult_SortSetting_SpinnerItem_SalesDate_DESC">
+        <item name="code">@string/Code_SortSetting_SalesDate_Descending</item>
+        <item name="label">@string/Label_SortSetting_SalesDate_Descending</item>
     </string-array>
-
-    <string-array name="settings_sort_Shelf_spinner">
-        <item>@array/settings_sort_Shelf_spinner_item_1</item>
-        <item>@array/settings_sort_Shelf_spinner_item_2</item>
-        <item>@array/settings_sort_Shelf_spinner_item_3</item>
-        <item>@array/settings_sort_Shelf_spinner_item_4</item>
-        <item>@array/settings_sort_Shelf_spinner_item_5</item>
-        <item>@array/settings_sort_Shelf_spinner_item_6</item>
-        <item>@array/settings_sort_Shelf_spinner_item_7</item>
-        <item>@array/settings_sort_Shelf_spinner_item_8</item>
+    <string-array name="Spinner_Bookshelf_SortSetting">
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_Title_ASC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_Title_DESC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_Author_ASC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_Author_DESC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_SalesDate_ASC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_SalesDate_DESC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_Registered_ASC</item>
+        <item>@array/Bookshelf_SortSetting_SpinnerItem_Registered_DESC</item>
     </string-array>
-
-    <string-array name="settings_sort_Search_spinner">
-        <item>@array/settings_sort_Search_spinner_item_1</item>
-        <item>@array/settings_sort_Search_spinner_item_2</item>
+    <string-array name="Spinner_SearchResult_SortSetting">
+        <item>@array/SearchResult_SortSetting_SpinnerItem_SalesDate_ASC</item>
+        <item>@array/SearchResult_SortSetting_SpinnerItem_SalesDate_DESC</item>
     </string-array>
 
 </resources>

@@ -15,14 +15,14 @@ public final class BaseDialogFragment extends DialogFragment {
     private static final boolean D = true;
     private static final String TAG = BaseDialogFragment.class.getSimpleName();
 
-    public static final String ARG_TITLE = "title";
-    public static final String ARG_MESSAGE = "message";
-    public static final String ARG_ITEMS = "items";
-    public static final String ARG_POSITIVE_LABEL = "positive_label";
-    public static final String ARG_NEGATIVE_LABEL = "negative_label";
-    public static final String ARG_CANCELABLE = "cancelable";
-    public static final String ARG_PARAMS= "params";
-    public static final String ARG_REQUEST_CODE = "request_code";
+    public static final String title = "title";
+    public static final String message = "message";
+    public static final String items = "items";
+    public static final String positiveLabel = "positive_label";
+    public static final String negativeLabel = "negative_label";
+    public static final String cancelable = "cancelable";
+    public static final String params = "params";
+    public static final String request_code = "request_code";
 
 
     public interface OnBaseDialogListener {
@@ -36,7 +36,7 @@ public final class BaseDialogFragment extends DialogFragment {
     public static BaseDialogFragment newInstance(Fragment fragment, Bundle bundle){
         BaseDialogFragment instance = new BaseDialogFragment();
         instance.setArguments(bundle);
-        int request_code = bundle.getInt(ARG_REQUEST_CODE);
+        int request_code = bundle.getInt(BaseDialogFragment.request_code);
         instance.setTargetFragment(fragment,request_code);
         return instance;
     }
@@ -76,17 +76,17 @@ public final class BaseDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 dismiss();
                 if (getArguments() != null) {
-                    mListener.onBaseDialogSucceeded(getRequestCode(), which, getArguments().getBundle(ARG_PARAMS));
+                    mListener.onBaseDialogSucceeded(getRequestCode(), which, getArguments().getBundle(params));
                 }
             }
         };
 
-        final String title = bundle.getString(ARG_TITLE);
-        final String message = bundle.getString(ARG_MESSAGE);
-        final String[] items = bundle.getStringArray(ARG_ITEMS);
-        final String positiveLabel = bundle.getString(ARG_POSITIVE_LABEL);
-        final String negativeLabel = bundle.getString(ARG_NEGATIVE_LABEL);
-        setCancelable(bundle.getBoolean(ARG_CANCELABLE));
+        final String title = bundle.getString(BaseDialogFragment.title);
+        final String message = bundle.getString(BaseDialogFragment.message);
+        final String[] items = bundle.getStringArray(BaseDialogFragment.items);
+        final String positiveLabel = bundle.getString(BaseDialogFragment.positiveLabel);
+        final String negativeLabel = bundle.getString(BaseDialogFragment.negativeLabel);
+        setCancelable(bundle.getBoolean(cancelable));
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         if (!TextUtils.isEmpty(title)) {
@@ -112,15 +112,15 @@ public final class BaseDialogFragment extends DialogFragment {
     public void onCancel(DialogInterface dialog) {
         Bundle bundle = getArguments();
         if(bundle != null){
-            mListener.onBaseDialogCancelled(getRequestCode(), getArguments().getBundle(ARG_PARAMS));
+            mListener.onBaseDialogCancelled(getRequestCode(), getArguments().getBundle(params));
         }
     }
 
     private int getRequestCode() {
         Bundle bundle = getArguments();
         if(bundle != null) {
-            if(bundle.containsKey(ARG_REQUEST_CODE)){
-                return bundle.getInt(ARG_REQUEST_CODE);
+            if(bundle.containsKey(request_code)){
+                return bundle.getInt(request_code);
             }else{
                 return getTargetRequestCode();
             }

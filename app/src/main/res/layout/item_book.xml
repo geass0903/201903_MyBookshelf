@@ -19,7 +19,7 @@
         android:orientation="horizontal">
 
         <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/item_Search_Book_Image"
+            android:id="@+id/Item_Book_Image"
             android:layout_height="100dp"
             android:layout_width="100dp"
             fresco:actualImageScaleType="fitCenter"
@@ -31,7 +31,7 @@
             android:layout_height="match_parent" >
 
             <TextView
-                android:id="@+id/item_Search_Book_Title"
+                android:id="@+id/Item_Book_Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
@@ -43,28 +43,55 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
-                    android:id="@+id/item_Search_Book_Author"
+                    android:id="@+id/Item_Book_Author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/textSize_normal" />
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp" />
                 <TextView
-                    android:id="@+id/item_Search_Book_Publisher"
+                    android:id="@+id/Item_Book_Publisher"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/textSize_normal" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/item_Search_Book_SalesDate"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/textSize_normal" />
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/Item_Book_SalesDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/textSize_normal" />
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/textSize_normal"
+                    android:text="@string/unit_ItemPrice_Yen" />
+                <TextView
+                    android:id="@+id/Item_Book_ItemPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/textSize_normal" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/textSize_normal"
+                    android:text="@string/unit_ItemPrice_Tax" />
+
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <RatingBar
-                    android:id="@+id/item_Search_Book_Rating"
+                    android:id="@+id/Item_Book_Rating"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentBottom="true"
@@ -78,21 +105,20 @@
                     />
 
                 <ImageView
-                    android:id="@+id/item_Search_Book_Icon_ReadStatus"
+                    android:id="@+id/Item_Book_Icon_ReadStatus"
                     android:layout_alignParentBottom="true"
-                    android:layout_toLeftOf="@id/item_Shelf_Book_ReadStatus"
-                    android:layout_toStartOf="@id/item_Shelf_Book_ReadStatus"
-                    android:background="#FF0000"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp" />
+                    android:layout_toLeftOf="@id/Item_Book_ReadStatus"
+                    android:layout_toStartOf="@id/Item_Book_ReadStatus"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp" />
                 <TextView
-                    android:id="@+id/item_Search_Book_ReadStatus"
+                    android:id="@+id/Item_Book_ReadStatus"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/row_load_next" />
+                    android:text="@string/Item_ReadStatus_Unknown" />
             </RelativeLayout>
 
         </LinearLayout>

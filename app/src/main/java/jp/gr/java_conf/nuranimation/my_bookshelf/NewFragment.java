@@ -34,7 +34,7 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.OnBookClickListener{
+public class NewFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = NewFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -42,7 +42,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
     private Context mContext;
 
     List<String> authors_list = new ArrayList<>();
-    private ShelfBooksViewAdapter mBooksViewAdapter;
+    private BooksListViewAdapter mBooksViewAdapter;
     private LinearLayout mLinearLayout_Progress;
     private TextView mTextView_Progress;
     private Handler mHandler = new Handler();
@@ -81,7 +81,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
         mTextView_Progress = view.findViewById(R.id.fragment_new_progress_text_progress);
 
         Toolbar toolbar = view.findViewById(R.id.fragment_new_toolbar);
-        toolbar.setTitle(R.string.navigation_item_NewBooks);
+        toolbar.setTitle(R.string.Navigation_Item_NewBooks);
 
         toolbar.inflateMenu(R.menu.menu_new);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -113,7 +113,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
 
 
     private void initBooksViewAdapter(){
-        mBooksViewAdapter = new ShelfBooksViewAdapter(mData.getBooksListNew(),false);
+        mBooksViewAdapter = new BooksListViewAdapter(mData.getList_NewBooks(),false);
         mBooksViewAdapter.setContext(getContext());
         mBooksViewAdapter.setClickListener(this);
     }
@@ -148,7 +148,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                                 JSONObject data = jsonArray.getJSONObject(i);
                                 if(D) Log.d(TAG,"sb: " + data.toString());
                                 BookData book = new BookData();
-                                book.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BOOK);
+                                book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
 
                                 String isbn = getParam(data,"isbn");
                                 book.setIsbn(isbn);
@@ -195,7 +195,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
 
                             if(count - last > 0){
                                 BookData footer = new BookData();
-                                footer.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+                                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
                                 mBooksViewAdapter.setFooter(footer);
 //                        mBooksViewAdapter.setLoadNext();
                             }else{
@@ -222,7 +222,7 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
                     authors_list.remove(0);
                     AsyncSearchTask(search_author,1);
                 }else{
-                    mData.updateBooksListNew();
+                    mData.updateList_NewBooks();
                     mLinearLayout_Progress.setVisibility(View.GONE);
                     if(mFragmentListener != null) {
                         mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
@@ -307,12 +307,12 @@ public class NewFragment extends BaseFragment implements ShelfBooksViewAdapter.O
     }
 
     @Override
-    public void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
 
     }
 
     @Override
-    public void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
 
     }
 

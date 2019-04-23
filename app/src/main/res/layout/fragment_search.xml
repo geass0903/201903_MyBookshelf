@@ -50,7 +50,7 @@
             android:gravity="center_horizontal"
             android:textColor="#FF000000"
             android:textSize="@dimen/textSize_xlarge"
-            android:text="@string/progress_search"/>
+            android:text="@string/Progress_Search"/>
         <ProgressBar
             android:layout_margin="@dimen/margin_large"
             android:layout_width="wrap_content"

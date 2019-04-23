@@ -35,17 +35,17 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapter.OnBookClickListener{
+public class SearchFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     private static final boolean D = true;
     public static final String TAG = SearchFragment.class.getSimpleName();
     private MyBookshelfApplicationData mData;
     private Handler mHandler = new Handler();
-
-    private ShelfBooksViewAdapter mBooksViewAdapter;
-
+    private BooksListViewAdapter mBooksViewAdapter;
     private SearchView mSearchView;
-
     private LinearLayout mLinearLayout_Progress;
+    private List<BookData> mList_SearchResult = new ArrayList<>();
+    private String searchKeyword;
+    private int searchPage;
 
     @Override
     public void onAttach (Context context) {
@@ -81,7 +81,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
     }
 
     private void initBooksViewAdapter(){
-        mBooksViewAdapter = new ShelfBooksViewAdapter(mData.getBooksListSearch(),false);
+        mBooksViewAdapter = new BooksListViewAdapter(mList_SearchResult,false);
         mBooksViewAdapter.setContext(getContext());
         mBooksViewAdapter.setClickListener(this);
     }
@@ -98,29 +98,33 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
         mSearchView.setIconifiedByDefault(false);
         mSearchView.setQueryHint(getString(R.string.search_input_hint));
         mSearchView.setSubmitButtonEnabled(false);
-        mSearchView.setQuery(mData.loadTmpKeyword(),false);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String searchWord) {
                 mSearchView.clearFocus();
-                if(!searchWord.equals("")){
-                    if(D) Log.d(TAG,"Search: " + searchWord);
+                if(!searchWord.equals("")) {
+                    if (D) Log.d(TAG, "Search: " + searchWord);
                     mBooksViewAdapter.clearBooksData();
-                    mData.saveSearchKeyword(searchWord);
-                    mData.saveSearchPage(1);
-                    AsyncSearchTask(searchWord, 1);
+                    searchKeyword = searchWord;
+                    searchPage = 1;
+
+                    if (mFragmentListener != null) {
+                        mFragmentListener.onFragmentEvent(FragmentEvent.DISP_MASK);
+                    }
+                    mLinearLayout_Progress.setVisibility(View.VISIBLE);
+
+                    AsyncSearchTask(searchKeyword, searchPage);
                 }
                 return false;
             }
             @Override
             public boolean onQueryTextChange(String word) {
-                mData.saveTmpKeyword(word);
                 return false;
             }
         });
     }
 
-
+/*
     public void callback(final boolean result, final JSONObject json){
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -146,7 +150,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                                 JSONObject data = jsonArray.getJSONObject(i);
                                 if(D) Log.d(TAG,"sb: " + data.toString());
                                 BookData book = new BookData();
-                                book.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BOOK);
+                                book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
 
                                 String isbn = getParam(data,"isbn");
                                 book.setIsbn(isbn);
@@ -164,6 +168,10 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                                 book.setItemPrice(itemPrice);
                                 String rakutenUrl = getParam(data,"rakutenUrl");
                                 book.setRakutenUrl(rakutenUrl);
+                                String rating = getParam(data,"reviewAverage");
+                                book.setRating(rating);
+                                String readStatus = "5"; // Unregistered
+                                book.setReadStatus(readStatus);
 
                                 dataset.add(book);
                             }
@@ -183,7 +191,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
 
                             if(count - last > 0){
                                 BookData footer = new BookData();
-                                footer.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+                                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
                                 mBooksViewAdapter.setFooter(footer);
 //                        mBooksViewAdapter.setLoadNext();
                             }else{
@@ -201,7 +209,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
         },1500);
     }
 
-
+*/
 
     String getParam(JSONObject json, String keyword){
         try {
@@ -220,9 +228,9 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
 
 
     @Override
-    public void onBookClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
         int view_type = adapter.getItemViewType(position);
-        if(view_type == ShelfBooksViewAdapter.VIEW_TYPE_BOOK){
+        if(view_type == BooksListViewAdapter.VIEW_TYPE_BOOK){
             FragmentManager fragmentManager = getFragmentManager();
             if(fragmentManager != null){
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -243,15 +251,12 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                 fragmentTransaction.commit();
             }
         }else{
-            if(view_type == ShelfBooksViewAdapter.VIEW_TYPE_BUTTON_LOAD){
+            if(view_type == BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD){
                 BookData footer = new BookData();
-                footer.setView_type(ShelfBooksViewAdapter.VIEW_TYPE_LOADING);
+                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
                 adapter.setFooter(footer);
-//                adapter.startLoadNext();
-                String search = mData.loadSearchKeyword();
-                int search_page = mData.loadSearchPage() + 1;
-                mData.saveSearchPage(search_page);
-                AsyncSearchTask(search,search_page);
+                searchPage++;
+                AsyncSearchTask(searchKeyword,searchPage);
             }
         }
 
@@ -259,7 +264,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
     }
 
     @Override
-    public void onBookLongClick(ShelfBooksViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
         if(position != adapter.getItemCount() && data != null){
             String title = data.getTitle();
             if(D) Log.d(TAG,"LongClick: " + title);
@@ -269,10 +274,106 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
 
 
     public void AsyncSearchTask(String search, int page) {
-        new AsyncSearch(this,search,page).execute();
+        String code = mData.getStringPreference(MyBookshelfPreferenceManager.Key_SortSetting_SearchResult, getString(R.string.Code_SortSetting_SalesDate_Descending));
+        String sort = "standard";
+        if(code.equals(getString(R.string.Code_SortSetting_SalesDate_Ascending))){
+            sort = "+releaseDate";
+        }
+        if(code.equals(getString(R.string.Code_SortSetting_SalesDate_Descending))){
+            sort = "-releaseDate";
+        }
+        AsyncSearchBooks asyncSearchBooks = new AsyncSearchBooks(sort,search,page);
+        asyncSearchBooks.setOnCallBack(callbackAsyncSearchBooks);
+        asyncSearchBooks.execute();
     }
 
 
+    AsyncSearchBooks.CallBackTask callbackAsyncSearchBooks = new AsyncSearchBooks.CallBackTask(){
+        @Override
+        public void CallBack(final boolean result,final int status, final JSONObject json){
+            super.CallBack(result,status,json);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mLinearLayout_Progress.setVisibility(View.GONE);
+                    if(mFragmentListener != null) {
+                        mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
+                    }
+
+                    List<BookData> dataset = new ArrayList<>();
+                    int count = 0;
+                    int last = 0;
+
+                    mBooksViewAdapter.setFooter(null);
+
+                    if(result) {
+                        try {
+                            if(json.has("Items")) {
+                                JSONArray jsonArray = json.getJSONArray("Items");
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject data = jsonArray.getJSONObject(i);
+                                    if(D) Log.d(TAG,"sb: " + data.toString());
+                                    BookData book = new BookData();
+                                    book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+
+                                    String isbn = getParam(data,"isbn");
+                                    book.setIsbn(isbn);
+                                    String imageUrl = getParam(data,"largeImageUrl");
+                                    book.setImage(imageUrl);
+                                    String title = getParam(data,"title");
+                                    book.setTitle(title);
+                                    String author = getParam(data,"author");
+                                    book.setAuthor(author);
+                                    String publisher = getParam(data,"publisherName");
+                                    book.setPublisher(publisher);
+                                    String salesDate = getParam(data,"salesDate");
+                                    book.setSalesDate(salesDate);
+                                    String itemPrice = getParam(data,"itemPrice");
+                                    book.setItemPrice(itemPrice);
+                                    String rating = getParam(data,"reviewAverage");
+                                    book.setRating(rating);
+                                    String readStatus = "0"; // Unregistered
+                                    book.setReadStatus(readStatus);
+
+                                    dataset.add(book);
+                                }
+
+
+                                if(json.has("count")) {
+                                    count = json.getInt("count");
+                                    if (D) Log.d(TAG, "count: " + count);
+                                }
+
+                                if(json.has("last")) {
+                                    last = json.getInt("last");
+                                    if (D) Log.d(TAG, "last: " + last);
+                                }
+
+                                mBooksViewAdapter.addBooksData(dataset);
+
+                                if(count - last > 0){
+                                    BookData footer = new BookData();
+                                    footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+                                    mBooksViewAdapter.setFooter(footer);
+//                        mBooksViewAdapter.setLoadNext();
+                                }else{
+                                    mBooksViewAdapter.setFooter(null);
+                                }
+
+                            }
+
+
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            },1500);
+        }
+    };
+
+
+/*
     private static class AsyncSearch extends AsyncTask<Void, Void, Boolean> {
         private final WeakReference<SearchFragment> mFragmentReference;
         final String keyword;
@@ -312,6 +413,7 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
                 String urlSort = "&sort=" + URLEncoder.encode("-releaseDate", "UTF-8");
                 String urlKeyword = "&keyword=" + URLEncoder.encode(keyword);
 
+
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits
                         + urlPage + urlStockFlag + urlField + urlSort + urlKeyword;
                 URL url = new URL(urlString);
@@ -350,5 +452,5 @@ public class SearchFragment extends BaseFragment implements ShelfBooksViewAdapte
             mFragmentReference.get().callback(result, json);
         }
     }
-
+*/
 }
