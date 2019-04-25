@@ -1,64 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="SpUsage"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-
-    <LinearLayout
-        android:orientation="vertical"
+    android:layout_height="match_parent">
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/fragment_search_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/fragment_search_toolbar"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            <android.support.v7.widget.SearchView
+                android:id="@+id/searchView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-                <android.support.v7.widget.SearchView
-                    android:id="@+id/searchView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </android.support.v7.widget.Toolbar>
-        </android.support.design.widget.AppBarLayout>
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/fragment_search_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical" />
-    </LinearLayout>
+                android:layout_height="wrap_content"/>
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/fragment_search_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
+</LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/fragment_search_progress_view"
-        android:orientation="vertical"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/shape_dialog"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:visibility="gone" >
-        <TextView
-            android:id="@+id/fragment_search_progress_text_title"
-            android:layout_margin="@dimen/margin_large"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textColor="#FF000000"
-            android:textSize="@dimen/textSize_xlarge"
-            android:text="@string/Progress_Search"/>
-        <ProgressBar
-            android:layout_margin="@dimen/margin_large"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="false"
-            android:layout_gravity="center"
-            android:visibility="visible"
-            style="?android:attr/progressBarStyleLarge" />
-    </LinearLayout>
-
-</RelativeLayout>

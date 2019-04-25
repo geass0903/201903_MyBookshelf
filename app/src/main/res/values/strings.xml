@@ -5,6 +5,11 @@
 
     <!-- Permission -->
     <string name="Permission_Error">パーミッションエラー</string>
+    <string name="Permission_Title">ストレージの書き込み権限取得許可</string>
+    <string name="Permission_Message">この機能の使用には書き込み権限が必要です</string>
+    <string name="Permission_PositiveLabel">次へ</string>
+    <string name="Permission_NegativeLabel">キャンセル</string>
+
 
     <!-- Navigation -->
     <string name="Navigation_Item_Shelf">本棚</string>

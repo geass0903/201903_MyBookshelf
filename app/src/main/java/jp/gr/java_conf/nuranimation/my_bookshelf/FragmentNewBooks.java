@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,8 +35,8 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class NewFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
-    public static final String TAG = NewFragment.class.getSimpleName();
+public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
+    public static final String TAG = FragmentNewBooks.class.getSimpleName();
     private static final boolean D = true;
 
     private MyBookshelfApplicationData mData;
@@ -43,8 +44,6 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
 
     List<String> authors_list = new ArrayList<>();
     private BooksListViewAdapter mBooksViewAdapter;
-    private LinearLayout mLinearLayout_Progress;
-    private TextView mTextView_Progress;
     private Handler mHandler = new Handler();
     int size = 0;
 
@@ -77,8 +76,6 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
         size = authors_list.size();
         initBooksViewAdapter();
         initRecyclerView(view);
-        mLinearLayout_Progress = view.findViewById(R.id.fragment_new_progress_view);
-        mTextView_Progress = view.findViewById(R.id.fragment_new_progress_text_progress);
 
         Toolbar toolbar = view.findViewById(R.id.fragment_new_toolbar);
         toolbar.setTitle(R.string.Navigation_Item_NewBooks);
@@ -91,15 +88,18 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
                     case R.id.menu_new_action_renew:
                         if(authors_list.size() > 0){
                             mDBOpenHelper.deleteTABLE_NEW_BOOKS();
-                            mLinearLayout_Progress.setVisibility(View.VISIBLE);
-                            if(mFragmentListener != null) {
-                                mFragmentListener.onFragmentEvent(FragmentEvent.DISP_MASK);
-                            }
                             cal_baseDate = Calendar.getInstance();
                             cal_baseDate.add(Calendar.DAY_OF_MONTH,-14);
                             cal_salesDate = Calendar.getInstance();
+
                             String text = "0" + "/" + size;
-                            mTextView_Progress.setText(text);
+
+                            Bundle bundle = new Bundle();
+                            bundle.putString(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload));
+                            bundle.putString(BaseProgressDialogFragment.message, text);
+                            Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
+                            msg.setData(bundle);
+                            handler.sendMessage(msg);
                             search_author = authors_list.get(0);
                             authors_list.remove(0);
                             AsyncSearchTask(search_author,1);
@@ -113,8 +113,7 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
 
 
     private void initBooksViewAdapter(){
-        mBooksViewAdapter = new BooksListViewAdapter(mData.getList_NewBooks(),false);
-        mBooksViewAdapter.setContext(getContext());
+        mBooksViewAdapter = new BooksListViewAdapter(getContext(),mData.getList_NewBooks(),false);
         mBooksViewAdapter.setClickListener(this);
     }
 
@@ -152,20 +151,22 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
 
                                 String isbn = getParam(data,"isbn");
                                 book.setIsbn(isbn);
+                                String imageUrl = getParam(data,"largeImageUrl");
+                                book.setImage(imageUrl);
                                 String title = getParam(data,"title");
                                 book.setTitle(title);
                                 String author = getParam(data,"author");
                                 book.setAuthor(author);
-                                String imageUrl = getParam(data,"largeImageUrl");
-                                book.setImage(imageUrl);
                                 String publisher = getParam(data,"publisherName");
                                 book.setPublisher(publisher);
-                                String salesDate = getParam(data,"textView_SalesDate");
+                                String salesDate = getParam(data,"salesDate");
                                 book.setSalesDate(salesDate);
                                 String itemPrice = getParam(data,"itemPrice");
                                 book.setItemPrice(itemPrice);
-                                String rakutenUrl = getParam(data,"rakutenUrl");
-                                book.setRakutenUrl(rakutenUrl);
+                                String rating = getParam(data,"reviewAverage");
+                                book.setRating(rating);
+                                String readStatus = "0"; // Unregistered
+                                book.setReadStatus(readStatus);
 
                                 if(checkNewBook(book)){
 
@@ -216,17 +217,14 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
                 if(authors_list.size() > 0){
                     int now = size - authors_list.size();
                     String text = now + "/" + size;
-                    mTextView_Progress.setText(text);
+                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS, -1, -1, text).sendToTarget();
 
                     search_author = authors_list.get(0);
                     authors_list.remove(0);
                     AsyncSearchTask(search_author,1);
                 }else{
                     mData.updateList_NewBooks();
-                    mLinearLayout_Progress.setVisibility(View.GONE);
-                    if(mFragmentListener != null) {
-                        mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
-                    }
+                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
                 }
             }
         },1200);
@@ -303,7 +301,7 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
 
 
     public void AsyncSearchTask(String search, int page) {
-        new NewFragment.AsyncSearch(this,search,page).execute();
+        new FragmentNewBooks.AsyncSearch(this,search,page).execute();
     }
 
     @Override
@@ -318,12 +316,12 @@ public class NewFragment extends BaseFragment implements BooksListViewAdapter.On
 
 
     private static class AsyncSearch extends AsyncTask<Void, Void, Boolean> {
-        private final WeakReference<NewFragment> mFragmentReference;
+        private final WeakReference<FragmentNewBooks> mFragmentReference;
         final String keyword;
         final int page;
         JSONObject json;
 
-        private AsyncSearch(NewFragment fragment, String keyword, int page) {
+        private AsyncSearch(FragmentNewBooks fragment, String keyword, int page) {
             this.mFragmentReference = new WeakReference<>(fragment);
             this.keyword = keyword;
             this.page = page;

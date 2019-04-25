@@ -47,7 +47,8 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     private File downloadDir;
 
 
-    BooksListViewAdapter(List<BookData> list, boolean download) {
+    BooksListViewAdapter(Context context, List<BookData> list, boolean download) {
+        this.mContext = context;
         this.list = list;
         this.downloadFlg = download;
         File dir = Environment.getExternalStorageDirectory();
@@ -69,10 +70,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         mRecyclerView = null;
-    }
-
-    public void setContext(Context context){
-        mContext = context;
     }
 
     @Override
@@ -219,51 +216,55 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private String getReadStatus(String status){
-        String readStatus;
-        switch(status){
-            case "1":
-                readStatus = mContext.getString(R.string.Item_ReadStatus_Interested);
-                break;
-            case "2":
-                readStatus = mContext.getString(R.string.Item_ReadStatus_Unread);
-                break;
-            case "3":
-                readStatus = mContext.getString(R.string.Item_ReadStatus_Unread);
-                break;
-            case "4":
-                readStatus = mContext.getString(R.string.Item_ReadStatus_Read);
-                break;
-            case "5":
-                readStatus = mContext.getString(R.string.Item_ReadStatus_Unknown);
-                break;
-            default:
-                readStatus = mContext.getString(R.string.Item_ReadStatus_Unregistered);
-                break;
+        String readStatus = mContext.getString(R.string.Item_ReadStatus_Unregistered);
+        if(status != null) {
+            switch (status) {
+                case "1":
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_Interested);
+                    break;
+                case "2":
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_Unread);
+                    break;
+                case "3":
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_Unread);
+                    break;
+                case "4":
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_Read);
+                    break;
+                case "5":
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_Unknown);
+                    break;
+                default:
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_Unregistered);
+                    break;
+            }
         }
         return readStatus;
     }
 
     private Drawable getReadStatusIcon(String status){
-        Drawable icon;
-        switch(status){
-            case "1":
-                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_interested_24dp,null);
-                break;
-            case "2":
-                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unread_24dp,null);
-                break;
-            case "3":
-                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unread_24dp,null);
-                break;
-            case "4":
-                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_read_24dp,null);
-                break;
-            case "5":
-                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unknown_24dp,null);
-                break;
-            default:
-                icon = ResourcesCompat.getDrawable(mContext.getResources(),R.drawable.ic_vector_status_unregistered_24dp,null);
-                break;
+        Drawable icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_unregistered_24dp, null);;
+        if(status != null) {
+            switch (status) {
+                case "1":
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_interested_24dp, null);
+                    break;
+                case "2":
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_unread_24dp, null);
+                    break;
+                case "3":
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_unread_24dp, null);
+                    break;
+                case "4":
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_read_24dp, null);
+                    break;
+                case "5":
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_unknown_24dp, null);
+                    break;
+                default:
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_status_unregistered_24dp, null);
+                    break;
+            }
         }
         return icon;
     }

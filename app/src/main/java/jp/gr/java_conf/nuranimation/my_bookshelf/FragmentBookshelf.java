@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,21 +18,17 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-public class ShelfFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
-    public static final String TAG = ShelfFragment.class.getSimpleName();
+public class FragmentBookshelf extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
+    public static final String TAG = FragmentBookshelf.class.getSimpleName();
     private static final boolean D = true;
 
-    private BooksListViewAdapter adapter;
-
     private MyBookshelfApplicationData mData;
-    private Context mContext;
-
+    private BooksListViewAdapter booksListViewAdapter;
 
     @Override
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mContext = context;
         mData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
@@ -39,13 +36,12 @@ public class ShelfFragment extends BaseFragment implements BooksListViewAdapter.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
-        return inflater.inflate(R.layout.fragment_shelf, container, false);
+        return inflater.inflate(R.layout.fragment_bookshelf, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Toolbar toolbar = view.findViewById(R.id.fragment_shelf_toolbar);
+        Toolbar toolbar = view.findViewById(R.id.fragment_bookshelf_toolbar);
         toolbar.setTitle(R.string.Navigation_Item_Shelf);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,12 +63,10 @@ public class ShelfFragment extends BaseFragment implements BooksListViewAdapter.
             }
         });
 
-
         RecyclerView recyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
         LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(manager);
         SetShelfRowData(recyclerView);
-
     }
 
     @Override
@@ -85,16 +79,9 @@ public class ShelfFragment extends BaseFragment implements BooksListViewAdapter.
         List<BookData> books = mData.getList_MyBookshelf();
         int recodeCount = books.size();
         if(D) Log.d(TAG, "recodeCount : " + recodeCount);
-/*
-        for(BookData book : books){
-            if(D) Log.d(TAG,"author: " + book.getAuthor());
-            helper.registerAuthor(book.getAuthor());
-        }
-*/
-        adapter = new BooksListViewAdapter(books,true);
-        adapter.setContext(mContext);
-        adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
+        booksListViewAdapter = new BooksListViewAdapter(this.getContext(),books,true);
+        booksListViewAdapter.setClickListener(this);
+        recyclerView.setAdapter(booksListViewAdapter);
     }
 
 
@@ -110,5 +97,45 @@ public class ShelfFragment extends BaseFragment implements BooksListViewAdapter.
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
         String title = data.getTitle();
         if(D) Log.d(TAG,"LongClick: " + title);
+        showLogoutDialog();
     }
+
+
+
+
+
+    private void showLogoutDialog(){
+        Bundle bundle = new Bundle();
+        bundle.putString(BaseDialogFragment.title,getString(R.string.Dialog_Label_Logout));
+        bundle.putString(BaseDialogFragment.message,getString(R.string.Dialog_Message_Logout));
+        bundle.putString(BaseDialogFragment.positiveLabel,getString(R.string.Dialog_Button_Positive));
+        bundle.putString(BaseDialogFragment.negativeLabel,getString(R.string.Dialog_Button_Negative));
+        bundle.putInt(BaseDialogFragment.request_code,RequestCode_Logout);
+        if(getActivity() != null) {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            BaseDialogFragment dialog = BaseDialogFragment.newInstance(this,bundle);
+            dialog.show(manager, FragmentSettings.TAG);
+        }
+    }
+
+
+    @Override
+    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+
+ //       String isbn = data.getIsbn();
+
+        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
+   //     helper.deleteBook(isbn);
+
+
+    }
+
+
+    @Override
+    public void onBaseDialogCancelled(int requestCode, Bundle params) {
+        super.onBaseDialogCancelled(requestCode,params);
+    }
+
+
 }

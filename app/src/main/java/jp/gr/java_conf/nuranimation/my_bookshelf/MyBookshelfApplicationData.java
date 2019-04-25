@@ -1,30 +1,42 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MyBookshelfApplicationData extends MultiDexApplication {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 
+    private static final String PreferenceName = "MyBookshelfPreference";
+    static final String Key_Access_Token = "Key_Access_Token";
+    static final String Key_SortSetting_Bookshelf = "Key_SortSetting_Bookshelf";
+    static final String Key_SortSetting_SearchResult = "Key_SortSetting_SearchResult";
+    static final String Key_isCheckedPermissions = "Key_isCheckedPermissions";
+
+    private SharedPreferences mPreferences;
+
+    private static final String[] Use_Permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private boolean isCheckedPermissions = false;
+
     private MyBookshelfDBOpenHelper mDatabaseHelper;
-    private MyBookshelfPreferenceManager mPreferenceManager;
     private List<BookData> mList_Bookshelf;
     private List<BookData> mList_NewBooks;
+
 
     @Override
     public void onCreate(){
         super.onCreate();
         if(D) Log.d(TAG,"onCreate");
         Fresco.initialize(this);
-        registerActivityLifecycleCallbacks(new LifecycleHandler());
-        mPreferenceManager = new MyBookshelfPreferenceManager(getApplicationContext());
+        mPreferences = getSharedPreferences(PreferenceName,Context.MODE_PRIVATE);
         mDatabaseHelper = new MyBookshelfDBOpenHelper(getApplicationContext());
         initData();
     }
@@ -74,33 +86,20 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         mList_NewBooks = mDatabaseHelper.getNewBooks();
     }
 
-
-    @SuppressWarnings({"unused","SameParameterValue"})
-    boolean containsKey(String key){
-        return mPreferenceManager.containsKey(key);
-    }
-    @SuppressWarnings({"unused","SameParameterValue"})
-    void removeKey(String key){
-        mPreferenceManager.removeKey(key);
+    public SharedPreferences getSharedPreferences(){
+        return mPreferences;
     }
 
-    @SuppressWarnings("unused")
-    public void putIntPreference(String key, int value){
-        mPreferenceManager.putInt(key,value);
-    }
-    @SuppressWarnings("unused")
-    public void putStringPreference(String key, String value){
-        mPreferenceManager.putString(key,value);
+    public String[] getUse_Permissions(){
+        return Use_Permissions;
     }
 
-    @SuppressWarnings("unused")
-    public int getIntPreference(String key,int defValue){
-        return mPreferenceManager.getInt(key,defValue);
+    public void checkedPermissions(boolean flag){
+        mPreferences.edit().putBoolean(Key_isCheckedPermissions,flag).apply();
     }
 
-    @SuppressWarnings("unused")
-    public String getStringPreference(String key,String defValue){
-        return mPreferenceManager.getString(key,defValue);
+    public boolean isCheckedPermissions(){
+        return mPreferences.getBoolean(Key_isCheckedPermissions,false);
     }
 
 }

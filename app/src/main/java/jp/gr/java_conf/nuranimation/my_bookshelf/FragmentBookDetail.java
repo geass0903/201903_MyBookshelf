@@ -14,8 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class BookDetailFragment extends BaseFragment{
-    public static final String TAG = BookDetailFragment.class.getSimpleName();
+public class FragmentBookDetail extends BaseFragment{
+    public static final String TAG = FragmentBookDetail.class.getSimpleName();
     private static final boolean D = true;
 
     public static final String ARG_KEY_IMAGE = "arg_key_image";

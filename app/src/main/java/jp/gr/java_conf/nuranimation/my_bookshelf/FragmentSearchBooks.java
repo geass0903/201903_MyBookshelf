@@ -1,9 +1,9 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.transition.Slide;
@@ -23,26 +23,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
-
-public class SearchFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
+public class FragmentSearchBooks extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     private static final boolean D = true;
-    public static final String TAG = SearchFragment.class.getSimpleName();
+    public static final String TAG = FragmentSearchBooks.class.getSimpleName();
+
     private MyBookshelfApplicationData mData;
     private Handler mHandler = new Handler();
     private BooksListViewAdapter mBooksViewAdapter;
     private SearchView mSearchView;
-    private LinearLayout mLinearLayout_Progress;
     private List<BookData> mList_SearchResult = new ArrayList<>();
     private String searchKeyword;
     private int searchPage;
@@ -77,12 +68,11 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
         initBooksViewAdapter();
         initSearchView(view);
         initRecyclerView(view);
-        mLinearLayout_Progress = view.findViewById(R.id.fragment_search_progress_view);
     }
 
     private void initBooksViewAdapter(){
-        mBooksViewAdapter = new BooksListViewAdapter(mList_SearchResult,false);
-        mBooksViewAdapter.setContext(getContext());
+        mBooksViewAdapter = new BooksListViewAdapter(getContext(),mList_SearchResult,false);
+//        mBooksViewAdapter.setContext(getContext());
         mBooksViewAdapter.setClickListener(this);
     }
 
@@ -107,12 +97,12 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
                     mBooksViewAdapter.clearBooksData();
                     searchKeyword = searchWord;
                     searchPage = 1;
-
-                    if (mFragmentListener != null) {
-                        mFragmentListener.onFragmentEvent(FragmentEvent.DISP_MASK);
-                    }
-                    mLinearLayout_Progress.setVisibility(View.VISIBLE);
-
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BaseProgressDialogFragment.title, getString(R.string.Progress_Search));
+                    bundle.putString(BaseProgressDialogFragment.message, "");
+                    Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
                     AsyncSearchTask(searchKeyword, searchPage);
                 }
                 return false;
@@ -155,7 +145,7 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
                                 String isbn = getParam(data,"isbn");
                                 book.setIsbn(isbn);
                                 String title = getParam(data,"title");
-                                book.setTitle(title);
+                                book.setProgressTitle(title);
                                 String author = getParam(data,"author");
                                 book.setAuthor(author);
                                 String imageUrl = getParam(data,"largeImageUrl");
@@ -234,19 +224,19 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
             FragmentManager fragmentManager = getFragmentManager();
             if(fragmentManager != null){
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                BookDetailFragment fragment = new BookDetailFragment();
+                FragmentBookDetail fragment = new FragmentBookDetail();
                 Bundle bundle = new Bundle();
-                bundle.putString(BookDetailFragment.ARG_KEY_IMAGE,data.getImage());
-                bundle.putString(BookDetailFragment.ARG_KEY_TITLE,data.getTitle());
-                bundle.putString(BookDetailFragment.ARG_KEY_AUTHOR,data.getAuthor());
+                bundle.putString(FragmentBookDetail.ARG_KEY_IMAGE,data.getImage());
+                bundle.putString(FragmentBookDetail.ARG_KEY_TITLE,data.getTitle());
+                bundle.putString(FragmentBookDetail.ARG_KEY_AUTHOR,data.getAuthor());
 
 
                 fragment.setArguments(bundle);
                 Slide slide = new Slide();
                 slide.setSlideEdge(Gravity.END);
                 fragment.setEnterTransition(slide);
-//                fragmentTransaction.replace(R.id.contents_container, fragment,BookDetailFragment.TAG);
-                fragmentTransaction.add(R.id.contents_container, fragment,BookDetailFragment.TAG);
+//                fragmentTransaction.replace(R.id.contents_container, fragment,FragmentBookDetail.TAG);
+                fragmentTransaction.add(R.id.contents_container, fragment, FragmentBookDetail.TAG);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             }
@@ -274,13 +264,15 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
 
 
     public void AsyncSearchTask(String search, int page) {
-        String code = mData.getStringPreference(MyBookshelfPreferenceManager.Key_SortSetting_SearchResult, getString(R.string.Code_SortSetting_SalesDate_Descending));
         String sort = "standard";
-        if(code.equals(getString(R.string.Code_SortSetting_SalesDate_Ascending))){
-            sort = "+releaseDate";
-        }
-        if(code.equals(getString(R.string.Code_SortSetting_SalesDate_Descending))){
-            sort = "-releaseDate";
+        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_SearchResult, getString(R.string.Code_SortSetting_SalesDate_Descending));
+        if(code != null) {
+            if (code.equals(getString(R.string.Code_SortSetting_SalesDate_Ascending))) {
+                sort = "+releaseDate";
+            }
+            if (code.equals(getString(R.string.Code_SortSetting_SalesDate_Descending))) {
+                sort = "-releaseDate";
+            }
         }
         AsyncSearchBooks asyncSearchBooks = new AsyncSearchBooks(sort,search,page);
         asyncSearchBooks.setOnCallBack(callbackAsyncSearchBooks);
@@ -295,10 +287,7 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mLinearLayout_Progress.setVisibility(View.GONE);
-                    if(mFragmentListener != null) {
-                        mFragmentListener.onFragmentEvent(FragmentEvent.REMOVE_MASK);
-                    }
+                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
 
                     List<BookData> dataset = new ArrayList<>();
                     int count = 0;
@@ -375,12 +364,12 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
 
 /*
     private static class AsyncSearch extends AsyncTask<Void, Void, Boolean> {
-        private final WeakReference<SearchFragment> mFragmentReference;
+        private final WeakReference<FragmentSearchBooks> mFragmentReference;
         final String keyword;
         final int page;
         JSONObject json;
 
-        private AsyncSearch(SearchFragment fragment, String keyword, int page) {
+        private AsyncSearch(FragmentSearchBooks fragment, String keyword, int page) {
             this.mFragmentReference = new WeakReference<>(fragment);
             this.keyword = keyword;
             this.page = page;
@@ -389,7 +378,7 @@ public class SearchFragment extends BaseFragment implements BooksListViewAdapter
         @Override
         protected void onPreExecute() {
             if(page == 1) {
-                SearchFragment fragment = mFragmentReference.get();
+                FragmentSearchBooks fragment = mFragmentReference.get();
                 if (fragment.mFragmentListener != null) {
                     fragment.mFragmentListener.onFragmentEvent(FragmentEvent.DISP_MASK);
                 }

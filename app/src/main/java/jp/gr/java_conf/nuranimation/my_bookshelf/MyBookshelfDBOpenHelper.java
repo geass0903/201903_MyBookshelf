@@ -174,6 +174,11 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         db.insert(TABLE_MY_BOOKSHELF,"",insertValues);
     }
 
+    void deleteBook(String isbn){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MY_BOOKSHELF,"isbn = ?",new String[]{isbn});
+    }
+
 
     List<String> getAuthors(){
         List<String> list = new ArrayList<>();
@@ -278,30 +283,32 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
     private String getOrder_Bookshelf(){
         String order = "";
-        String code = mData.getStringPreference(MyBookshelfPreferenceManager.Key_SortSetting_Bookshelf,mContext.getString(R.string.Code_SortSetting_Registered_Ascending));
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_Title_Ascending))){
-            order = " order by " + BOOKSHELF_KEY_TITLE + " asc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_Title_Descending))){
-            order = " order by " + BOOKSHELF_KEY_TITLE + " desc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_Author_Ascending))){
-            order = " order by " + BOOKSHELF_KEY_AUTHOR + " asc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_Author_Descending))){
-            order = " order by " + BOOKSHELF_KEY_AUTHOR + " desc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_SalesDate_Ascending))){
-            order = " order by " + BOOKSHELF_KEY_RELEASE_DATE + " asc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_SalesDate_Descending))){
-            order = " order by " + BOOKSHELF_KEY_RELEASE_DATE + " desc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_Registered_Ascending))){
-            order = " order by " + BOOKSHELF_KEY_REGISTER_DATE + " asc";
-        }
-        if(code.equals(mContext.getString(R.string.Code_SortSetting_Registered_Descending))){
-            order = " order by " + BOOKSHELF_KEY_REGISTER_DATE + " desc";
+        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_Bookshelf,mContext.getString(R.string.Code_SortSetting_Registered_Ascending));
+        if(code != null) {
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_Title_Ascending))) {
+                order = " order by " + BOOKSHELF_KEY_TITLE + " asc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_Title_Descending))) {
+                order = " order by " + BOOKSHELF_KEY_TITLE + " desc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_Author_Ascending))) {
+                order = " order by " + BOOKSHELF_KEY_AUTHOR + " asc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_Author_Descending))) {
+                order = " order by " + BOOKSHELF_KEY_AUTHOR + " desc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_SalesDate_Ascending))) {
+                order = " order by " + BOOKSHELF_KEY_RELEASE_DATE + " asc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_SalesDate_Descending))) {
+                order = " order by " + BOOKSHELF_KEY_RELEASE_DATE + " desc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_Registered_Ascending))) {
+                order = " order by " + BOOKSHELF_KEY_REGISTER_DATE + " asc";
+            }
+            if (code.equals(mContext.getString(R.string.Code_SortSetting_Registered_Descending))) {
+                order = " order by " + BOOKSHELF_KEY_REGISTER_DATE + " desc";
+            }
         }
         return order;
     }

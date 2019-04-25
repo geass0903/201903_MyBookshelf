@@ -8,22 +8,6 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 public enum FragmentEvent {
 
-    DISP_MASK {
-        @Override
-        public void apply(MainActivity activity){
-            activity.dispMask(true);
-        }
-    },
-    REMOVE_MASK {
-        @Override
-        public void apply(MainActivity activity){
-            activity.dispMask(false);
-        }
-    },
-
-
-
-
     EVENT1 {
         @Override
         public void apply(MainActivity activity){
