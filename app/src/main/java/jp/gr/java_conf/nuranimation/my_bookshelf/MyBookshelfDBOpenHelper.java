@@ -5,11 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("WeakerAccess")
 public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     public static final String TAG = MyBookshelfDBOpenHelper.class.getSimpleName();
     private static final boolean D = true;
@@ -82,7 +84,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     private MyBookshelfApplicationData mData;
 
 
-    MyBookshelfDBOpenHelper(Context context){
+    public MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
         mContext = context;
         mData = (MyBookshelfApplicationData) context.getApplicationContext();
@@ -104,26 +106,26 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    void deleteTABLE_SHELF(){
+    public void deleteTABLE_SHELF(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(DROP_TABLE_SHELF);
         db.execSQL(CREATE_TABLE_SHELF);
     }
 
-    void deleteTABLE_AUTHOR(){
+    public void deleteTABLE_AUTHOR(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(DROP_TABLE_AUTHOR);
         db.execSQL(CREATE_TABLE_AUTHOR);
     }
 
-    void deleteTABLE_NEW_BOOKS(){
+    public void deleteTABLE_NEW_BOOKS(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(DROP_TABLE_NEW_BOOKS);
         db.execSQL(CREATE_TABLE_NEW_BOOKS);
     }
 
 
-    List<BookData> getMyBookshelf(){
+    public List<BookData> getMyBookshelf(){
         List<BookData> bookshelf = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String order = getOrder_Bookshelf();
@@ -154,7 +156,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         return bookshelf;
     }
 
-    void registerBook(BookData book){
+    public void registerBook(BookData book){
         ContentValues insertValues = new ContentValues();
         insertValues.put(BOOKSHELF_KEY_ISBN, book.getIsbn());// ISBN
         insertValues.put(BOOKSHELF_KEY_TITLE, book.getTitle());// タイトル
@@ -174,13 +176,15 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         db.insert(TABLE_MY_BOOKSHELF,"",insertValues);
     }
 
-    void deleteBook(String isbn){
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_MY_BOOKSHELF,"isbn = ?",new String[]{isbn});
+    public void deleteBook(String isbn){
+        if(!TextUtils.isEmpty(isbn)) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.delete(TABLE_MY_BOOKSHELF, "isbn = ?", new String[]{isbn});
+        }
     }
 
 
-    List<String> getAuthors(){
+    public List<String> getAuthors(){
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 //        String sql = "select * from " + TABLE_AUTHOR + ";";
@@ -196,7 +200,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    void registerAuthor(String author){
+    public void registerAuthor(String author){
         if(!author.equals("")) {
             author = author.replaceAll("[\\x20\\u3000]","");
             SQLiteDatabase db = this.getWritableDatabase();
@@ -217,7 +221,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    List<BookData> getNewBooks(){
+    public List<BookData> getNewBooks(){
         List<BookData> new_books = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "select * from " + TABLE_NEW_BOOKS_LIST + " order by " + BOOKSHELF_KEY_RELEASE_DATE + " desc" + ";";
@@ -248,7 +252,38 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    void addNewBook(BookData book){
+    public BookData searchRegistered(String isbn){
+        BookData book = null;
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "select * from " + TABLE_MY_BOOKSHELF + " where " + BOOKSHELF_KEY_ISBN + " = ?;";
+        Cursor c = db.rawQuery(sql, new String[]{isbn});
+        boolean mov = c.moveToFirst();
+        if (mov) {
+            book = new BookData();
+            book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+            book.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
+            book.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
+            book.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
+            book.setAuthor(c.getString(c.getColumnIndex(BOOKSHELF_KEY_AUTHOR)));
+            book.setPublisher(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PUBLISHER)));
+            book.setSalesDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RELEASE_DATE)));
+            book.setItemPrice(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PRICE)));
+            book.setRakutenUrl(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RAKUTEN_URL)));
+            book.setRating(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RATING)));
+            book.setReadStatus(c.getString(c.getColumnIndex(BOOKSHELF_KEY_READ_STATUS)));
+            book.setTags(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TAGS)));
+            book.setFinishReadDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_FINISH_READ_DATE)));
+            book.setRegisterDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_REGISTER_DATE)));
+        }
+        c.close();
+        return book;
+    }
+
+
+
+
+
+    public void addNewBook(BookData book){
         String isbn = book.getIsbn();
         SQLiteDatabase db = this.getWritableDatabase();
         String sql = "select * from " + TABLE_NEW_BOOKS_LIST + " where " + BOOKSHELF_KEY_ISBN + " = ?;";
@@ -312,7 +347,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
         return order;
     }
-
 
 
 }

@@ -7,16 +7,18 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,45 +72,49 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_new,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.menu_new_action_renew:
+                if(D) Log.d(TAG,"new action search");
+                if(authors_list.size() > 0){
+                    mDBOpenHelper.deleteTABLE_NEW_BOOKS();
+                    cal_baseDate = Calendar.getInstance();
+                    cal_baseDate.add(Calendar.DAY_OF_MONTH,-14);
+                    cal_salesDate = Calendar.getInstance();
+
+                    String text = "0" + "/" + size;
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload));
+                    bundle.putString(BaseProgressDialogFragment.message, text);
+                    Message msg = handler.obtainMessage(BaseFragment.MESSAGE_Progress_Show);
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
+                    search_author = authors_list.get(0);
+                    authors_list.remove(0);
+                    AsyncSearchTask(search_author,1);
+                }
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         authors_list.clear();
         authors_list.addAll(mData.getDatabaseHelper().getAuthors());
         size = authors_list.size();
         initBooksViewAdapter();
         initRecyclerView(view);
-
-        Toolbar toolbar = view.findViewById(R.id.fragment_new_toolbar);
-        toolbar.setTitle(R.string.Navigation_Item_NewBooks);
-
-        toolbar.inflateMenu(R.menu.menu_new);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.menu_new_action_renew:
-                        if(authors_list.size() > 0){
-                            mDBOpenHelper.deleteTABLE_NEW_BOOKS();
-                            cal_baseDate = Calendar.getInstance();
-                            cal_baseDate.add(Calendar.DAY_OF_MONTH,-14);
-                            cal_salesDate = Calendar.getInstance();
-
-                            String text = "0" + "/" + size;
-
-                            Bundle bundle = new Bundle();
-                            bundle.putString(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload));
-                            bundle.putString(BaseProgressDialogFragment.message, text);
-                            Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
-                            msg.setData(bundle);
-                            handler.sendMessage(msg);
-                            search_author = authors_list.get(0);
-                            authors_list.remove(0);
-                            AsyncSearchTask(search_author,1);
-                        }
-                        break;
-                }
-                return false;
-            }
-        });
     }
 
 
@@ -127,10 +133,13 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
 
 
     public void callback(final boolean result, final JSONObject json){
+        LoaderManager manager = LoaderManager.getInstance(this);
+        manager.destroyLoader(0);
+
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-
+                handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
                 List<BookData> dataset = new ArrayList<>();
 
 
@@ -217,14 +226,14 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
                 if(authors_list.size() > 0){
                     int now = size - authors_list.size();
                     String text = now + "/" + size;
-                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS, -1, -1, text).sendToTarget();
+                    handler.obtainMessage(BaseFragment.MESSAGE_Progress_Message, -1, -1, text).sendToTarget();
 
                     search_author = authors_list.get(0);
                     authors_list.remove(0);
                     AsyncSearchTask(search_author,1);
                 }else{
                     mData.updateList_NewBooks();
-                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+                    handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
                 }
             }
         },1200);
@@ -301,7 +310,17 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
 
 
     public void AsyncSearchTask(String search, int page) {
-        new FragmentNewBooks.AsyncSearch(this,search,page).execute();
+//        new FragmentNewBooks.AsyncSearch(this,search,page).execute();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("search",search);
+        bundle.putInt("page",page);
+
+        LoaderManager manager = LoaderManager.getInstance(this);
+
+
+        manager.initLoader(0,bundle,mCallback);
+
     }
 
     @Override
@@ -311,85 +330,45 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
 
     @Override
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
-
     }
 
 
-    private static class AsyncSearch extends AsyncTask<Void, Void, Boolean> {
-        private final WeakReference<FragmentNewBooks> mFragmentReference;
-        final String keyword;
-        final int page;
-        JSONObject json;
-
-        private AsyncSearch(FragmentNewBooks fragment, String keyword, int page) {
-            this.mFragmentReference = new WeakReference<>(fragment);
-            this.keyword = keyword;
-            this.page = page;
-        }
-
+    private LoaderManager.LoaderCallbacks<AsyncSearchBook.Result> mCallback = new LoaderManager.LoaderCallbacks<AsyncSearchBook.Result>() {
+        @NonNull
         @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            boolean isSuccess = false;
-            HttpsURLConnection connection = null;
-            try {
-                String urlBase = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId=1028251347039610250";
-                String urlFormat = "&format=" + "json";
-                String urlFormatVersion = "&formatVersion=" + "2";
-                String urlGenre = "&booksGenreId=" + "001"; // Books
-                String urlHits = "&hits=20";
-                String urlPage = "&page=" + String.valueOf(page);
-                String urlStockFlag = "&outOfStockFlag=" + "1";
-                String urlField = "&field=" + "0";
-                String urlSort = "&sort=" + URLEncoder.encode("-releaseDate", "UTF-8");
-                String urlKeyword = "&keyword=" + URLEncoder.encode(keyword);
-
-                String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits
-                        + urlPage + urlStockFlag + urlField + urlSort + urlKeyword;
-                URL url = new URL(urlString);
-                connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setInstanceFollowRedirects(false);
-                connection.connect();
-
-                int status = connection.getResponseCode();
-                if (status == HttpURLConnection.HTTP_OK) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    reader.close();
-
-                    if (D) Log.d(TAG, "sb: " + sb.toString());
-                    json = new JSONObject(sb.toString());
-                    isSuccess = true;
+        public Loader<AsyncSearchBook.Result> onCreateLoader(int i, @Nullable Bundle bundle) {
+            String sort = "standard";
+            String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_SearchResult, getString(R.string.Code_SortSetting_SalesDate_Descending));
+            if(code != null) {
+                if (code.equals(getString(R.string.Code_SortSetting_SalesDate_Ascending))) {
+                    sort = "+releaseDate";
                 }
-            } catch (IOException | JSONException e) {
-                if (D) Log.d(TAG, "Error");
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
+                if (code.equals(getString(R.string.Code_SortSetting_SalesDate_Descending))) {
+                    sort = "-releaseDate";
                 }
             }
-            return isSuccess;
+            String keyword = "";
+            int page = 1;
+            if(bundle != null){
+                keyword = bundle.getString("search","error");
+                page = bundle.getInt("page",1);
+            }
+            return new AsyncSearchBook(getContext(),sort,keyword,page);
         }
 
         @Override
-        protected void onPostExecute(Boolean result) {
-            mFragmentReference.get().callback(result, json);
+        public void onLoadFinished(@NonNull Loader<AsyncSearchBook.Result> loader, AsyncSearchBook.Result result) {
+
+
+
+//            callback(isSuccess.isSuccess,isSuccess.json);
         }
-    }
 
+        @Override
+        public void onLoaderReset(@NonNull Loader<AsyncSearchBook.Result> loader) {
 
-
-
-
+        }
+    };
 
 
 }

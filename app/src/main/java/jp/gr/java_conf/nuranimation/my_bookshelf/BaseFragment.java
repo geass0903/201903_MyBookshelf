@@ -11,10 +11,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Created by Kamada on 2019/03/11.
@@ -23,21 +26,28 @@ import java.util.List;
 public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener{
     private static final String TAG = BaseFragment.class.getSimpleName();
 
-    public static final int MESSAGE_PROGRESS_SHOW       = 1;
-    public static final int MESSAGE_PROGRESS            = 2;
-    public static final int MESSAGE_PROGRESS_DISMISS = 3;
+    public static final int MESSAGE_Progress_Show       = 1;
+    public static final int MESSAGE_Progress_Message    = 2;
+    public static final int MESSAGE_Progress_Dismiss    = 3;
 
-    static final int RequestCode_Logout = 100;
-    static final int RequestCode_ask_for_Permissions = 999;
-    private static final String Key_saved_RequestPermissions = "Key_saved_RequestPermissions";
+    static final int REQUEST_CODE_Logout = 100;
+    static final int REQUEST_CODE_Delete_Book = 110;
+    static final int REQUEST_CODE_Ask_for_Permissions = 999;
+    private static final String KEY_Saved_RequestPermissions = "KEY_Saved_RequestPermissions";
+    private static final String KEY_isShowingDialog = "KEY_isShowingDialog";
+    private static final String KEY_bundleProgressDialog = "KEY_bundleProgressDialog";
 
     private String[] mRequestPermissions;
+    boolean isShowingDialog;
 
     AppCompatActivity mActivity = null;
     FragmentListener mFragmentListener = null;
 
     BaseProgressDialogFragment progressDialogFragment;
     ProgressDialogHandler handler = new ProgressDialogHandler(this);
+    Handler waitHandler = new Handler();
+    boolean isClickEnabled = true;
+    Bundle bundleProgressDialog;
 
 
     @SuppressWarnings("unused")
@@ -67,19 +77,63 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if(savedInstanceState != null){
+            isShowingDialog = savedInstanceState.getBoolean(KEY_isShowingDialog,false);
+            bundleProgressDialog = new BundleBuilder(savedInstanceState.getBundle(KEY_bundleProgressDialog)).build();
+        }
+    }
+
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            // 保存していたパーミッションを再設定
+            setRequestPermissions(savedInstanceState.getStringArray(KEY_Saved_RequestPermissions));
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         handler.resume();
+        if(isShowingDialog){
+            showProgress();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        if(progressDialogFragment != null){
+            progressDialogFragment.dismiss();
+            progressDialogFragment = null;
+        }
         handler.pause();
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putStringArray(KEY_Saved_RequestPermissions, mRequestPermissions);
+        outState.putBoolean(KEY_isShowingDialog,isShowingDialog);
+        outState.putBundle(KEY_bundleProgressDialog,bundleProgressDialog);
+    }
 
 
+    public void setProgressDialog(Bundle bundle){
+        isShowingDialog = true;
+        bundleProgressDialog = new BundleBuilder(bundle).build();
+        showProgress();
+    }
+
+
+    private void showProgress(){
+        Message msg = handler.obtainMessage(BaseFragment.MESSAGE_Progress_Show);
+        msg.setData(bundleProgressDialog);
+        handler.sendMessage(msg);
+    }
 
     private void setRequestPermissions(String[] permissions) {
         mRequestPermissions = permissions;
@@ -87,20 +141,6 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     private String[] getRequestPermissions() {
         return mRequestPermissions;
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putStringArray(Key_saved_RequestPermissions, mRequestPermissions);
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            // 保存していたパーミッションを再設定
-            setRequestPermissions(savedInstanceState.getStringArray(Key_saved_RequestPermissions));
-        }
     }
 
 
@@ -121,7 +161,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                 setRequestPermissions(denyPermissions);
 
                 // パーミッションの要求ダイアログを表示
-                requestPermissions(getRequestPermissions(), RequestCode_ask_for_Permissions);
+                requestPermissions(getRequestPermissions(), REQUEST_CODE_Ask_for_Permissions);
             } else {
                 // 要求するパーミッションを設定
                 setRequestPermissions(shouldShowRationalePermissions);
@@ -174,7 +214,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         bundle.putString(BaseDialogFragment.positiveLabel, getString(R.string.Permission_PositiveLabel));
         bundle.putString(BaseDialogFragment.negativeLabel, getString(R.string.Permission_NegativeLabel));
         bundle.putBoolean(BaseDialogFragment.cancelable,true);
-        bundle.putInt(BaseDialogFragment.request_code, RequestCode_ask_for_Permissions);
+        bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Ask_for_Permissions);
         BaseDialogFragment dialog = BaseDialogFragment.newInstance(this, bundle);
         if(getActivity() != null) {
             dialog.show(getActivity().getSupportFragmentManager(), BaseFragment.TAG);
@@ -184,7 +224,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     @SuppressWarnings({"unused","SameParameterValue"})
     protected void onNextRequestPermissions(final String[] requestPermissions) {
         // パーミッション要求ダイアログを表示
-        requestPermissions(requestPermissions, RequestCode_ask_for_Permissions);
+        requestPermissions(requestPermissions, REQUEST_CODE_Ask_for_Permissions);
     }
     @SuppressWarnings({"unused","SameParameterValue"})
     protected void onSkipRequestPermissions(final String[] requestPermissions) {
@@ -195,7 +235,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode != RequestCode_ask_for_Permissions) {
+        if (requestCode != REQUEST_CODE_Ask_for_Permissions) {
             return;
         }
 
@@ -236,7 +276,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     @Override
     public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        if(requestCode == RequestCode_ask_for_Permissions) {
+        if(requestCode == REQUEST_CODE_Ask_for_Permissions) {
             if(resultCode == DialogInterface.BUTTON_POSITIVE) {
                 onNextRequestPermissions(getRequestPermissions());
             }else{
@@ -247,17 +287,30 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     @Override
     public void onBaseDialogCancelled(int requestCode, Bundle params) {
-        if(requestCode == RequestCode_ask_for_Permissions) {
+        if(requestCode == REQUEST_CODE_Ask_for_Permissions) {
             onSkipRequestPermissions(getRequestPermissions());
         }
     }
 
+    @SuppressWarnings({"SameParameterValue"})
+    void setWait_ClickEnable(long wait){
+        waitHandler.removeCallbacks(enableClick);
+        waitHandler.postDelayed(enableClick,wait);
+    }
+
+    Runnable enableClick = new Runnable() {
+        @Override
+        public void run() {
+            isClickEnabled = true;
+        }
+    };
 
 
     static class ProgressDialogHandler extends Handler {
         private final WeakReference<BaseFragment> mWeakReference;
 
-        private List<Message> messageList = new ArrayList<>();
+        private Queue<Message> mQueue = new LinkedList<>();
+//        private List<Message> messageList = new ArrayList<>();
         private boolean isPaused;
 
         ProgressDialogHandler(BaseFragment fragment) {
@@ -266,10 +319,11 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
         void resume() {
             isPaused = false;
-            while (messageList.size() > 0) {
-                Message msg = messageList.get(0);
-                messageList.remove(0);
-                sendMessage(msg);
+            while(!mQueue.isEmpty()){
+                Message msg = mQueue.poll();
+                if(msg != null){
+                    sendMessage(msg);
+                }
             }
         }
 
@@ -281,7 +335,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
             BaseFragment fragment = mWeakReference.get();
             if (fragment != null) {
                 switch (msg.what) {
-                    case MESSAGE_PROGRESS_SHOW:
+                    case MESSAGE_Progress_Show:
                         Bundle bundle = msg.getData();
                         if (fragment.getActivity() != null) {
                             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
@@ -289,13 +343,14 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                             fragment.progressDialogFragment.show(manager, BaseFragment.TAG);
                         }
                         break;
-                    case MESSAGE_PROGRESS:
+                    case MESSAGE_Progress_Message:
                         if (fragment.progressDialogFragment != null) {
                             String progress = (String) msg.obj;
                             fragment.progressDialogFragment.setProgressMessage(progress);
                         }
                         break;
-                    case MESSAGE_PROGRESS_DISMISS:
+                    case MESSAGE_Progress_Dismiss:
+                        fragment.isShowingDialog = false;
                         if(fragment.progressDialogFragment != null){
                             fragment.progressDialogFragment.dismiss();
                             fragment.progressDialogFragment = null;
@@ -305,17 +360,23 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
             }
         }
 
+
         @Override
-        public void handleMessage(Message msg) {
-            if (isPaused) {
+        public void dispatchMessage(Message msg){
+            if(isPaused){
                 Message msgCopy = new Message();
                 msgCopy.copyFrom(msg);
-                messageList.add(msgCopy);
-            } else {
-                processMessage(msg);
+                mQueue.offer(msgCopy);
+            }else{
+                super.dispatchMessage(msg);
             }
         }
 
+
+        @Override
+        public void handleMessage(Message msg) {
+            processMessage(msg);
+        }
     }
 
 }

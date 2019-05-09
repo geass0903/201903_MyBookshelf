@@ -13,6 +13,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -75,10 +78,6 @@ public class FragmentSettings extends BaseFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Toolbar toolbar = view.findViewById(R.id.fragment_settings_toolbar);
-        toolbar.setTitle(R.string.Navigation_Item_Settings);
-        toolbar.setNavigationOnClickListener(toolbarClickListener);
-
         mButton_Export = view.findViewById(R.id.settings_button_export);
         mButton_Import = view.findViewById(R.id.settings_button_import);
         mButton_Login = view.findViewById(R.id.settings_button_log_in_dropbox);
@@ -207,7 +206,7 @@ public class FragmentSettings extends BaseFragment {
 
     public void callback(ButtonAction action, boolean result) {
         mCurrentAction = ButtonAction.None;
-        handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+        handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
         if (result) {
             switch (action) {
                 case Export_CSV:
@@ -265,13 +264,6 @@ public class FragmentSettings extends BaseFragment {
         new AsyncCSV(this, action).execute();
     }
 
-
-    View.OnClickListener toolbarClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            // Do Nothing
-        }
-    };
 
     View.OnClickListener button_exportListener = new View.OnClickListener() {
         @Override
@@ -357,7 +349,7 @@ public class FragmentSettings extends BaseFragment {
         bundle.putString(BaseDialogFragment.message, getString(R.string.Dialog_Message_Logout));
         bundle.putString(BaseDialogFragment.positiveLabel, getString(R.string.Dialog_Button_Positive));
         bundle.putString(BaseDialogFragment.negativeLabel, getString(R.string.Dialog_Button_Negative));
-        bundle.putInt(BaseDialogFragment.request_code, RequestCode_Logout);
+        bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Logout);
         if (getActivity() != null) {
             FragmentManager manager = getActivity().getSupportFragmentManager();
             BaseDialogFragment dialog = BaseDialogFragment.newInstance(this, bundle);
@@ -369,7 +361,7 @@ public class FragmentSettings extends BaseFragment {
     public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
         super.onBaseDialogSucceeded(requestCode, resultCode, params);
         switch (requestCode) {
-            case RequestCode_Logout:
+            case REQUEST_CODE_Logout:
                 switch (resultCode) {
                     case DialogInterface.BUTTON_POSITIVE:
                         if (D) Log.d(TAG, "Log out button pressed");
@@ -381,7 +373,7 @@ public class FragmentSettings extends BaseFragment {
                         break;
                 }
                 break;
-            case RequestCode_ask_for_Permissions:
+            case REQUEST_CODE_Ask_for_Permissions:
                 switch (resultCode) {
                     case DialogInterface.BUTTON_POSITIVE:
                         break;
@@ -400,7 +392,7 @@ public class FragmentSettings extends BaseFragment {
     @Override
     public void onBaseDialogCancelled(int requestCode, Bundle params) {
         super.onBaseDialogCancelled(requestCode, params);
-        if (requestCode == RequestCode_ask_for_Permissions) {
+        if (requestCode == REQUEST_CODE_Ask_for_Permissions) {
             if (D) Log.d(TAG, "Permission cancel");
             mCurrentAction = ButtonAction.None;
         }
@@ -447,7 +439,7 @@ public class FragmentSettings extends BaseFragment {
                 fragment.progressDialogFragment.show(manager, FragmentSettings.TAG);
             }
 */
-            Message msg = fragment.handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
+            Message msg = fragment.handler.obtainMessage(BaseFragment.MESSAGE_Progress_Show);
             msg.setData(bundle);
             fragment.handler.sendMessage(msg);
 
@@ -491,7 +483,7 @@ public class FragmentSettings extends BaseFragment {
 
     private void initSpinner_SortSetting_Bookshelf(View view) {
         Spinner spinner_SortSetting_Bookshelf = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_Bookshelf);
-        SpinnerArrayAdapter arrayAdapter_SortSetting_Bookshelf = new SpinnerArrayAdapter(this.mContext, R.layout.item_spinner, getList_Spinner_Sort_Shelf());
+        BaseSpinnerArrayAdapter arrayAdapter_SortSetting_Bookshelf = new BaseSpinnerArrayAdapter(this.mContext, R.layout.item_spinner, getList_Spinner_Sort_Shelf());
         spinner_SortSetting_Bookshelf.setAdapter(arrayAdapter_SortSetting_Bookshelf);
         String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_Bookshelf, getString(R.string.Code_SortSetting_Registered_Ascending));
         spinner_SortSetting_Bookshelf.setSelection(arrayAdapter_SortSetting_Bookshelf.getPosition(code), false);
@@ -501,7 +493,7 @@ public class FragmentSettings extends BaseFragment {
 
     private void initSpinner_SortSetting_SearchResult(View view) {
         Spinner spinner_SortSetting_SearchResult = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_SearchResult);
-        SpinnerArrayAdapter arrayAdapter_SortSetting_SearchResult = new SpinnerArrayAdapter(this.mContext, R.layout.item_spinner, getList_Spinner_Sort_SearchResult());
+        BaseSpinnerArrayAdapter arrayAdapter_SortSetting_SearchResult = new BaseSpinnerArrayAdapter(this.mContext, R.layout.item_spinner, getList_Spinner_Sort_SearchResult());
         spinner_SortSetting_SearchResult.setAdapter(arrayAdapter_SortSetting_SearchResult);
         String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_SearchResult, getString(R.string.Code_SortSetting_SalesDate_Descending));
         spinner_SortSetting_SearchResult.setSelection(arrayAdapter_SortSetting_SearchResult.getPosition(code), false);
@@ -509,30 +501,30 @@ public class FragmentSettings extends BaseFragment {
     }
 
 
-    private List<SpinnerItem> getList_Spinner_Sort_Shelf() {
-        List<SpinnerItem> list = new ArrayList<>();
+    private List<BaseSpinnerItem> getList_Spinner_Sort_Shelf() {
+        List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
         TypedArray array = res.obtainTypedArray(R.array.Spinner_Bookshelf_SortSetting);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
                 String[] item = res.getStringArray(id);
-                list.add(new SpinnerItem(item[0], item[1]));
+                list.add(new BaseSpinnerItem(item[0], item[1]));
             }
         }
         array.recycle();
         return list;
     }
 
-    private List<SpinnerItem> getList_Spinner_Sort_SearchResult() {
-        List<SpinnerItem> list = new ArrayList<>();
+    private List<BaseSpinnerItem> getList_Spinner_Sort_SearchResult() {
+        List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
         TypedArray array = res.obtainTypedArray(R.array.Spinner_SearchResult_SortSetting);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
                 String[] item = res.getStringArray(id);
-                list.add(new SpinnerItem(item[0], item[1]));
+                list.add(new BaseSpinnerItem(item[0], item[1]));
             }
         }
         array.recycle();
@@ -544,7 +536,7 @@ public class FragmentSettings extends BaseFragment {
         @Override
         public void onItemSelected(AdapterView<?> adapter,
                                    View v, int position, long id) {
-            SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
+            BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
             if (D) Log.d(TAG, "selected: " + item.mLabel);
             mData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.Key_SortSetting_Bookshelf, item.mCode).apply();
             mData.updateList_MyBookshelf();
@@ -559,7 +551,7 @@ public class FragmentSettings extends BaseFragment {
         @Override
         public void onItemSelected(AdapterView<?> adapter,
                                    View v, int position, long id) {
-            SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
+            BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
             if (D) Log.d(TAG, "selected: " + item.mLabel);
             mData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.Key_SortSetting_SearchResult, item.mCode).apply();
         }

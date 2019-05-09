@@ -24,7 +24,6 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
     private SharedPreferences mPreferences;
 
     private static final String[] Use_Permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    private boolean isCheckedPermissions = false;
 
     private MyBookshelfDBOpenHelper mDatabaseHelper;
     private List<BookData> mList_Bookshelf;

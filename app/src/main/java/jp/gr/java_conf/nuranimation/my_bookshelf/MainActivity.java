@@ -3,10 +3,13 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.transition.Slide;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
@@ -20,9 +23,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         super.onCreate(savedInstanceState);
         if (D) Log.e(TAG, "+++ ON CREATE +++");
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.activity_main_toolbar);
+        setSupportActionBar(toolbar);
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         if (savedInstanceState == null) {
+            setTitle(R.string.Navigation_Item_Shelf);
             getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new FragmentBookshelf(), FragmentBookshelf.TAG).commit();
         }
     }
@@ -75,30 +81,38 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             // remove FragmentBookDetail
             fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookDetail.TAG);
             if(fragment instanceof FragmentBookDetail){
+                Slide slide = new Slide();
+                slide.setSlideEdge(Gravity.BOTTOM);
+                fragment.setExitTransition(slide);
                 mFragmentTransaction.remove(fragment);
             }
             switch (item.getItemId()) {
                 case R.id.navigation_shelf:
                     fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookshelf.TAG);
                     if(!(fragment instanceof FragmentBookshelf)){
+                        setTitle(R.string.Navigation_Item_Shelf);
                         mFragmentTransaction.replace(R.id.contents_container, new FragmentBookshelf(), FragmentBookshelf.TAG);
+
                     }
                     break;
                 case R.id.navigation_search:
                     fragment = getSupportFragmentManager().findFragmentByTag(FragmentSearchBooks.TAG);
                     if(!(fragment instanceof FragmentSearchBooks)){
+                        setTitle(R.string.Navigation_Item_Search);
                         mFragmentTransaction.replace(R.id.contents_container, new FragmentSearchBooks(), FragmentSearchBooks.TAG);
                     }
                     break;
                 case R.id.navigation_new:
                     fragment = getSupportFragmentManager().findFragmentByTag(FragmentNewBooks.TAG);
                     if(!(fragment instanceof FragmentNewBooks)){
+                        setTitle(R.string.Navigation_Item_NewBooks);
                         mFragmentTransaction.replace(R.id.contents_container, new FragmentNewBooks(), FragmentNewBooks.TAG);
                     }
                     break;
                 case R.id.navigation_settings:
                     fragment = getSupportFragmentManager().findFragmentByTag(FragmentSettings.TAG);
                     if(!(fragment instanceof FragmentSettings)){
+                        setTitle(R.string.Navigation_Item_Settings);
                         mFragmentTransaction.replace(R.id.contents_container, new FragmentSettings(), FragmentSettings.TAG);
                     }
                     break;

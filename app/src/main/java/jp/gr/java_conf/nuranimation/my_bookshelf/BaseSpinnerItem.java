@@ -1,10 +1,10 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
-class SpinnerItem {
+class BaseSpinnerItem {
     String mCode;
     String mLabel;
 
-    SpinnerItem(String code, String label){
+    BaseSpinnerItem(String code, String label){
         mCode = code;
         mLabel = label;
     }

@@ -76,7 +76,7 @@ class FileManager {
                 bw_bookshelf.write(str_book);
                 count++;
                 String progress = count + "/" + recodeCount;
-                mHandler.obtainMessage(BaseFragment.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+                mHandler.obtainMessage(BaseFragment.MESSAGE_Progress_Message, -1, -1, progress).sendToTarget();
             }
             bw_bookshelf.close();
 
@@ -94,7 +94,7 @@ class FileManager {
                 bw_authors.write(author+ "\r\n");
                 count++;
                 String progress = count + "/" + recodeCount;
-                mHandler.obtainMessage(FragmentSettings.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+                mHandler.obtainMessage(FragmentSettings.MESSAGE_Progress_Message, -1, -1, progress).sendToTarget();
             }
             bw_authors.close();
         } catch (IOException e){
@@ -156,7 +156,7 @@ class FileManager {
                     helper.registerBook(book);
                     count++;
                     String progress = count + "/" + size;
-                    mHandler.obtainMessage(FragmentSettings.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+                    mHandler.obtainMessage(FragmentSettings.MESSAGE_Progress_Message, -1, -1, progress).sendToTarget();
                 }
             }
             if(idx_bookshelf.length == 20){
@@ -166,7 +166,7 @@ class FileManager {
                     import_MYBOOKSHELF_CSV(split);
                     count++;
                     String progress = count + "/" + size;
-                    mHandler.obtainMessage(FragmentSettings.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+                    mHandler.obtainMessage(FragmentSettings.MESSAGE_Progress_Message, -1, -1, progress).sendToTarget();
                 }
             }
             br_bookshelf.close();
@@ -193,7 +193,7 @@ class FileManager {
                 helper.registerAuthor(str_line_authors);
                 count++;
                 String progress = count + "/" + size;
-                mHandler.obtainMessage(FragmentSettings.MESSAGE_PROGRESS, -1, -1, progress).sendToTarget();
+                mHandler.obtainMessage(FragmentSettings.MESSAGE_Progress_Message, -1, -1, progress).sendToTarget();
             }
             br_authors.close();
 

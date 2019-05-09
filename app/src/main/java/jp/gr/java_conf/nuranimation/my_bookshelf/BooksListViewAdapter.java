@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -276,6 +277,14 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyItemRangeInserted(size,add_size);
     }
 
+    void deleteBook(int position){
+        if(position >= 0 && position < list.size()) {
+            list.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+
     void clearBooksData(){
         list.clear();
         notifyDataSetChanged();
@@ -373,8 +382,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         protected void onPostExecute(Boolean result) {
             if(D) Log.d(TAG,"download: " + result);
 
-//            mReference.get().setLoadNext();
-//            mFragmentReference.get().callback(result, json);
         }
     }
 

@@ -18,10 +18,7 @@ public class FragmentBookDetail extends BaseFragment{
     public static final String TAG = FragmentBookDetail.class.getSimpleName();
     private static final boolean D = true;
 
-    public static final String ARG_KEY_IMAGE = "arg_key_image";
-    public static final String ARG_KEY_TITLE = "arg_key_title";
-    public static final String ARG_KEY_AUTHOR = "arg_key_author";
-
+    public static final String KEY_bundle_book = "Key_bundle_book";
 
     TextView titleView;
     TextView authorView;
@@ -43,16 +40,13 @@ public class FragmentBookDetail extends BaseFragment{
 
         Bundle bundle = getArguments();
         if(bundle != null) {
-            String image = bundle.getString(ARG_KEY_IMAGE);
-            String title = bundle.getString(ARG_KEY_TITLE);
-            String author = bundle.getString(ARG_KEY_AUTHOR);
-
-            draweeView.setImageURI(getImageUri(image));
-            titleView.setText(title);
-            authorView.setText(author);
-
+            BookData book = bundle.getParcelable(KEY_bundle_book);
+            if(book != null) {
+                draweeView.setImageURI(getImageUri(book.getImage()));
+                titleView.setText(book.getTitle());
+                authorView.setText(book.getAuthor());
+            }
         }
-
     }
 
 
