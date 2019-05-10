@@ -129,11 +129,8 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public void onClick(View view) {
         if(mRecyclerView != null && mListener != null){
-            BookData data = null;
             int position = mRecyclerView.getChildAdapterPosition(view);
-            if(list.get(position).getView_type() == VIEW_TYPE_BOOK) {
-                data = list.get(position);
-            }
+            BookData data = list.get(position);
             mListener.onBookClick(this, position, data);
         }
     }
@@ -141,11 +138,8 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public boolean onLongClick(View view){
         if(mRecyclerView != null && mListener != null){
-            BookData data = null;
             int position = mRecyclerView.getChildAdapterPosition(view);
-            if(list.get(position).getView_type() == VIEW_TYPE_BOOK) {
-                data = list.get(position);
-            }
+            BookData data = list.get(position);
             mListener.onBookLongClick(this, position, data);
             return true;
         }
@@ -281,6 +275,24 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         if(position >= 0 && position < list.size()) {
             list.remove(position);
             notifyItemRemoved(position);
+        }
+    }
+
+    void registerBook(int position){
+        if(position >= 0 && position < list.size()) {
+            BookData book = list.get(position);
+            book.setReadStatus("5");
+            list.set(position,book);
+            notifyItemChanged(position);
+        }
+    }
+
+    void unregisterBook(int position){
+        if(position >= 0 && position < list.size()) {
+            BookData book = list.get(position);
+            book.setReadStatus("0");
+            list.set(position,book);
+            notifyItemChanged(position);
         }
     }
 

@@ -32,6 +32,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     static final int REQUEST_CODE_Logout = 100;
     static final int REQUEST_CODE_Delete_Book = 110;
+    static final int REQUEST_CODE_Register_Book = 111;
     static final int REQUEST_CODE_Ask_for_Permissions = 999;
     private static final String KEY_Saved_RequestPermissions = "KEY_Saved_RequestPermissions";
     private static final String KEY_isShowingDialog = "KEY_isShowingDialog";

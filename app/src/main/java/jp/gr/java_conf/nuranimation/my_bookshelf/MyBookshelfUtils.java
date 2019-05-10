@@ -3,12 +3,10 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.regex.PatternSyntaxException;
 
 @SuppressWarnings({"unused","WeakerAccess"})
@@ -106,6 +104,8 @@ public class MyBookshelfUtils {
         book.setItemPrice(itemPrice);
         String rating = MyBookshelfUtils.getParam(data, "reviewAverage");
         book.setRating(rating);
+        String rakutenUrl = MyBookshelfUtils.getParam(data, "itemUrl");
+        book.setRakutenUrl(rakutenUrl);
         String readStatus = "0"; // Unregistered
         book.setReadStatus(readStatus);
         return book;

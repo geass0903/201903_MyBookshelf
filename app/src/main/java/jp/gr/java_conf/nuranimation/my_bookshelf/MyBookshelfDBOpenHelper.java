@@ -252,37 +252,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    public BookData searchRegistered(String isbn){
-        BookData book = null;
-        SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "select * from " + TABLE_MY_BOOKSHELF + " where " + BOOKSHELF_KEY_ISBN + " = ?;";
-        Cursor c = db.rawQuery(sql, new String[]{isbn});
-        boolean mov = c.moveToFirst();
-        if (mov) {
-            book = new BookData();
-            book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
-            book.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
-            book.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
-            book.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
-            book.setAuthor(c.getString(c.getColumnIndex(BOOKSHELF_KEY_AUTHOR)));
-            book.setPublisher(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PUBLISHER)));
-            book.setSalesDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RELEASE_DATE)));
-            book.setItemPrice(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PRICE)));
-            book.setRakutenUrl(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RAKUTEN_URL)));
-            book.setRating(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RATING)));
-            book.setReadStatus(c.getString(c.getColumnIndex(BOOKSHELF_KEY_READ_STATUS)));
-            book.setTags(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TAGS)));
-            book.setFinishReadDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_FINISH_READ_DATE)));
-            book.setRegisterDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_REGISTER_DATE)));
-        }
-        c.close();
-        return book;
-    }
-
-
-
-
-
     public void addNewBook(BookData book){
         String isbn = book.getIsbn();
         SQLiteDatabase db = this.getWritableDatabase();
@@ -312,6 +281,39 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
         c.close();
     }
+
+
+
+
+    public BookData searchRegistered(String isbn){
+        BookData book = null;
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "select * from " + TABLE_MY_BOOKSHELF + " where " + BOOKSHELF_KEY_ISBN + " = ?;";
+        Cursor c = db.rawQuery(sql, new String[]{isbn});
+        boolean mov = c.moveToFirst();
+        if (mov) {
+            book = new BookData();
+            book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+            book.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
+            book.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
+            book.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
+            book.setAuthor(c.getString(c.getColumnIndex(BOOKSHELF_KEY_AUTHOR)));
+            book.setPublisher(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PUBLISHER)));
+            book.setSalesDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RELEASE_DATE)));
+            book.setItemPrice(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PRICE)));
+            book.setRakutenUrl(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RAKUTEN_URL)));
+            book.setRating(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RATING)));
+            book.setReadStatus(c.getString(c.getColumnIndex(BOOKSHELF_KEY_READ_STATUS)));
+            book.setTags(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TAGS)));
+            book.setFinishReadDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_FINISH_READ_DATE)));
+            book.setRegisterDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_REGISTER_DATE)));
+        }
+        c.close();
+        return book;
+    }
+
+
+
 
 
 

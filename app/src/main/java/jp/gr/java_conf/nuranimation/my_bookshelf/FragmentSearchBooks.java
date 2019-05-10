@@ -1,6 +1,7 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,8 +23,11 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class FragmentSearchBooks extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     private static final boolean D = true;
@@ -33,7 +37,8 @@ public class FragmentSearchBooks extends BaseFragment implements BooksListViewAd
     private static final String KEY_Books_SearchResult = "KEY_Books_SearchResult";
     private static final String KEY_SearchKeyword = "KEY_SearchKeyword";
     private static final String KEY_SearchPage = "KEY_SearchPage";
-
+    private static final String KEY_position = "KEY_position";
+    private static final String KEY_Book = "KEY_Book";
 
     private MyBookshelfApplicationData mData;
     private BooksListViewAdapter mBooksViewAdapter;
@@ -249,45 +254,118 @@ public class FragmentSearchBooks extends BaseFragment implements BooksListViewAd
 
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
-        int view_type = adapter.getItemViewType(position);
-        if(view_type == BooksListViewAdapter.VIEW_TYPE_BOOK){
-            FragmentManager fragmentManager = getFragmentManager();
-            if(fragmentManager != null){
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                FragmentBookDetail fragment = new FragmentBookDetail();
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(FragmentBookDetail.KEY_bundle_book,data);
+        if(isClickEnabled) {
+            isClickEnabled = false;
+            setWait_ClickEnable(500);
+            int view_type = adapter.getItemViewType(position);
+            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+                FragmentManager fragmentManager = getFragmentManager();
+                if (fragmentManager != null) {
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    FragmentBookDetail fragment = new FragmentBookDetail();
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable(FragmentBookDetail.KEY_bundle_book, data);
 
-                fragment.setArguments(bundle);
-                Slide slide = new Slide();
-                slide.setSlideEdge(Gravity.END);
-                fragment.setEnterTransition(slide);
-//                fragmentTransaction.replace(R.id.contents_container, fragment,FragmentBookDetail.TAG);
-                fragmentTransaction.add(R.id.contents_container, fragment, FragmentBookDetail.TAG);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        }else{
-            if(view_type == BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD){
-                BookData footer = new BookData();
-                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
-                adapter.setFooter(footer);
-                mSearchPage++;
-                AsyncSearchTask(mSearchKeyword, mSearchPage);
+                    fragment.setArguments(bundle);
+                    Slide slide = new Slide();
+                    slide.setSlideEdge(Gravity.END);
+                    fragment.setEnterTransition(slide);
+                fragmentTransaction.replace(R.id.contents_container, fragment,FragmentBookDetail.TAG);
+//                    fragmentTransaction.add(R.id.contents_container, fragment, FragmentBookDetail.TAG);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
+            } else {
+                if (view_type == BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD) {
+                    BookData footer = new BookData();
+                    footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
+                    adapter.setFooter(footer);
+                    mSearchPage++;
+                    AsyncSearchTask(mSearchKeyword, mSearchPage);
+                }
             }
         }
-
-
     }
 
     @Override
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
-        if(position != adapter.getItemCount() && data != null){
+        int view_type = adapter.getItemViewType(position);
+        if(view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
             String title = data.getTitle();
             if(D) Log.d(TAG,"LongClick: " + title);
+            Bundle bundle = new Bundle();
+            if(data.getReadStatus().equals("0")){
+                // unregistered. register Dialog
+                bundle.putString(BaseDialogFragment.title,getString(R.string.Dialog_Label_Register_Book));
+                bundle.putString(BaseDialogFragment.message,getString(R.string.Dialog_Message_Register_Book));
+                bundle.putString(BaseDialogFragment.positiveLabel,getString(R.string.Dialog_Button_Positive));
+                bundle.putString(BaseDialogFragment.negativeLabel,getString(R.string.Dialog_Button_Negative));
+                bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Register_Book);
+            }else{
+                // registered. delete Dialog
+                bundle.putString(BaseDialogFragment.title,getString(R.string.Dialog_Label_Delete_Book));
+                bundle.putString(BaseDialogFragment.message,getString(R.string.Dialog_Message_Delete_Book));
+                bundle.putString(BaseDialogFragment.positiveLabel,getString(R.string.Dialog_Button_Positive));
+                bundle.putString(BaseDialogFragment.negativeLabel,getString(R.string.Dialog_Button_Negative));
+                bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Delete_Book);
+            }
+
+            Bundle bundle_book = new Bundle();
+            bundle_book.putInt(KEY_position,position);
+            bundle_book.putParcelable(KEY_Book,data);
+            bundle.putBundle(BaseDialogFragment.params,bundle_book);
+            if(getActivity() != null) {
+                FragmentManager manager = getActivity().getSupportFragmentManager();
+                BaseDialogFragment dialog = BaseDialogFragment.newInstance(this,bundle);
+                dialog.show(manager, FragmentSettings.TAG);
+            }
         }
+
     }
 
+
+    @Override
+    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+        if(resultCode == DialogInterface.BUTTON_POSITIVE && params != null){
+            switch (requestCode){
+                case REQUEST_CODE_Register_Book:
+                    int position_register = params.getInt(KEY_position, -1);
+                    BookData book_register = params.getParcelable(KEY_Book);
+                    if(book_register != null) {
+                        BookData book = new BookData(book_register);
+                        Calendar calendar = Calendar.getInstance();
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
+                        String registerDate = sdf.format(calendar.getTime());
+                        book.setRegisterDate(registerDate);
+                        book.setRating("0.0");
+                        book.setReadStatus("5");
+                        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
+                        helper.registerBook(book);
+                        mBooksViewAdapter.registerBook(position_register);
+                        Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case REQUEST_CODE_Delete_Book:
+                    int position_unregister = params.getInt(KEY_position, -1);
+                    BookData book_unregister = params.getParcelable(KEY_Book);
+                    if (book_unregister != null) {
+                        MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
+                        helper.deleteBook(book_unregister.getIsbn());
+                        mBooksViewAdapter.unregisterBook(position_unregister);
+                        Toast.makeText(getContext(),getString(R.string.Toast_Delete_Book),Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+        }
+
+    }
+
+
+    @Override
+    public void onBaseDialogCancelled(int requestCode, Bundle params) {
+        super.onBaseDialogCancelled(requestCode,params);
+    }
 
 
 }

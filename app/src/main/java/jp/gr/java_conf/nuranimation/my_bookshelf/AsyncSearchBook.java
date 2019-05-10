@@ -83,16 +83,21 @@ public class AsyncSearchBook extends BaseAsyncTaskLoader<AsyncSearchBook.Result>
                 connection.setRequestMethod("GET");
                 connection.setInstanceFollowRedirects(false);
                 connection.connect();
-
+                BufferedReader reader = null;
                 mResult.status = connection.getResponseCode();
-                if (mResult.status == HttpURLConnection.HTTP_OK                     // 200
-                        || mResult.status == HttpURLConnection.HTTP_BAD_REQUEST     // 400 wrong parameter
-                        || mResult.status == HttpURLConnection.HTTP_NOT_FOUND       // 404 not found
-                        || mResult.status == 429                                    // 429 too many requests
-                        || mResult.status == HttpURLConnection.HTTP_INTERNAL_ERROR  // 500 system error
-                        || mResult.status == HttpURLConnection.HTTP_UNAVAILABLE     // 503 service unavailable
-                ) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                switch (mResult.status){
+                    case HttpURLConnection.HTTP_OK:             // 200
+                        reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        break;
+                    case HttpURLConnection.HTTP_BAD_REQUEST:    // 400 wrong parameter
+                    case HttpURLConnection.HTTP_NOT_FOUND:      // 404 not found
+                    case 429:                                   // 429 too many requests
+                    case HttpURLConnection.HTTP_INTERNAL_ERROR: // 500 system error
+                    case HttpURLConnection.HTTP_UNAVAILABLE:    // 503 service unavailable
+                        reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                        break;
+                }
+                if(reader != null) {
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -102,21 +107,26 @@ public class AsyncSearchBook extends BaseAsyncTaskLoader<AsyncSearchBook.Result>
                     JSONObject json = new JSONObject(sb.toString());
                     mResult.books = getBooks(json);
                     mResult.isSuccess = true;
-                    return mResult;
                 }
             } catch (InterruptedException e) {
+                e.printStackTrace();
                 if (D) Log.d(TAG, "InterruptedException");
                 mResult.status = ErrorStatus.Error_InterruptedException;
             } catch (IOException e) {
+                e.printStackTrace();
                 if (D) Log.d(TAG, "IOException");
                 mResult.status = ErrorStatus.Error_IOException;
             } catch (JSONException e) {
+                e.printStackTrace();
                 if (D) Log.d(TAG, "JSONException");
                 mResult.status = ErrorStatus.Error_JSONException;
             } finally {
                 if (connection != null) {
                     connection.disconnect();
                 }
+            }
+            if(mResult.isSuccess){
+                return mResult;
             }
             retried++;
         }
@@ -139,12 +149,12 @@ public class AsyncSearchBook extends BaseAsyncTaskLoader<AsyncSearchBook.Result>
 
                     String isbn = MyBookshelfUtils.getParam(data, "isbn");
                     BookData registered = mData.getDatabaseHelper().searchRegistered(isbn);
-                    if(registered == null){
-                        BookData book = MyBookshelfUtils.getBook(data);
-                        books.add(book);
-                    }else{
-                        books.add(registered);
+                    BookData book = MyBookshelfUtils.getBook(data);
+                    if(registered != null){
+                        book.setRegisterDate(registered.getRegisterDate());
+                        book.setReadStatus(registered.getReadStatus());
                     }
+                    books.add(book);
                 }
 
                 if (json.has("count")) {

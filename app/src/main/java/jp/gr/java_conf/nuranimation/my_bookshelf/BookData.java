@@ -3,6 +3,7 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 class BookData implements Parcelable {
     private int view_type;
@@ -24,11 +25,31 @@ class BookData implements Parcelable {
     BookData(){
     }
 
+    BookData(@Nullable BookData book){
+        if(book != null) {
+            this.view_type = book.getView_type();
+            this.isbn = book.getIsbn();
+            this.title = book.getTitle();
+            this.image = book.getImage();
+            this.author = book.getAuthor();
+            this.publisher = book.getPublisher();
+            this.salesDate = book.getSalesDate();
+            this.itemPrice = book.getItemPrice();
+            this.rakutenUrl = book.getRakutenUrl();
+            this.rating = book.getRating();
+            this.readStatus = book.getReadStatus();
+            this.tags = book.getTags();
+            this.finishReadDate = book.getFinishReadDate();
+            this.registerDate = book.getRegisterDate();
+        }
+    }
+
     @SuppressWarnings("unused")
-    BookData(int view_type, String isbn, String image, String author, String publisher, String salesDate, String itemPrice,
+    BookData(int view_type, String isbn, String title, String image, String author, String publisher, String salesDate, String itemPrice,
              String rakutenUrl, String rating, String readStatus, String tags, String finishReadDate, String registerDate){
         this.view_type = view_type;
         this.isbn = isbn;
+        this.title = title;
         this.image = image;
         this.author = author;
         this.publisher = publisher;

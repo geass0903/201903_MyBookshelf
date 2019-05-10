@@ -1,7 +1,8 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,7 +12,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,18 +24,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = FragmentNewBooks.class.getSimpleName();
@@ -78,10 +69,18 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.menu_new_action_reload).getIcon().setColorFilter(Color.argb(255,255,255,255), PorterDuff.Mode.SRC_ATOP);
+        if(D) Log.d(TAG,"onPrepareOptionsMenu()");
+    }
+
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.menu_new_action_renew:
+            case R.id.menu_new_action_reload:
                 if(D) Log.d(TAG,"new action search");
                 if(authors_list.size() > 0){
                     mDBOpenHelper.deleteTABLE_NEW_BOOKS();

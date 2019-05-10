@@ -2,6 +2,8 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -28,8 +31,8 @@ public class FragmentBookshelf extends BaseFragment implements BooksListViewAdap
     private MyBookshelfApplicationData mData;
     private BooksListViewAdapter booksListViewAdapter;
 
-    private String KEY_position = "KEY_position";
-    private String KEY_Book = "KEY_Book";
+    private static final String KEY_position = "KEY_position";
+    private static final String KEY_Book = "KEY_Book";
 
     @Override
     public void onAttach (Context context) {
@@ -60,6 +63,15 @@ public class FragmentBookshelf extends BaseFragment implements BooksListViewAdap
         inflater.inflate(R.menu.menu_shelf,menu);
     }
 
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.menu_shelf_action_search).getIcon().setColorFilter(Color.argb(255,255,255,255), PorterDuff.Mode.SRC_ATOP);
+        if(D) Log.d(TAG,"onPrepareOptionsMenu()");
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -74,6 +86,7 @@ public class FragmentBookshelf extends BaseFragment implements BooksListViewAdap
 
 
     private void SetShelfRowData(RecyclerView recyclerView) {
+        mData.updateList_MyBookshelf();
         List<BookData> books = mData.getList_MyBookshelf();
         int recodeCount = books.size();
         if(D) Log.d(TAG, "recodeCount : " + recodeCount);
@@ -103,8 +116,8 @@ public class FragmentBookshelf extends BaseFragment implements BooksListViewAdap
                     Slide slide = new Slide();
                     slide.setSlideEdge(Gravity.BOTTOM);
                     fragment.setEnterTransition(slide);
-//                fragmentTransaction.replace(R.id.contents_container, fragment,FragmentBookDetail.TAG);
-                    fragmentTransaction.add(R.id.contents_container, fragment, FragmentBookDetail.TAG);
+                fragmentTransaction.replace(R.id.contents_container, fragment,FragmentBookDetail.TAG);
+//                    fragmentTransaction.add(R.id.contents_container, fragment, FragmentBookDetail.TAG);
                     fragmentTransaction.addToBackStack(null);
                     fragmentTransaction.commit();
                 }
@@ -150,6 +163,7 @@ public class FragmentBookshelf extends BaseFragment implements BooksListViewAdap
                 MyBookshelfDBOpenHelper helper = mData.getDatabaseHelper();
                 helper.deleteBook(book.getIsbn());
                 booksListViewAdapter.deleteBook(position);
+                Toast.makeText(getContext(),getString(R.string.Toast_Delete_Book),Toast.LENGTH_SHORT).show();
             }
         }
     }
