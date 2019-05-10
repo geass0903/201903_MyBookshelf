@@ -3,24 +3,23 @@
 
     <item
         android:id="@+id/navigation_shelf"
-        android:icon="@drawable/ic_vector_navi_shelf_24dp"
-        android:title="@string/Navigation_Item_Shelf"
-        />
+        android:icon="@drawable/ic_vector_shelf_24dp"
+        android:title="@string/Navigation_Item_Shelf" />
 
 
     <item
         android:id="@+id/navigation_search"
-        android:icon="@drawable/ic_vector_navi_search_24dp"
+        android:icon="@drawable/ic_vector_search_24dp"
         android:title="@string/Navigation_Item_Search" />
 
     <item
         android:id="@+id/navigation_new"
-        android:icon="@drawable/ic_vector_navi_new_24dp"
+        android:icon="@drawable/ic_vector_new_24dp"
         android:title="@string/Navigation_Item_NewBooks" />
 
     <item
         android:id="@+id/navigation_settings"
-        android:icon="@drawable/ic_vector_navi_settings_24dp"
+        android:icon="@drawable/ic_vector_settings_24dp"
         android:title="@string/Navigation_Item_Settings" />
 
 </menu>

@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_new_action_reload"
-        android:icon="@drawable/ic_vector_reload_24dp"
-        android:title="@string/Menu_Action_Reload"
+        android:id="@+id/menu_detail_register_action_register"
+        android:icon="@drawable/ic_vector_register_24dp"
+        android:title="@string/Menu_Action_Register"
         app:showAsAction="always"
         />
 </menu>
