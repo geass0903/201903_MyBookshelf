@@ -3,18 +3,21 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.transition.Slide;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean D = true;
+
+
+    private static final String KEY_STATE = "KEY_STATE";
+
+    private int state = 0;
 
 
 
@@ -29,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         if (savedInstanceState == null) {
             setTitle(R.string.Navigation_Item_Shelf);
-            getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new FragmentBookshelf(), FragmentBookshelf.TAG).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new FragmentShelfBooks(), FragmentShelfBooks.TAG).commit();
         }
     }
 
@@ -64,6 +67,22 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         if (D) Log.e(TAG, "--- ON DESTROY ---");
     }
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_STATE,state);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        state = savedInstanceState.getInt(KEY_STATE,0);
+    }
+
+
+
+
     @Override
     public void onFragmentEvent(FragmentEvent event) {
         event.apply(this);
@@ -78,46 +97,74 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             Fragment fragment;
             FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-            // remove FragmentBookDetail
-            fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookDetail.TAG);
-            if(fragment instanceof FragmentBookDetail){
-                Slide slide = new Slide();
-                slide.setSlideEdge(Gravity.BOTTOM);
-                fragment.setExitTransition(slide);
-                mFragmentTransaction.remove(fragment);
-            }
             switch (item.getItemId()) {
                 case R.id.navigation_shelf:
-                    fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookshelf.TAG);
-                    if(!(fragment instanceof FragmentBookshelf)){
-                        setTitle(R.string.Navigation_Item_Shelf);
-                        mFragmentTransaction.replace(R.id.contents_container, new FragmentBookshelf(), FragmentBookshelf.TAG);
-
+                    switch (state) {
+                        case 0:
+                        case R.id.navigation_shelf:
+                            fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookDetail.TAG);
+                            if (fragment instanceof FragmentBookDetail) {
+                                getSupportFragmentManager().popBackStack();
+                            } else {
+                                fragment = getSupportFragmentManager().findFragmentByTag(FragmentShelfBooks.TAG);
+                                if (fragment instanceof FragmentShelfBooks) {
+                                    ((FragmentShelfBooks) fragment).scrollTop();
+                                }
+                            }
+                            break;
+                        default:
+                            setTitle(R.string.Navigation_Item_Shelf);
+                            mFragmentTransaction.replace(R.id.contents_container, new FragmentShelfBooks(), FragmentShelfBooks.TAG);
+                            mFragmentTransaction.commit();
+                            break;
                     }
+                    state = R.id.navigation_shelf;
                     break;
                 case R.id.navigation_search:
-                    fragment = getSupportFragmentManager().findFragmentByTag(FragmentSearchBooks.TAG);
-                    if(!(fragment instanceof FragmentSearchBooks)){
-                        setTitle(R.string.Navigation_Item_Search);
-                        mFragmentTransaction.replace(R.id.contents_container, new FragmentSearchBooks(), FragmentSearchBooks.TAG);
+                    switch (state) {
+                        case R.id.navigation_search:
+                            fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookDetail.TAG);
+                            if (fragment instanceof FragmentBookDetail) {
+                                getSupportFragmentManager().popBackStack();
+                            } else {
+                                fragment = getSupportFragmentManager().findFragmentByTag(FragmentSearchBooks.TAG);
+                                if (fragment instanceof FragmentSearchBooks) {
+                                }
+                            }
+                            break;
+                        default:
+                            setTitle(R.string.Navigation_Item_Search);
+                            mFragmentTransaction.replace(R.id.contents_container, new FragmentSearchBooks(), FragmentSearchBooks.TAG);
+                            mFragmentTransaction.commit();
+                            break;
                     }
+                    state = R.id.navigation_search;
                     break;
                 case R.id.navigation_new:
-                    fragment = getSupportFragmentManager().findFragmentByTag(FragmentNewBooks.TAG);
-                    if(!(fragment instanceof FragmentNewBooks)){
-                        setTitle(R.string.Navigation_Item_NewBooks);
-                        mFragmentTransaction.replace(R.id.contents_container, new FragmentNewBooks(), FragmentNewBooks.TAG);
+                    switch (state) {
+                        case R.id.navigation_new:
+                            break;
+                        default:
+                            setTitle(R.string.Navigation_Item_NewBooks);
+                            mFragmentTransaction.replace(R.id.contents_container, new FragmentNewBooks(), FragmentNewBooks.TAG);
+                            mFragmentTransaction.commit();
+                            break;
                     }
+                    state = R.id.navigation_new;
                     break;
                 case R.id.navigation_settings:
-                    fragment = getSupportFragmentManager().findFragmentByTag(FragmentSettings.TAG);
-                    if(!(fragment instanceof FragmentSettings)){
-                        setTitle(R.string.Navigation_Item_Settings);
-                        mFragmentTransaction.replace(R.id.contents_container, new FragmentSettings(), FragmentSettings.TAG);
+                    switch (state) {
+                        case R.id.navigation_settings:
+                            break;
+                        default:
+                            setTitle(R.string.Navigation_Item_Settings);
+                            mFragmentTransaction.replace(R.id.contents_container, new FragmentSettings(), FragmentSettings.TAG);
+                            mFragmentTransaction.commit();
+                            break;
                     }
+                    state = R.id.navigation_settings;
                     break;
             }
-            mFragmentTransaction.commit();
             return true;
         }
     };

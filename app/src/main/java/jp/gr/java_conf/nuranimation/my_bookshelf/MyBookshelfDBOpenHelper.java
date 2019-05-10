@@ -80,14 +80,14 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + BOOKSHELF_KEY_REGISTER_DATE    + " text"  // 登録日
             + ");";
 
+    private MyBookshelfApplicationData mApplicationData;
     private Context mContext;
-    private MyBookshelfApplicationData mData;
 
 
     public MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
+        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
         mContext = context;
-        mData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
     @Override
@@ -125,36 +125,57 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    public List<BookData> getMyBookshelf(){
-        List<BookData> bookshelf = new ArrayList<>();
+    public List<BookData> getShelfBooks(String word){
+        List<BookData> shelfBooks = new ArrayList<>();
+        String where = getWhere(word);
+        String order = getOrder();
         SQLiteDatabase db = this.getReadableDatabase();
-        String order = getOrder_Bookshelf();
-        String sql = "select * from " + TABLE_MY_BOOKSHELF + order + ";";
+        String sql = "select * from " + TABLE_MY_BOOKSHELF + where + order + ";";
 
         Cursor c = db.rawQuery(sql, null);
         boolean mov = c.moveToFirst();
         while (mov) {
-            BookData data = new BookData();
-            data.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
-            data.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
-            data.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
-            data.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
-            data.setAuthor(c.getString(c.getColumnIndex(BOOKSHELF_KEY_AUTHOR)));
-            data.setPublisher(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PUBLISHER)));
-            data.setSalesDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RELEASE_DATE)));
-            data.setItemPrice(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PRICE)));
-            data.setRakutenUrl(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RAKUTEN_URL)));
-            data.setRating(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RATING)));
-            data.setReadStatus(c.getString(c.getColumnIndex(BOOKSHELF_KEY_READ_STATUS)));
-            data.setTags(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TAGS)));
-            data.setFinishReadDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_FINISH_READ_DATE)));
-            data.setRegisterDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_REGISTER_DATE)));
-            bookshelf.add(data);
+            BookData book = new BookData();
+            book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+            book.setIsbn(c.getString(c.getColumnIndex(BOOKSHELF_KEY_ISBN)));
+            book.setImage(c.getString(c.getColumnIndex(BOOKSHELF_KEY_IMAGES)));
+            book.setTitle(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TITLE)));
+            book.setAuthor(c.getString(c.getColumnIndex(BOOKSHELF_KEY_AUTHOR)));
+            book.setPublisher(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PUBLISHER)));
+            book.setSalesDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RELEASE_DATE)));
+            book.setItemPrice(c.getString(c.getColumnIndex(BOOKSHELF_KEY_PRICE)));
+            book.setRakutenUrl(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RAKUTEN_URL)));
+            book.setRating(c.getString(c.getColumnIndex(BOOKSHELF_KEY_RATING)));
+            book.setReadStatus(c.getString(c.getColumnIndex(BOOKSHELF_KEY_READ_STATUS)));
+            book.setTags(c.getString(c.getColumnIndex(BOOKSHELF_KEY_TAGS)));
+            book.setFinishReadDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_FINISH_READ_DATE)));
+            book.setRegisterDate(c.getString(c.getColumnIndex(BOOKSHELF_KEY_REGISTER_DATE)));
+            shelfBooks.add(book);
             mov = c.moveToNext();
         }
         c.close();
-        return bookshelf;
+        return shelfBooks;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void registerBook(BookData book){
         ContentValues insertValues = new ContentValues();
@@ -175,6 +196,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(TABLE_MY_BOOKSHELF,"",insertValues);
     }
+
 
     public void deleteBook(String isbn){
         if(!TextUtils.isEmpty(isbn)) {
@@ -200,6 +222,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
+
     public void registerAuthor(String author){
         if(!author.equals("")) {
             author = author.replaceAll("[\\x20\\u3000]","");
@@ -219,7 +242,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             c.close();
         }
     }
-
 
     public List<BookData> getNewBooks(){
         List<BookData> new_books = new ArrayList<>();
@@ -250,6 +272,10 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         c.close();
         return new_books;
     }
+
+
+
+
 
 
     public void addNewBook(BookData book){
@@ -283,8 +309,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-
-
     public BookData searchRegistered(String isbn){
         BookData book = null;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -314,13 +338,21 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
 
 
+    private String getWhere(final String word){
+        String where = "";
+        if(!TextUtils.isEmpty(word)){
+            where = " where "
+                    + BOOKSHELF_KEY_TITLE   + " like " + "'%" + word + "%'" + " or "
+                    + BOOKSHELF_KEY_AUTHOR  + " like " + "'%" + word + "%'" + " or "
+                    + BOOKSHELF_KEY_ISBN    + " = "    + "'"  + word + "'";
+        }
+        return where;
+    }
 
 
-
-
-    private String getOrder_Bookshelf(){
+    private String getOrder(){
         String order = "";
-        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_Bookshelf,mContext.getString(R.string.Code_SortSetting_Registered_Ascending));
+        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.Key_SortSetting_Bookshelf,mContext.getString(R.string.Code_SortSetting_Registered_Ascending));
         if(code != null) {
             if (code.equals(mContext.getString(R.string.Code_SortSetting_Title_Ascending))) {
                 order = " order by " + BOOKSHELF_KEY_TITLE + " asc";

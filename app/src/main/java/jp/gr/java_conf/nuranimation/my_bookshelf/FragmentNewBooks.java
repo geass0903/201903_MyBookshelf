@@ -93,7 +93,7 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
                     Bundle bundle = new Bundle();
                     bundle.putString(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload));
                     bundle.putString(BaseProgressDialogFragment.message, text);
-                    Message msg = handler.obtainMessage(BaseFragment.MESSAGE_Progress_Show);
+                    Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
                     msg.setData(bundle);
                     handler.sendMessage(msg);
                     search_author = authors_list.get(0);
@@ -138,7 +138,7 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
+                handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
                 List<BookData> dataset = new ArrayList<>();
 
 
@@ -225,14 +225,14 @@ public class FragmentNewBooks extends BaseFragment implements BooksListViewAdapt
                 if(authors_list.size() > 0){
                     int now = size - authors_list.size();
                     String text = now + "/" + size;
-                    handler.obtainMessage(BaseFragment.MESSAGE_Progress_Message, -1, -1, text).sendToTarget();
+                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, text).sendToTarget();
 
                     search_author = authors_list.get(0);
                     authors_list.remove(0);
                     AsyncSearchTask(search_author,1);
                 }else{
                     mData.updateList_NewBooks();
-                    handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
+                    handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
                 }
             }
         },1200);

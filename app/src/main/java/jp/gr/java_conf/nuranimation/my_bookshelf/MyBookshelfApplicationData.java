@@ -26,7 +26,6 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
     private static final String[] Use_Permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private MyBookshelfDBOpenHelper mDatabaseHelper;
-    private List<BookData> mList_Bookshelf;
     private List<BookData> mList_NewBooks;
 
 
@@ -37,53 +36,14 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         Fresco.initialize(this);
         mPreferences = getSharedPreferences(PreferenceName,Context.MODE_PRIVATE);
         mDatabaseHelper = new MyBookshelfDBOpenHelper(getApplicationContext());
-        initData();
     }
 
     @Override
     public void onTerminate(){
         super.onTerminate();
         if(D) Log.d(TAG,"onTerminate");
-        clearData();
     }
 
-
-    public void initData(){
-        updateList_MyBookshelf();
-        updateList_NewBooks();
-    }
-
-    public void clearData(){
-        SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
-        if(db != null && db.isOpen()){
-            db.close();
-        }
-        mDatabaseHelper = null;
-        mList_Bookshelf.clear();
-        mList_NewBooks.clear();
-    }
-
-
-    public MyBookshelfDBOpenHelper getDatabaseHelper(){
-        return mDatabaseHelper;
-    }
-
-
-    public List<BookData> getList_MyBookshelf(){
-        return mList_Bookshelf;
-    }
-
-    public void updateList_MyBookshelf(){
-        mList_Bookshelf = mDatabaseHelper.getMyBookshelf();
-    }
-
-    public List<BookData> getList_NewBooks(){
-        return mList_NewBooks;
-    }
-
-    public void updateList_NewBooks(){
-        mList_NewBooks = mDatabaseHelper.getNewBooks();
-    }
 
     public SharedPreferences getSharedPreferences(){
         return mPreferences;
@@ -100,5 +60,66 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
     public boolean isCheckedPermissions(){
         return mPreferences.getBoolean(Key_isCheckedPermissions,false);
     }
+
+
+    public MyBookshelfDBOpenHelper getDatabaseHelper(){
+        return mDatabaseHelper;
+    }
+
+    public List<BookData> getShelfBooks(String word){
+        return mDatabaseHelper.getShelfBooks(word);
+    }
+
+    public List<BookData> getList_NewBooks(){
+        return mDatabaseHelper.getNewBooks();
+    }
+
+    public void updateList_NewBooks(){
+        mList_NewBooks = mDatabaseHelper.getNewBooks();
+    }
+
+
+
+    public void deleteBook(String isbn){
+        mDatabaseHelper.deleteBook(isbn);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

@@ -264,6 +264,13 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         return icon;
     }
 
+
+    void setBooksData(List<BookData> books){
+        list.clear();
+        list.addAll(books);
+        notifyDataSetChanged();
+    }
+
     void addBooksData(List<BookData> books){
         int size = list.size();
         int add_size = books.size();

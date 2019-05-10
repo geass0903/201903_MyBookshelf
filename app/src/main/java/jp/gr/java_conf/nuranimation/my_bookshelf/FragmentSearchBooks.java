@@ -233,7 +233,7 @@ public class FragmentSearchBooks extends BaseFragment implements BooksListViewAd
         }else{
             Toast.makeText(getContext(), getString(R.string.search_error_unknown), Toast.LENGTH_SHORT).show();
         }
-        handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
+        handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
     }
 
 
@@ -300,14 +300,14 @@ public class FragmentSearchBooks extends BaseFragment implements BooksListViewAd
                 bundle.putString(BaseDialogFragment.message,getString(R.string.Dialog_Message_Register_Book));
                 bundle.putString(BaseDialogFragment.positiveLabel,getString(R.string.Dialog_Button_Positive));
                 bundle.putString(BaseDialogFragment.negativeLabel,getString(R.string.Dialog_Button_Negative));
-                bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Register_Book);
+                bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_REGISTER_BOOK);
             }else{
                 // registered. delete Dialog
                 bundle.putString(BaseDialogFragment.title,getString(R.string.Dialog_Label_Delete_Book));
                 bundle.putString(BaseDialogFragment.message,getString(R.string.Dialog_Message_Delete_Book));
                 bundle.putString(BaseDialogFragment.positiveLabel,getString(R.string.Dialog_Button_Positive));
                 bundle.putString(BaseDialogFragment.negativeLabel,getString(R.string.Dialog_Button_Negative));
-                bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Delete_Book);
+                bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_DELETE_BOOK);
             }
 
             Bundle bundle_book = new Bundle();
@@ -329,7 +329,7 @@ public class FragmentSearchBooks extends BaseFragment implements BooksListViewAd
         super.onBaseDialogSucceeded(requestCode, resultCode, params);
         if(resultCode == DialogInterface.BUTTON_POSITIVE && params != null){
             switch (requestCode){
-                case REQUEST_CODE_Register_Book:
+                case REQUEST_CODE_REGISTER_BOOK:
                     int position_register = params.getInt(KEY_position, -1);
                     BookData book_register = params.getParcelable(KEY_Book);
                     if(book_register != null) {
@@ -346,7 +346,7 @@ public class FragmentSearchBooks extends BaseFragment implements BooksListViewAd
                         Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case REQUEST_CODE_Delete_Book:
+                case REQUEST_CODE_DELETE_BOOK:
                     int position_unregister = params.getInt(KEY_position, -1);
                     BookData book_unregister = params.getParcelable(KEY_Book);
                     if (book_unregister != null) {

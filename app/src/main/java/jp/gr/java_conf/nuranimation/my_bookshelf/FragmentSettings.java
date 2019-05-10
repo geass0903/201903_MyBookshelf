@@ -10,12 +10,8 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -206,7 +202,7 @@ public class FragmentSettings extends BaseFragment {
 
     public void callback(ButtonAction action, boolean result) {
         mCurrentAction = ButtonAction.None;
-        handler.obtainMessage(BaseFragment.MESSAGE_Progress_Dismiss).sendToTarget();
+        handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
         if (result) {
             switch (action) {
                 case Export_CSV:
@@ -349,7 +345,7 @@ public class FragmentSettings extends BaseFragment {
         bundle.putString(BaseDialogFragment.message, getString(R.string.Dialog_Message_Logout));
         bundle.putString(BaseDialogFragment.positiveLabel, getString(R.string.Dialog_Button_Positive));
         bundle.putString(BaseDialogFragment.negativeLabel, getString(R.string.Dialog_Button_Negative));
-        bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_Logout);
+        bundle.putInt(BaseDialogFragment.request_code, REQUEST_CODE_LOGOUT);
         if (getActivity() != null) {
             FragmentManager manager = getActivity().getSupportFragmentManager();
             BaseDialogFragment dialog = BaseDialogFragment.newInstance(this, bundle);
@@ -361,7 +357,7 @@ public class FragmentSettings extends BaseFragment {
     public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
         super.onBaseDialogSucceeded(requestCode, resultCode, params);
         switch (requestCode) {
-            case REQUEST_CODE_Logout:
+            case REQUEST_CODE_LOGOUT:
                 switch (resultCode) {
                     case DialogInterface.BUTTON_POSITIVE:
                         if (D) Log.d(TAG, "Log out button pressed");
@@ -373,7 +369,7 @@ public class FragmentSettings extends BaseFragment {
                         break;
                 }
                 break;
-            case REQUEST_CODE_Ask_for_Permissions:
+            case REQUEST_CODE_ASK_FOR_PERMISSIONS:
                 switch (resultCode) {
                     case DialogInterface.BUTTON_POSITIVE:
                         break;
@@ -392,7 +388,7 @@ public class FragmentSettings extends BaseFragment {
     @Override
     public void onBaseDialogCancelled(int requestCode, Bundle params) {
         super.onBaseDialogCancelled(requestCode, params);
-        if (requestCode == REQUEST_CODE_Ask_for_Permissions) {
+        if (requestCode == REQUEST_CODE_ASK_FOR_PERMISSIONS) {
             if (D) Log.d(TAG, "Permission cancel");
             mCurrentAction = ButtonAction.None;
         }
@@ -439,7 +435,7 @@ public class FragmentSettings extends BaseFragment {
                 fragment.progressDialogFragment.show(manager, FragmentSettings.TAG);
             }
 */
-            Message msg = fragment.handler.obtainMessage(BaseFragment.MESSAGE_Progress_Show);
+            Message msg = fragment.handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
             msg.setData(bundle);
             fragment.handler.sendMessage(msg);
 
@@ -539,7 +535,7 @@ public class FragmentSettings extends BaseFragment {
             BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
             if (D) Log.d(TAG, "selected: " + item.mLabel);
             mData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.Key_SortSetting_Bookshelf, item.mCode).apply();
-            mData.updateList_MyBookshelf();
+ //           mData.updateList_MyBookshelf();
         }
 
         @Override
