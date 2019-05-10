@@ -19,7 +19,11 @@
 
     <!-- Menu -->
     <string name="Menu_Action_Search">検索</string>
+    <string name="Menu_Action_SearchShelf">本棚内検索</string>
     <string name="Menu_Action_Reload">更新</string>
+    <string name="Menu_Action_Register">登録</string>
+    <string name="Menu_Action_Update">上書き</string>
+    <string name="Menu_Action_Delete">削除</string>
 
     <!-- Toast -->
     <string name="Toast_Failed">エラーが発生しました</string>
@@ -27,6 +31,8 @@
     <string name="Toast_Success_Import">インポートしました</string>
     <string name="Toast_Success_Backup">バックアップしました</string>
     <string name="Toast_Success_Restore">リストアしました</string>
+    <string name="Toast_Register_Book">本を登録しました</string>
+    <string name="Toast_Delete_Book">本を削除しました</string>
 
     <!-- Progress -->
     <string name="Progress_Search">検索中…</string>
@@ -42,6 +48,10 @@
     <string name="Dialog_Button_Negative">キャンセル</string>
     <string name="Dialog_Label_Logout">ログアウト</string>
     <string name="Dialog_Message_Logout">Dropboxからログアウトしますか？</string>
+    <string name="Dialog_Label_Delete_Book">削除の確認</string>
+    <string name="Dialog_Message_Delete_Book">この本を削除しますか？</string>
+    <string name="Dialog_Label_Register_Book">登録の確認</string>
+    <string name="Dialog_Message_Register_Book">この本を登録しますか？</string>
 
     <!-- ReadStatus -->
     <string name="Item_ReadStatus_Unregistered">未登録</string>
@@ -89,11 +99,17 @@
 
     <!-- Search -->
     <string name="search_input_hint">タイトルまたは著者、ISBNなど</string>
+    <string name="search_error_input_word">検索文字列エラー(半角2文字または全角1文字以上。ひらがな・カタカナ・記号の場合は2文字以上)</string>
+    <string name="search_error_unknown">検索できませんでした</string>
+    <string name="search_error_http_400">400 wrong parameter</string>
+    <string name="search_error_http_404">404 not found</string>
+    <string name="search_error_http_429">429 too many requests</string>
+    <string name="search_error_http_500">500 system error</string>
+    <string name="search_error_http_503">503 service unavailable</string>
+    <string name="search_book_not_found">本が見つかりませんでした</string>
 
 
     <string name="row_load_next">次の20件を表示</string>
-
-
 
 
     <!-- string array -->

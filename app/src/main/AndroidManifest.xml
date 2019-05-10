@@ -24,7 +24,7 @@
             android:name=".MainActivity"
             android:label="@string/App_Name"
             android:windowSoftInputMode="adjustPan"
-            android:configChanges="locale|keyboard|keyboardHidden|orientation">
+            android:configChanges="locale|keyboard|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
