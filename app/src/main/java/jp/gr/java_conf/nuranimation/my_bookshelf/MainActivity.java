@@ -3,20 +3,24 @@ package jp.gr.java_conf.nuranimation.my_bookshelf;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.event.ActivityEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.event.FragmentEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
+
+public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener{
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean D = true;
 
+    private static final String KEY_NAVIGATION_STATE = "KEY_NAVIGATION_STATE";
 
-    private static final String KEY_STATE = "KEY_STATE";
-
+    private MyBookshelfApplicationData mApplicationData;
     private int state = 0;
 
 
@@ -26,13 +30,15 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         super.onCreate(savedInstanceState);
         if (D) Log.e(TAG, "+++ ON CREATE +++");
         setContentView(R.layout.activity_main);
+
+        mApplicationData = (MyBookshelfApplicationData)getApplicationContext();
         Toolbar toolbar = findViewById(R.id.activity_main_toolbar);
         setSupportActionBar(toolbar);
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         if (savedInstanceState == null) {
             setTitle(R.string.Navigation_Item_Shelf);
-            getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new FragmentShelfBooks(), FragmentShelfBooks.TAG).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new ShelfBooksFragment(), ShelfBooksFragment.TAG).commit();
         }
     }
 
@@ -65,22 +71,21 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
     public void onDestroy() {
         super.onDestroy();
         if (D) Log.e(TAG, "--- ON DESTROY ---");
+        mApplicationData.setCheckedPermissions(false);
     }
 
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(KEY_STATE,state);
+        outState.putInt(KEY_NAVIGATION_STATE,state);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        state = savedInstanceState.getInt(KEY_STATE,0);
+        state = savedInstanceState.getInt(KEY_NAVIGATION_STATE,0);
     }
-
-
 
 
     @Override
@@ -89,33 +94,24 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
     }
 
 
+    private void onEvent(ActivityEvent event){
+        event.apply(this);
+    }
+
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            Fragment fragment;
-            FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-
             switch (item.getItemId()) {
                 case R.id.navigation_shelf:
                     switch (state) {
                         case 0:
                         case R.id.navigation_shelf:
-                            fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookDetail.TAG);
-                            if (fragment instanceof FragmentBookDetail) {
-                                getSupportFragmentManager().popBackStack();
-                            } else {
-                                fragment = getSupportFragmentManager().findFragmentByTag(FragmentShelfBooks.TAG);
-                                if (fragment instanceof FragmentShelfBooks) {
-                                    ((FragmentShelfBooks) fragment).scrollTop();
-                                }
-                            }
+                            onEvent(ActivityEvent.NAVIGATION_SHELF);
                             break;
                         default:
-                            setTitle(R.string.Navigation_Item_Shelf);
-                            mFragmentTransaction.replace(R.id.contents_container, new FragmentShelfBooks(), FragmentShelfBooks.TAG);
-                            mFragmentTransaction.commit();
+                            onEvent(ActivityEvent.NAVIGATION_OTHER_TO_SHELF);
                             break;
                     }
                     state = R.id.navigation_shelf;
@@ -123,19 +119,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 case R.id.navigation_search:
                     switch (state) {
                         case R.id.navigation_search:
-                            fragment = getSupportFragmentManager().findFragmentByTag(FragmentBookDetail.TAG);
-                            if (fragment instanceof FragmentBookDetail) {
-                                getSupportFragmentManager().popBackStack();
-                            } else {
-                                fragment = getSupportFragmentManager().findFragmentByTag(FragmentSearchBooks.TAG);
-                                if (fragment instanceof FragmentSearchBooks) {
-                                }
-                            }
+                            onEvent(ActivityEvent.NAVIGATION_SEARCH);
                             break;
                         default:
-                            setTitle(R.string.Navigation_Item_Search);
-                            mFragmentTransaction.replace(R.id.contents_container, new FragmentSearchBooks(), FragmentSearchBooks.TAG);
-                            mFragmentTransaction.commit();
+                            onEvent(ActivityEvent.NAVIGATION_OTHER_TO_SEARCH);
                             break;
                     }
                     state = R.id.navigation_search;
@@ -143,11 +130,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 case R.id.navigation_new:
                     switch (state) {
                         case R.id.navigation_new:
+                            onEvent(ActivityEvent.NAVIGATION_NEW);
                             break;
                         default:
-                            setTitle(R.string.Navigation_Item_NewBooks);
-                            mFragmentTransaction.replace(R.id.contents_container, new FragmentNewBooks(), FragmentNewBooks.TAG);
-                            mFragmentTransaction.commit();
+                            onEvent(ActivityEvent.NAVIGATION_OTHER_TO_NEW);
                             break;
                     }
                     state = R.id.navigation_new;
@@ -155,11 +141,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 case R.id.navigation_settings:
                     switch (state) {
                         case R.id.navigation_settings:
+                            onEvent(ActivityEvent.NAVIGATION_SETTINGS);
                             break;
                         default:
-                            setTitle(R.string.Navigation_Item_Settings);
-                            mFragmentTransaction.replace(R.id.contents_container, new FragmentSettings(), FragmentSettings.TAG);
-                            mFragmentTransaction.commit();
+                            onEvent(ActivityEvent.NAVIGATION_OTHER_TO_SETTINGS);
                             break;
                     }
                     state = R.id.navigation_settings;
@@ -169,6 +154,4 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         }
     };
 
-
-
- }
+}

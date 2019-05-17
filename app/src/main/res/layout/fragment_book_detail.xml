@@ -1,27 +1,288 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    tools:ignore="SpUsage"
+    android:fillViewport="true"
+    android:background="@color/colorBackground"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:focusable="true"
-    android:clickable="true"
-    android:background="#33FF0000">
+    android:layout_height="match_parent">
 
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/book_detail_image"
-        android:layout_height="200dp"
-        android:layout_width="200dp"
-        fresco:actualImageScaleType="fitCenter"
-        fresco:placeholderImage="@drawable/ic_vector_image_24dp" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/book_detail_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/book_detail_author"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/book_detail_image"
+                android:layout_width="190dp"
+                android:layout_height="190dp"
+                fresco:actualImageScaleType="fitCenter"
+                fresco:placeholderImage="@drawable/ic_vector_image_24dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+            <Button
+                android:id="@+id/book_detail_button_reload_book"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/book_detail_image"
+                android:layout_toRightOf="@id/book_detail_image"
+                android:layout_alignParentTop="true"
+                android:drawableLeft="@drawable/ic_vector_file_download_24dp"
+                android:drawableStart="@drawable/ic_vector_file_download_24dp"
+                android:text="@string/Label_Reload_Book" />
+            <Button
+                android:id="@+id/book_detail_button_reload_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/book_detail_image"
+                android:layout_toRightOf="@id/book_detail_image"
+                android:layout_below="@id/book_detail_button_reload_book"
+                android:drawableLeft="@drawable/ic_vector_reload_24dp"
+                android:drawableStart="@drawable/ic_vector_reload_24dp"
+                android:text="@string/Label_Reload_Image" />
+            <Button
+                android:id="@+id/book_detail_button_rakutenUrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/book_detail_image"
+                android:layout_toRightOf="@id/book_detail_image"
+                android:layout_below="@id/book_detail_button_reload_image"
+                android:drawableLeft="@drawable/ic_vector_web_24dp"
+                android:drawableStart="@drawable/ic_vector_web_24dp"
+                android:text="@string/Label_RakutenUrl"
+                />
+        </RelativeLayout>
 
-</LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Label_Review"
+                android:textSize="@dimen/textSize_large"
+                android:textColor="#FF000000"
+                android:gravity="center_vertical" />
+            <TextView
+                android:id="@+id/book_detail_rating_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/padding_xlarge"
+                android:paddingStart="@dimen/padding_xlarge"
+                android:paddingRight="@dimen/padding_small"
+                android:paddingEnd="@dimen/padding_small"
+                android:textSize="@dimen/textSize_large"
+                android:textColor="#FF000000"
+                android:gravity="center_vertical" />
+            <RatingBar
+                android:id="@+id/book_detail_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:stepSize="0.5"
+                android:isIndicator="false"
+                android:rating="0"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
+                style = "@style/RatingBar" />
+        </LinearLayout>
+
+
+        <EditText
+            tools:targetApi="o"
+            android:id="@+id/book_detail_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginRight="@dimen/margin_large"
+            android:layout_marginEnd="@dimen/margin_large"
+            android:autofillHints="@string/InputHint_Title"
+            android:hint="@string/InputHint_Title"
+            android:inputType="text" />
+
+        <EditText
+            tools:targetApi="o"
+            android:id="@+id/book_detail_author"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginRight="@dimen/margin_large"
+            android:layout_marginEnd="@dimen/margin_large"
+            android:autofillHints="@string/InputHint_Author"
+            android:hint="@string/InputHint_Author"
+            android:inputType="text" />
+
+        <EditText
+            tools:targetApi="o"
+            android:id="@+id/book_detail_publisher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginRight="@dimen/margin_large"
+            android:layout_marginEnd="@dimen/margin_large"
+            android:autofillHints="@string/InputHint_Publisher"
+            android:hint="@string/InputHint_Publisher"
+            android:inputType="text" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Label_SalesDate"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:layout_marginRight="@dimen/margin_large"
+                android:layout_marginEnd="@dimen/margin_large"
+                android:gravity="center_vertical" />
+            <TextView
+                android:id="@+id/book_detail_sales_date"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="@dimen/padding_small"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/selector_textview_transparent"
+                android:text="@string/Label_No_Data"
+                android:textSize="@dimen/textSize_large"
+                android:textColor="#FF000000"
+                android:gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Label_ItemPrice"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:gravity="center_vertical"
+                android:layout_marginRight="@dimen/margin_large"
+                android:layout_marginEnd="@dimen/margin_large" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Unit_ItemPrice_Yen"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:gravity="center_vertical" />
+            <EditText
+                android:id="@+id/book_detail_price"
+                android:layout_width="180dp"
+                android:layout_height="match_parent"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:autofillHints="@string/InputHint_ItemPrice"
+                android:hint="@string/InputHint_ItemPrice"
+                android:inputType="number"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                tools:targetApi="o" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Label_ISBN"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:layout_marginRight="@dimen/margin_large"
+                android:layout_marginEnd="@dimen/margin_large"
+                android:gravity="center_vertical" />
+            <EditText
+                android:id="@+id/book_detail_isbn"
+                android:layout_width="160dp"
+                android:layout_height="match_parent"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:autofillHints="@string/InputHint_ISBN"
+                android:hint="@string/InputHint_ISBN"
+                android:maxLength="13"
+                android:inputType="number"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                tools:targetApi="o" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large">
+            <TextView
+                android:id="@+id/book_detail_read_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Label_ReadStatus"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:gravity="center_vertical" />
+            <Spinner
+                android:id="@+id/book_detail_spinner_read_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_spinner_transparent"
+                android:spinnerMode="dialog" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="@dimen/margin_large"
+            android:layout_marginStart="@dimen/margin_large">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/Label_ReadDate"
+                android:textColor="#FF000000"
+                android:textSize="@dimen/textSize_large"
+                android:layout_marginRight="@dimen/margin_large"
+                android:layout_marginEnd="@dimen/margin_large"
+                android:gravity="center_vertical" />
+            <TextView
+                android:id="@+id/book_detail_read_date"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="@dimen/padding_small"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/selector_textview_transparent"
+                android:text="@string/Label_No_Data"
+                android:textSize="@dimen/textSize_large"
+                android:textColor="#FF000000"
+                android:gravity="center_vertical" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

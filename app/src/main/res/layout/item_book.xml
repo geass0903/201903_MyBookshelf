@@ -73,7 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/textSize_normal"
-                    android:text="@string/unit_ItemPrice_Yen" />
+                    android:text="@string/Unit_ItemPrice_Yen" />
                 <TextView
                     android:id="@+id/Item_Book_ItemPrice"
                     android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/textSize_normal"
-                    android:text="@string/unit_ItemPrice_Tax" />
+                    android:text="@string/Unit_ItemPrice_Tax" />
 
             </LinearLayout>
 
@@ -118,7 +118,7 @@
                     android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/Item_ReadStatus_Unknown" />
+                    android:text="@string/Item_ReadStatus_5" />
             </RelativeLayout>
 
         </LinearLayout>
