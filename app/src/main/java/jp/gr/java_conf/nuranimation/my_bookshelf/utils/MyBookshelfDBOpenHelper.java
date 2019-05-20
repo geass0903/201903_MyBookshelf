@@ -23,7 +23,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "jp.gr.java_conf.nuranimation.MyBookshelf.db";
     private static final int DB_VERSION = 1;
 
-    private static final String TABLE_SHELF_BOOKS   = "shelf_booksf";
+    private static final String TABLE_SHELF_BOOKS   = "shelf_books";
     private static final String TABLE_AUTHORS       = "authors";
     private static final String TABLE_SEARCH_BOOKS  = "search_books";
     private static final String TABLE_NEW_BOOKS     = "new_books";
@@ -243,7 +243,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                     + KEY_AUTHOR + " like " + "'%" + word + "%'" + " or "
                     + KEY_ISBN + " = " + "'" + word + "'";
         }
-        String order = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, "");
+        String order = mApplicationData.getShelfBooksSortSetting();
         Cursor c = null;
         try {
             List<BookData> tmp = new ArrayList<>();
@@ -491,7 +491,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 insertValues.put(KEY_TAGS, book.getTags());// タグ
                 insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate()); // 読了日
                 insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());// 登録日
-                db.insert(TABLE_SHELF_BOOKS, "", insertValues);
+                db.insert(TABLE_SEARCH_BOOKS, "", insertValues);
             }
             isSuccess = true;
         } catch (SQLException e) {

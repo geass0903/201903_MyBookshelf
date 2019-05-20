@@ -13,7 +13,7 @@ import android.util.Log;
 
 public final class BaseDialogFragment extends DialogFragment {
     private static final boolean D = true;
-    private static final String TAG = BaseDialogFragment.class.getSimpleName();
+    public static final String TAG = BaseDialogFragment.class.getSimpleName();
 
     public static final String KEY_TITLE = "KEY_TITLE";
     public static final String KEY_MESSAGE = "KEY_MESSAGE";

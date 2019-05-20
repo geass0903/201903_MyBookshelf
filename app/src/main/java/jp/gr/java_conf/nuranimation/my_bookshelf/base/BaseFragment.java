@@ -147,11 +147,6 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         showProgress();
     }
 
-    protected void dismissProgress(){
-        isShowingProgress = false;
-    }
-
-
     private void showProgress(){
         Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
         msg.setData(mBundleProgress);

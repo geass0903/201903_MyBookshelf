@@ -499,7 +499,7 @@ public class SettingsFragment extends BaseFragment {
         Spinner spinner_SortSetting_Bookshelf = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_Bookshelf);
         SettingsSpinnerArrayAdapter arrayAdapter_SortSetting_Bookshelf = new SettingsSpinnerArrayAdapter(this.getContext(), R.layout.item_spinner, getList_Spinner_Sort_Shelf());
         spinner_SortSetting_Bookshelf.setAdapter(arrayAdapter_SortSetting_Bookshelf);
-        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.Code_SortSetting_Registered_Ascending));
+        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_Registered_Ascending));
         spinner_SortSetting_Bookshelf.setSelection(arrayAdapter_SortSetting_Bookshelf.getPosition(code), false);
         spinner_SortSetting_Bookshelf.setOnItemSelectedListener(listener_SortSetting_Bookshelf);
     }
@@ -509,7 +509,7 @@ public class SettingsFragment extends BaseFragment {
         Spinner spinner_SortSetting_SearchResult = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_SearchResult);
         SettingsSpinnerArrayAdapter arrayAdapter_SortSetting_SearchResult = new SettingsSpinnerArrayAdapter(getContext(), R.layout.item_spinner, getList_Spinner_Sort_SearchResult());
         spinner_SortSetting_SearchResult.setAdapter(arrayAdapter_SortSetting_SearchResult);
-        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.Code_SortSetting_SalesDate_Descending));
+        String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending));
         spinner_SortSetting_SearchResult.setSelection(arrayAdapter_SortSetting_SearchResult.getPosition(code), false);
         spinner_SortSetting_SearchResult.setOnItemSelectedListener(listener_SortSetting_SearchResult);
     }
@@ -518,7 +518,7 @@ public class SettingsFragment extends BaseFragment {
     private List<BaseSpinnerItem> getList_Spinner_Sort_Shelf() {
         List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.Spinner_Bookshelf_SortSetting);
+        TypedArray array = res.obtainTypedArray(R.array.Spinner_ShelfBooks_SortSetting);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
@@ -533,7 +533,7 @@ public class SettingsFragment extends BaseFragment {
     private List<BaseSpinnerItem> getList_Spinner_Sort_SearchResult() {
         List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.Spinner_SearchResult_SortSetting);
+        TypedArray array = res.obtainTypedArray(R.array.Spinner_SearchBooks_SortSetting);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {

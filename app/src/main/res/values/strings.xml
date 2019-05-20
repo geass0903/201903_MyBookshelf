@@ -105,22 +105,8 @@
     <!-- Settings -->
     <string name="Label_SortSetting_Shelf">本棚のソート設定</string>
     <string name="Label_SortSetting_SearchResult">検索結果のソート設定</string>
-    <string name="Label_SortSetting_Title_Ascending">タイトル(昇順)</string>
-    <string name="Label_SortSetting_Title_Descending">タイトル(降順)</string>
-    <string name="Label_SortSetting_Author_Ascending">著者(昇順)</string>
-    <string name="Label_SortSetting_Author_Descending">著者(降順)</string>
-    <string name="Label_SortSetting_Registered_Ascending">登録日(昇順)</string>
-    <string name="Label_SortSetting_Registered_Descending">登録日(降順)</string>
-    <string name="Label_SortSetting_SalesDate_Ascending">発売日(昇順)</string>
-    <string name="Label_SortSetting_SalesDate_Descending">発売日(降順)</string>
-    <string name="Code_SortSetting_Title_Ascending">Title_ASC</string>
-    <string name="Code_SortSetting_Title_Descending">Title_DESC</string>
-    <string name="Code_SortSetting_Author_Ascending">Author_ASC</string>
-    <string name="Code_SortSetting_Author_Descending">Author_DESC</string>
-    <string name="Code_SortSetting_Registered_Ascending">Registered_ASC</string>
-    <string name="Code_SortSetting_Registered_Descending">Registered_DESC</string>
-    <string name="Code_SortSetting_SalesDate_Ascending">SalesDate_ASC</string>
-    <string name="Code_SortSetting_SalesDate_Descending">SalesDate_DESC</string>
+
+
 
     <string name="Settings_title_export_import">エクスポート／インポート</string>
     <string name="Settings_title_dropbox">Dropbox連携</string>
@@ -131,7 +117,7 @@
     <string name="Settings_button_backup">バックアップ</string>
     <string name="Settings_button_restore">リストア</string>
 
-
+    <!-- Settings -->
     <string-array name="BookDetail_ReadStatus_SpinnerItem_ReadStatus_0">
         <item name="code">0</item>
         <item name="label">@string/Item_ReadStatus_0</item>
@@ -165,65 +151,94 @@
     </string-array>
 
 
+
+
+
+
+
+    <!-- Spinner ShelfBooks Sort Setting -->
+    <string name="ShelfBooks_SortSetting_Label_Title_Ascending">タイトル(昇順)</string>
+    <string name="ShelfBooks_SortSetting_Label_Title_Descending">タイトル(降順)</string>
+    <string name="ShelfBooks_SortSetting_Label_Author_Ascending">著者(昇順)</string>
+    <string name="ShelfBooks_SortSetting_Label_Author_Descending">著者(降順)</string>
+    <string name="ShelfBooks_SortSetting_Label_SalesDate_Ascending">発売日(昇順)</string>
+    <string name="ShelfBooks_SortSetting_Label_SalesDate_Descending">発売日(降順)</string>
+    <string name="ShelfBooks_SortSetting_Label_Registered_Ascending">登録日(昇順)</string>
+    <string name="ShelfBooks_SortSetting_Label_Registered_Descending">登録日(降順)</string>
+    <string name="ShelfBooks_SortSetting_Code_Title_Ascending">" order by title asc"</string>
+    <string name="ShelfBooks_SortSetting_Code_Title_Descending">" order by title desc</string>
+    <string name="ShelfBooks_SortSetting_Code_Author_Ascending">" order by author asc"</string>
+    <string name="ShelfBooks_SortSetting_Code_Author_Descending">" order by author desc"</string>
+    <string name="ShelfBooks_SortSetting_Code_SalesDate_Ascending">" order by release_date asc"</string>
+    <string name="ShelfBooks_SortSetting_Code_SalesDate_Descending">" order by release_date desc"</string>
+    <string name="ShelfBooks_SortSetting_Code_Registered_Ascending">" order by register_date asc"</string>
+    <string name="ShelfBooks_SortSetting_Code_Registered_Descending">" order by register_date desc"</string>
     <!-- string array -->
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_Title_ASC">
-        <item name="code">" order by title asc"</item>
-        <item name="label">@string/Label_SortSetting_Title_Ascending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_Title_ASC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_Title_Ascending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_Title_Ascending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_Title_DESC">
-        <item name="code">" order by title desc"</item>
-        <item name="label">@string/Label_SortSetting_Title_Descending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_Title_DESC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_Title_Descending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_Title_Descending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_Author_ASC">
-        <item name="code">" order by author asc"</item>
-        <item name="label">@string/Label_SortSetting_Author_Ascending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_Author_ASC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_Author_Ascending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_Author_Ascending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_Author_DESC">
-        <item name="code">" order by author desc"</item>
-        <item name="label">@string/Label_SortSetting_Author_Descending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_Author_DESC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_Author_Descending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_Author_Descending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_SalesDate_ASC">
-        <item name="code">" order by release_date asc"</item>
-        <item name="label">@string/Label_SortSetting_SalesDate_Ascending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_SalesDate_ASC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_SalesDate_Ascending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_SalesDate_Ascending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_SalesDate_DESC">
-        <item name="code">" order by release_date desc"</item>
-        <item name="value">@string/Label_SortSetting_SalesDate_Descending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_SalesDate_DESC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_SalesDate_Descending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_SalesDate_Descending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_Registered_ASC">
-        <item name="code">" order by register_date asc"</item>
-        <item name="value">@string/Label_SortSetting_Registered_Ascending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_Registered_ASC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_Registered_Ascending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_Registered_Ascending</item>
     </string-array>
-    <string-array name="Bookshelf_SortSetting_SpinnerItem_Registered_DESC">
-        <item name="code">" order by register_date desc"</item>
-        <item name="value">@string/Label_SortSetting_Registered_Descending</item>
+    <string-array name="ShelfBooks_SortSetting_SpinnerItem_Registered_DESC">
+        <item name="code">@string/ShelfBooks_SortSetting_Code_Registered_Descending</item>
+        <item name="label">@string/ShelfBooks_SortSetting_Label_Registered_Descending</item>
+    </string-array>
+    <!-- Spinner -->
+    <string-array name="Spinner_ShelfBooks_SortSetting">
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_Title_ASC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_Title_DESC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_Author_ASC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_Author_DESC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_SalesDate_ASC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_SalesDate_DESC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_Registered_ASC</item>
+        <item>@array/ShelfBooks_SortSetting_SpinnerItem_Registered_DESC</item>
+    </string-array>
+
+    <!-- Spinner SearchBooks Sort Setting -->
+    <string name="SearchBooks_SortSetting_Label_SalesDate_Ascending">発売日(昇順)</string>
+    <string name="SearchBooks_SortSetting_Label_SalesDate_Descending">発売日(降順)</string>
+    <string name="SearchBooks_SortSetting_Code_SalesDate_Ascending">"+releaseDate"</string>
+    <string name="SearchBooks_SortSetting_Code_SalesDate_Descending">"-releaseDate"</string>
+    <!-- string array -->
+    <string-array name="SearchBooks_SortSetting_SpinnerItem_SalesDate_ASC">
+        <item name="code">@string/SearchBooks_SortSetting_Code_SalesDate_Ascending</item>
+        <item name="label">@string/SearchBooks_SortSetting_Label_SalesDate_Ascending</item>
+    </string-array>
+    <string-array name="SearchBooks_SortSetting_SpinnerItem_SalesDate_DESC">
+        <item name="code">@string/SearchBooks_SortSetting_Code_SalesDate_Descending</item>
+        <item name="label">@string/SearchBooks_SortSetting_Label_SalesDate_Descending</item>
+    </string-array>
+    <!-- Spinner -->
+    <string-array name="Spinner_SearchBooks_SortSetting">
+        <item>@array/SearchBooks_SortSetting_SpinnerItem_SalesDate_ASC</item>
+        <item>@array/SearchBooks_SortSetting_SpinnerItem_SalesDate_DESC</item>
     </string-array>
 
 
 
-
-
-    <string-array name="SearchResult_SortSetting_SpinnerItem_SalesDate_ASC">
-        <item name="code">@string/Code_SortSetting_SalesDate_Ascending</item>
-        <item name="label">@string/Label_SortSetting_SalesDate_Ascending</item>
-    </string-array>
-    <string-array name="SearchResult_SortSetting_SpinnerItem_SalesDate_DESC">
-        <item name="code">@string/Code_SortSetting_SalesDate_Descending</item>
-        <item name="label">@string/Label_SortSetting_SalesDate_Descending</item>
-    </string-array>
-    <string-array name="Spinner_Bookshelf_SortSetting">
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_Title_ASC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_Title_DESC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_Author_ASC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_Author_DESC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_SalesDate_ASC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_SalesDate_DESC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_Registered_ASC</item>
-        <item>@array/Bookshelf_SortSetting_SpinnerItem_Registered_DESC</item>
-    </string-array>
-    <string-array name="Spinner_SearchResult_SortSetting">
-        <item>@array/SearchResult_SortSetting_SpinnerItem_SalesDate_ASC</item>
-        <item>@array/SearchResult_SortSetting_SpinnerItem_SalesDate_DESC</item>
-    </string-array>
 
 </resources>

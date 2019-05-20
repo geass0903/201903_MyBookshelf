@@ -4,12 +4,14 @@ import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.multidex.MultiDexApplication;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
 import java.util.List;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
 
 
@@ -126,7 +128,9 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         return mDatabaseHelper.registerToSearchBooks(book);
     }
 
-
+    public boolean registerToSearchBooks(List<BookData> books){
+        return mDatabaseHelper.registerToSearchBooks(books);
+    }
 
     public boolean deleteTABLE_NEW_BOOKS(){
         return mDatabaseHelper.deleteTABLE_NEW_BOOKS();
@@ -140,6 +144,27 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         return mDatabaseHelper.registerToNewBooks(book);
     }
 
+    public boolean registerToNewBooks(List<BookData> books){
+        return mDatabaseHelper.registerToNewBooks(books);
+    }
 
+
+    public String getShelfBooksSortSetting(){
+        String sort = mPreferences.getString(KEY_SHELF_BOOKS_ORDER,null);
+        if(TextUtils.isEmpty(sort)){
+            sort = getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending);
+            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending)).apply();
+        }
+        return sort;
+    }
+
+    public String getSearchBooksSortSetting(){
+        String sort = mPreferences.getString(KEY_SEARCH_BOOKS_ORDER,null);
+        if(TextUtils.isEmpty(sort)){
+            sort = getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending);
+            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending)).apply();
+        }
+        return sort;
+    }
 
 }

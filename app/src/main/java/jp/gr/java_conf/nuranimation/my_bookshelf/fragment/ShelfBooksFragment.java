@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.utils.BundleBuilder;
@@ -51,9 +50,6 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     private Parcelable mListState;
     private String mKeyword;
 
-
-
-
     @Override
     public void onAttach (Context context) {
         super.onAttach(context);
@@ -76,7 +72,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             mKeyword = savedInstanceState.getString(KEY_KEYWORD,null);
             mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
         }
-        List<BookData> mShelfBooks = new ArrayList<>(mApplicationData.getShelfBooks(mKeyword));
+        List<BookData> mShelfBooks = mApplicationData.getShelfBooks(mKeyword);
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(),mShelfBooks,true);
         mShelfBooksViewAdapter.setClickListener(this);
         mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
@@ -125,6 +121,81 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     }
 
 
+    @Override
+    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
+        if(isClickable()){
+            setClickDisable();
+            int view_type = adapter.getItemViewType(position);
+            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+                FragmentManager fragmentManager = getFragmentManager();
+                if (fragmentManager != null) {
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    BookDetailFragment fragment = new BookDetailFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, data);
+                    fragment.setArguments(bundle);
+                    Slide slide = new Slide();
+                    slide.setSlideEdge(Gravity.BOTTOM);
+                    fragment.setEnterTransition(slide);
+                    fragmentTransaction.replace(R.id.contents_container, fragment, BookDetailFragment.TAG);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
+        if (isClickable()) {
+            setClickDisable();
+            int view_type = adapter.getItemViewType(position);
+            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+                Bundle bundle_book = new Bundle();
+                bundle_book.putInt(KEY_POSITION, position);
+                BookData book = new BookData(data);
+                bundle_book.putParcelable(KEY_BOOK_DATA, book);
+                Bundle bundle = new BundleBuilder()
+                        .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Book_Title))
+                        .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
+                        .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
+                        .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                        .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DELETE_BOOK)
+                        .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
+                        .put(BaseDialogFragment.KEY_CANCELABLE, true)
+                        .build();
+                if (getActivity() != null) {
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
+                    fragment.show(manager, BaseDialogFragment.TAG);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+        if (requestCode == REQUEST_CODE_DELETE_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
+            int position = params.getInt(KEY_POSITION, -1);
+            BookData book = params.getParcelable(KEY_BOOK_DATA);
+            if (book != null) {
+                boolean isSuccess = mApplicationData.deleteFromShelfBooks(book.getISBN());
+                if(isSuccess) {
+                    mShelfBooksViewAdapter.deleteBook(position);
+                    Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBaseDialogCancelled(int requestCode, Bundle params) {
+        super.onBaseDialogCancelled(requestCode,params);
+    }
 
     private void initSearchView(Menu menu){
         mSearchView = (SearchView)menu.findItem(R.id.menu_shelf_search_view).getActionView();
@@ -154,11 +225,6 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         });
     }
 
-
-
-
-
-
     public void scrollTop(){
         mRecyclerView.scrollToPosition(0);
     }
@@ -169,83 +235,5 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     }
 
 
-
-    @Override
-    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
-        if(isClickable()){
-            setClickDisable();
-            int view_type = adapter.getItemViewType(position);
-            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
-                FragmentManager fragmentManager = getFragmentManager();
-                if (fragmentManager != null) {
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    BookDetailFragment fragment = new BookDetailFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, data);
-                    fragment.setArguments(bundle);
-                    Slide slide = new Slide();
-                    slide.setSlideEdge(Gravity.BOTTOM);
-                    fragment.setEnterTransition(slide);
-                    fragmentTransaction.replace(R.id.contents_container, fragment, BookDetailFragment.TAG);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
-                }
-            }
-        }
-
-    }
-
-    @Override
-    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
-        if(isClickable()) {
-            setClickDisable();
-            int view_type = adapter.getItemViewType(position);
-            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
-                Bundle bundle_book = new Bundle();
-                bundle_book.putInt(KEY_POSITION, position);
-                BookData book = new BookData(data);
-                bundle_book.putParcelable(KEY_BOOK_DATA, book);
-
-                if (getActivity() != null) {
-                    Bundle bundle = new BundleBuilder()
-                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Book_Title))
-                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
-                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
-                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DELETE_BOOK)
-                            .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
-                            .put(BaseDialogFragment.KEY_CANCELABLE, true)
-                            .build();
-                    FragmentManager manager = getActivity().getSupportFragmentManager();
-                    BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, ShelfBooksFragment.TAG);
-                }
-            }
-        }
-    }
-
-
-    @Override
-    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onBaseDialogSucceeded(requestCode, resultCode, params);
-        if (requestCode == REQUEST_CODE_DELETE_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
-            int position = params.getInt(KEY_POSITION, -1);
-            BookData book = params.getParcelable(KEY_BOOK_DATA);
-            if (book != null) {
-                boolean isSuccess = mApplicationData.deleteFromShelfBooks(book.getISBN());
-                if(isSuccess) {
-                    mShelfBooksViewAdapter.deleteBook(position);
-                    Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onBaseDialogCancelled(int requestCode, Bundle params) {
-        super.onBaseDialogCancelled(requestCode,params);
-    }
 
 }

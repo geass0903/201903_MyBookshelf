@@ -354,12 +354,12 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         @Override
         public Loader<AsyncSearchBook.Result> onCreateLoader(int i, @Nullable Bundle bundle) {
             String sort = "standard";
-            String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.Code_SortSetting_SalesDate_Descending));
+            String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending));
             if(code != null) {
-                if (code.equals(getString(R.string.Code_SortSetting_SalesDate_Ascending))) {
+                if (code.equals(getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Ascending))) {
                     sort = "+releaseDate";
                 }
-                if (code.equals(getString(R.string.Code_SortSetting_SalesDate_Descending))) {
+                if (code.equals(getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending))) {
                     sort = "-releaseDate";
                 }
             }
