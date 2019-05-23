@@ -142,9 +142,14 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
 
     public void setProgressDialog(Bundle bundle){
-        isShowingProgress = true;
-        mBundleProgress = new Bundle(bundle);
-        showProgress();
+        if(bundle != null) {
+            isShowingProgress = true;
+            mBundleProgress = new Bundle(bundle);
+            showProgress();
+        }else{
+            isShowingProgress = false;
+            handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+        }
     }
 
     private void showProgress(){
@@ -382,6 +387,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
             if (fragment != null) {
                 switch (msg.what) {
                     case MESSAGE_PROGRESS_SHOW:
+                        if(D) Log.d(TAG, "MESSAGE_PROGRESS_SHOW");
                         Bundle bundle_progress = msg.getData();
                         if (fragment.getActivity() != null && bundle_progress != null) {
                             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
@@ -396,6 +402,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         }
                         break;
                     case MESSAGE_PROGRESS_DISMISS:
+                        if(D) Log.d(TAG, "MESSAGE_PROGRESS_DISMISS");
                         fragment.isShowingProgress = false;
                         if(fragment.mProgressFragment != null){
                             fragment.mProgressFragment.dismiss();

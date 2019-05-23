@@ -115,7 +115,6 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     BookData footer = new BookData();
                     footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
                     mSearchBooks.add(footer);
-
                 }
             }
         }
@@ -139,7 +138,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             if (D) Log.d(TAG, "initLoader");
             mLoaderManager.initLoader(LoaderID, null, mCallback);
         }else{
-            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+            setProgressDialog(null);
         }
     }
 
@@ -381,6 +380,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
         @Override
         public void onLoaderReset(@NonNull Loader<AsyncSearchBook.Result> loader) {
+            if (D) Log.d(TAG, "onLoaderReset");
         }
     };
 

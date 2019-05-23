@@ -1,6 +1,14 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
+import android.app.ActivityManager;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +20,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.event.ActivityEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.event.FragmentEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookSearchService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener{
@@ -23,6 +32,21 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
     private MyBookshelfApplicationData mApplicationData;
     private int state = 0;
 
+
+
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (D) Log.e(TAG, "onServiceConnected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            if (D) Log.e(TAG, "onServiceDisconnected");
+
+        }
+    };
 
 
     @Override
@@ -72,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         super.onDestroy();
         if (D) Log.e(TAG, "--- ON DESTROY ---");
         mApplicationData.setCheckedPermissions(false);
+ //       unbindService(connection);
     }
 
 
@@ -108,7 +133,20 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                     switch (state) {
                         case 0:
                         case R.id.navigation_shelf:
-                            onEvent(ActivityEvent.NAVIGATION_SHELF);
+
+//                            Intent intent =  new Intent(getApplicationContext(), BookSearchService.class);
+
+                            Intent intent = new Intent(getApplicationContext(),BookSearchService.class);
+
+ //                           bindService(intent,connection, Service.BIND_AUTO_CREATE);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+   //                             startForegroundService(intent);
+                            }else{
+    //                            startService(intent);
+                            }
+
+
+//                            onEvent(ActivityEvent.NAVIGATION_SHELF);
                             break;
                         default:
                             onEvent(ActivityEvent.NAVIGATION_OTHER_TO_SHELF);
@@ -119,7 +157,16 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 case R.id.navigation_search:
                     switch (state) {
                         case R.id.navigation_search:
-                            onEvent(ActivityEvent.NAVIGATION_SEARCH);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                Intent intent = new Intent(getApplicationContext(),BookSearchService.class);
+
+   //                             startForegroundService(intent);
+                            }else{
+                                Intent intent = new Intent(getApplicationContext(),BookSearchService.class);
+
+    //                            startService(intent);
+                            }
+//                            onEvent(ActivityEvent.NAVIGATION_SEARCH);
                             break;
                         default:
                             onEvent(ActivityEvent.NAVIGATION_OTHER_TO_SEARCH);
@@ -130,7 +177,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 case R.id.navigation_new:
                     switch (state) {
                         case R.id.navigation_new:
-                            onEvent(ActivityEvent.NAVIGATION_NEW);
+                            Intent intent = new Intent(getApplicationContext(),BookSearchService.class);
+
+                            stopService(intent);
+//                            onEvent(ActivityEvent.NAVIGATION_NEW);
                             break;
                         default:
                             onEvent(ActivityEvent.NAVIGATION_OTHER_TO_NEW);

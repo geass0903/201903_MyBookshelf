@@ -133,7 +133,6 @@ public enum ActivityEvent {
     DEFAULT {
         @Override
         public void apply(MainActivity activity) {
-
         }
     };
 
