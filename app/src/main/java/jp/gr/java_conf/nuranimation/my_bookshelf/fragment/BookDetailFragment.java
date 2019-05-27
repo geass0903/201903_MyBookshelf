@@ -36,15 +36,15 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.ReadStatusSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDatePickerFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 
 
 public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener {

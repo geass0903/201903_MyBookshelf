@@ -10,7 +10,7 @@ import android.support.v4.app.Fragment;
 
 import java.util.Calendar;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 
 public class BaseDatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {

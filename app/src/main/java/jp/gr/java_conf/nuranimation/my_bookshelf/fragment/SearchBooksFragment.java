@@ -2,6 +2,8 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.media.MediaCasException;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -34,22 +36,34 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.AsyncSearchBook;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.AsyncSearchBook;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.SearchBooksResult;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BooksListViewAdapter;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 public class SearchBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = SearchBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
+    public static final String KEY_PARAM_PROGRESS       = "KEY_PARAM_PROGRESS";
+    public static final String KEY_PARAM_SEARCH_KEYWORD = "KEY_PARAM_SEARCH_KEYWORD";
+    public static final String KEY_PARAM_SEARCH_PAGE    = "KEY_PARAM_SEARCH_PAGE";
+    public static final String KEY_PARAM_SEARCH_SORT    = "KEY_PARAM_SEARCH_SORT";
+
+
+
     private static final int LoaderID = 1;
+
+
 
     private static final String KEY_LAYOUT_MANAGER = "KEY_LAYOUT_MANAGER";
     private static final String KEY_TEMP_KEYWORD = "KEY_TEMP_KEYWORD";
@@ -92,8 +106,33 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view,savedInstanceState);
-        if(D) Log.d(TAG,"onViewCreated");
-        if(savedInstanceState != null){
+        if(D) Log.d(TAG, "onViewCreated");
+        if(getActivity() != null) {
+            getActivity().setTitle(R.string.Navigation_Item_Search);
+        }
+        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks,false);
+        mSearchBooksViewAdapter.setClickListener(this);
+
+
+        if(savedInstanceState == null) {
+            if(getArguments() != null){
+                int id = getArguments().getInt(BookService.KEY_SERVICE_STATE,0);
+                switch(id) {
+                    case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
+                        Bundle progress = new BundleBuilder()
+                                .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Search))
+                                .put(BaseProgressDialogFragment.message, "")
+                                .build();
+                        setProgressBundle(progress);
+                        break;
+                    case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
+                        onEventSearchBooksFinish();
+                        break;
+                }
+
+
+            }
+        } else{
             if(D) Log.d(TAG,"savedInstanceState != null");
             mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
             mTempKeyword = savedInstanceState.getString(KEY_TEMP_KEYWORD,null);
@@ -109,17 +148,17 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             if(D) Log.d(TAG,"hasButtonLoad : " + hasButtonLoadNext);
 
             if(hasResultData) {
-                mSearchBooks = mApplicationData.getSearchBooks();
+                List<BookData> mSearchBooks = mApplicationData.getSearchBooks();
                 if(D) Log.d(TAG,"mSearchBooks.size() : " + mSearchBooks.size());
                 if(hasButtonLoadNext){
                     BookData footer = new BookData();
                     footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
                     mSearchBooks.add(footer);
+                    mSearchBooksViewAdapter.addBooksData(mSearchBooks);
                 }
             }
         }
-        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks,false);
-        mSearchBooksViewAdapter.setClickListener(this);
+
         RecyclerView mRecyclerView = view.findViewById(R.id.fragment_search_recyclerview);
         mLayoutManager = new LinearLayoutManager(view.getContext());
         if(mListState != null){
@@ -137,8 +176,6 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         if (mLoaderManager.getLoader(LoaderID) != null) {
             if (D) Log.d(TAG, "initLoader");
             mLoaderManager.initLoader(LoaderID, null, mCallback);
-        }else{
-            setProgressDialog(null);
         }
     }
 
@@ -203,10 +240,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 }
             } else {
                 if (view_type == BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD) {
-                    BookData footer = new BookData();
-                    footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
-                    adapter.setFooter(footer);
-                    AsyncSearchTask(mKeyword, mSearchPage);
+                    searchBooks(mKeyword, mSearchPage);
                 }
             }
 
@@ -305,6 +339,28 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         super.onBaseDialogCancelled(requestCode,params);
     }
 
+    @Override
+    public void onReceiveBroadcast(Context context, Intent intent){
+        if (D) Log.e(TAG, "onReceive");
+        String action = intent.getAction();
+        if(action != null){
+            switch (action){
+                case FILTER_ACTION_UPDATE_SERVICE_STATE:
+                    int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
+                    switch (state) {
+                        case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
+                            if (D) Log.e(TAG, "STATE_SEARCH_BOOKS_SEARCH_START");
+                            break;
+                        case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
+                            if (D) Log.e(TAG, "STATE_SEARCH_BOOKS_SEARCH_FINISH");
+                            onEventSearchBooksFinish();
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
 
     private void initSearchView(Menu menu){
         mSearchView = (SearchView)menu.findItem(R.id.menu_search_search_view).getActionView();
@@ -319,7 +375,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchView.clearFocus();
                 mKeyword = searchWord;
                 mSearchPage = 1;
-                AsyncSearchTask(mKeyword, mSearchPage);
+                searchBooks(mKeyword, mSearchPage);
                 return false;
             }
             @Override
@@ -337,23 +393,53 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         mSearchView.setIconified(false);
     }
 
-    public void AsyncSearchTask(String search, int page) {
-        if (MyBookshelfUtils.checkInputWord(search)) {
+
+    public void onEventSearchBooksFinish(){
+        if(D) Log.d(TAG,"onEventSearchBooksFinish");
+
+        if(getActivity() instanceof MainActivity){
+            BookService service = ((MainActivity) getActivity()).getService();
+            if(service != null) {
+                callback(service.getSearchBooksResult());
+                service.setServiceState(BookService.STATE_NONE);
+                service.stopForeground(false);
+                service.stopSelf();
+            }
+        }
+
+        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+
+
+    }
+
+
+
+
+    public void searchBooks(String keyword, int page) {
+        if (!MyBookshelfUtils.isValid(keyword)) {
+            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Keyword), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service == null) {
+                return;
+            }
             if (page == 1) {
                 Bundle progress = new BundleBuilder()
                         .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Search))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
-                setProgressDialog(progress);
+                setProgressBundle(progress);
+                showProgressDialog();
+            } else {
+                BookData footer = new BookData();
+                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
+                mSearchBooksViewAdapter.setFooter(footer);
             }
-            Bundle bundle = new BundleBuilder()
-                    .put(KEY_KEYWORD, search)
-                    .put(KEY_PAGE, page)
-                    .build();
-            mLoaderManager.restartLoader(LoaderID, bundle, mCallback);
-        } else {
-            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Keyword), Toast.LENGTH_SHORT).show();
+            service.searchBooks(keyword, page, mApplicationData.getSearchBooksSortSetting());
         }
+
     }
 
 
@@ -423,6 +509,48 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
     }
 
+    void callback(SearchBooksResult result){
+        if(mSearchPage == 1){
+            mApplicationData.deleteTABLE_SEARCH_BOOKS();
+            mSearchBooksViewAdapter.clearBooksData();
+            hasResultData = false;
+            hasButtonLoadNext = false;
+        }else{
+            BookData footer = new BookData();
+            footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+            mSearchBooksViewAdapter.setFooter(footer);
+        }
+
+        if(!result.isSuccess()){
+            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Unknown), Toast.LENGTH_SHORT).show();
+        }else{
+            switch (result.getErrorStatus()){
+                case HttpURLConnection.HTTP_BAD_REQUEST:     // 400 wrong parameter
+                    Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_400), Toast.LENGTH_SHORT).show();
+                    break;
+                case HttpURLConnection.HTTP_NOT_FOUND:      // 404 not found
+                    Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_404), Toast.LENGTH_SHORT).show();
+                    break;
+                case 429: // 429 too many requests
+                    Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_429), Toast.LENGTH_SHORT).show();
+                    break;
+                case HttpURLConnection.HTTP_INTERNAL_ERROR: // 500 system error
+                    Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_500), Toast.LENGTH_SHORT).show();
+                    break;
+                case HttpURLConnection.HTTP_UNAVAILABLE:    // 503 service unavailable
+                    Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_503), Toast.LENGTH_SHORT).show();
+                    break;
+                case HttpURLConnection.HTTP_OK:
+                    convertJSON(result.getJSONObject());
+                    break;
+            }
+        }
+        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+    }
+
+
+
+
     private void convertJSON(JSONObject json){
         List<BookData> books = new ArrayList<>();
         int count = 0;
@@ -478,6 +606,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Book_not_found), Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
 
 }

@@ -1,15 +1,20 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.base;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -23,8 +28,8 @@ import java.util.Queue;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.event.FragmentEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 
 /**
  * Created by Kamada on 2019/03/11.
@@ -45,9 +50,16 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public static final int REQUEST_CODE_DELETE_BOOK           = 111;
     public static final int REQUEST_CODE_ASK_FOR_PERMISSIONS   = 999;
 
+    public static final String FILTER_ACTION_UPDATE_SERVICE_STATE = "FILTER_ACTION_UPDATE_SERVICE_STATE";
+    public static final String KEY_UPDATE_SERVICE_STATE = "KEY_UPDATE_SERVICE_STATE";
+
     private static final String KEY_SAVED_REQUEST_PERMISSIONS   = "KEY_SAVED_REQUEST_PERMISSIONS";
     private static final String KEY_IS_SHOW_PROGRESS = "KEY_IS_SHOW_PROGRESS";
     private static final String KEY_BUNDLE_PROGRESS_DIALOG      = "KEY_BUNDLE_PROGRESS_DIALOG";
+
+    private LocalBroadcastManager mLocalBroadcastManager;
+    private BroadcastReceiver mReceiver;
+    private IntentFilter mIntentFilter;
 
     private PausedHandler handler = new PausedHandler(this);
     private AppCompatActivity mActivity = null;
@@ -61,7 +73,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     @SuppressWarnings("unused")
     public interface FragmentListener {
-        void onFragmentEvent(FragmentEvent event);
+        void onFragmentEvent(MyBookshelfEvent event, Bundle bundle);
     }
 
     public BaseFragment() {
@@ -72,6 +84,10 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public void onAttach(Context context) {
         super.onAttach(context);
         mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
+        mReceiver = new LocalReceiver();
+        mIntentFilter = new IntentFilter(FILTER_ACTION_UPDATE_SERVICE_STATE);
+
         if (context instanceof FragmentListener) {
             mFragmentListener = (FragmentListener) context;
         } else {
@@ -98,15 +114,10 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
 
     @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         handler.resume();
-
+        mLocalBroadcastManager.registerReceiver(mReceiver,mIntentFilter);
         if(!mApplicationData.isCheckedPermissions()) {
             mApplicationData.setCheckedPermissions(true);
             if (!isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
@@ -117,7 +128,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
             }
         }
         if(isShowingProgress){
-            showProgress();
+            showProgressDialog();
         }
     }
 
@@ -125,6 +136,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public void onPause() {
         super.onPause();
         handler.pause();
+        mLocalBroadcastManager.unregisterReceiver(mReceiver);
         if(mProgressFragment != null){
             mProgressFragment.dismiss();
             mProgressFragment = null;
@@ -140,19 +152,14 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         outState.putBundle(KEY_BUNDLE_PROGRESS_DIALOG, mBundleProgress);
     }
 
-
-    public void setProgressDialog(Bundle bundle){
-        if(bundle != null) {
-            isShowingProgress = true;
-            mBundleProgress = new Bundle(bundle);
-            showProgress();
-        }else{
-            isShowingProgress = false;
-            handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
-        }
+    public void setProgressBundle(Bundle bundle){
+        isShowingProgress = true;
+        mBundleProgress = new Bundle(bundle);
     }
 
-    private void showProgress(){
+
+
+    public void showProgressDialog(){
         Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
         msg.setData(mBundleProgress);
         handler.sendMessage(msg);
@@ -390,9 +397,11 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         if(D) Log.d(TAG, "MESSAGE_PROGRESS_SHOW");
                         Bundle bundle_progress = msg.getData();
                         if (fragment.getActivity() != null && bundle_progress != null) {
-                            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-                            fragment.mProgressFragment = BaseProgressDialogFragment.newInstance(bundle_progress);
-                            fragment.mProgressFragment.show(manager, BaseFragment.TAG);
+                            if(fragment.mProgressFragment == null){
+                                FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
+                                fragment.mProgressFragment = BaseProgressDialogFragment.newInstance(bundle_progress);
+                                fragment.mProgressFragment.show(manager, BaseFragment.TAG);
+                            }
                         }
                         break;
                     case MESSAGE_PROGRESS_UPDATE:
@@ -431,5 +440,20 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
             processMessage(msg);
         }
     }
+
+
+    public void onReceiveBroadcast(Context context, Intent intent){
+
+    }
+
+
+
+    private class LocalReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onReceiveBroadcast(context, intent);
+        }
+    }
+
 
 }

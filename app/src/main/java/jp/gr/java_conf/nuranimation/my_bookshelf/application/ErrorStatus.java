@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.utils;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 @SuppressWarnings({"unused","WeakerAccess"})
 public class ErrorStatus {

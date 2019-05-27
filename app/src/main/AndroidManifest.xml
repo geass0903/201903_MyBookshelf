@@ -17,7 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".utils.MyBookshelfApplicationData"
+        android:name=".application.MyBookshelfApplicationData"
         android:networkSecurityConfig="@xml/network_security_config">
         <meta-data android:name="android.security.net.config"
             android:resource="@xml/network_security_config" />
@@ -46,7 +46,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.BookSearchService" />
+        <service android:name=".background.BookService" />
 
     </application>
 

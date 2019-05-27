@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.utils;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,8 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 
 @SuppressWarnings({"unused","WeakerAccess"})
 public class MyBookshelfUtils {
@@ -43,9 +42,7 @@ public class MyBookshelfUtils {
         return "";
     }
 
-    public static boolean checkInputWord(String word){
-        if(D) Log.d(TAG,"Input: " + word);
-
+    public static boolean isValid(String word){
         if(TextUtils.isEmpty(word)){
             if(D) Log.d(TAG,"No word");
             return false;

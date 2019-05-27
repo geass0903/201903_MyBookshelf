@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.utils;
+package jp.gr.java_conf.nuranimation.my_bookshelf.base;
 
 import android.os.Bundle;
 import android.os.Parcelable;

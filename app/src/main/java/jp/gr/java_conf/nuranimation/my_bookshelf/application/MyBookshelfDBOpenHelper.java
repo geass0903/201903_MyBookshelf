@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.utils;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,8 +12,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 
 @SuppressWarnings({"WeakerAccess","unused","UnusedReturnValue"})
 public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {

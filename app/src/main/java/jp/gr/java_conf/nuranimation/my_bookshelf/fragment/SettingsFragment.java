@@ -24,16 +24,16 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.DropboxManager;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.FileManager;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.DropboxManager;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.FileManager;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SettingsSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.ErrorStatus;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.ErrorStatus;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 
 
 public class SettingsFragment extends BaseFragment {
@@ -81,7 +81,6 @@ public class SettingsFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_settings, container, false);
     }
 
@@ -89,6 +88,11 @@ public class SettingsFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if(D) Log.d(TAG, "onViewCreated");
+        if(getActivity() != null) {
+            getActivity().setTitle(R.string.Navigation_Item_Settings);
+        }
+
         if(savedInstanceState != null){
             isAllowedPermissions = savedInstanceState.getBoolean(KEY_IS_ALLOWED_PERMISSIONS);
             isLogged_in = savedInstanceState.getBoolean(KEY_IS_LOGGED_IN);

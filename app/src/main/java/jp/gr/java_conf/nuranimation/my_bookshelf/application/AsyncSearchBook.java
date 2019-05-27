@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.book;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -18,7 +18,6 @@ import java.net.URLEncoder;
 import javax.net.ssl.HttpsURLConnection;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseAsyncTaskLoader;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.ErrorStatus;
 
 public class AsyncSearchBook extends BaseAsyncTaskLoader<AsyncSearchBook.Result> {
     private static final String TAG = AsyncSearchBook.class.getSimpleName();

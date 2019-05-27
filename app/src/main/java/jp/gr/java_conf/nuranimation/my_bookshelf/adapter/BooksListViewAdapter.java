@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.book;
+package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
     private static final String TAG = BooksListViewAdapter.class.getSimpleName();

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.utils;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 import android.content.Context;
 import android.os.Environment;
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.SettingsFragment;
 
 public class FileManager {

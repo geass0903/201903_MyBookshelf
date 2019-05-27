@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.book;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 
 import android.os.Parcel;

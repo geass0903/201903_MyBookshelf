@@ -28,14 +28,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.AsyncSearchBook;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.AsyncSearchBook;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 
 public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = NewBooksFragment.class.getSimpleName();
@@ -122,6 +122,10 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if(D) Log.d(TAG, "onViewCreated");
+        if(getActivity() != null) {
+            getActivity().setTitle(R.string.Navigation_Item_NewBooks);
+        }
         authors_list.clear();
         authors_list.addAll(mData.getDatabaseHelper().getAuthors());
         size = authors_list.size();
@@ -142,6 +146,11 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mBooksViewAdapter);
     }
+
+    public void check(){
+
+    }
+
 
 
     public void callback(final boolean result, final JSONObject json){

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.utils;
+package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 import android.Manifest;
 import android.content.Context;
@@ -9,10 +9,11 @@ import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
+import org.json.JSONObject;
+
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
 
 
 @SuppressWarnings({"WeakerAccess","unused","UnusedReturnValue"})
@@ -25,13 +26,13 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
     public static final String KEY_SHELF_BOOKS_ORDER = "KEY_SHELF_BOOKS_ORDER";
     public static final String KEY_SEARCH_BOOKS_ORDER = "KEY_SEARCH_BOOKS_ORDER";
 
+
     private SharedPreferences mPreferences;
 
     private static final String[] Use_Permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private boolean isCheckedPermissions;
 
     private MyBookshelfDBOpenHelper mDatabaseHelper;
-
 
     @Override
     public void onCreate(){
@@ -166,5 +167,6 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         }
         return sort;
     }
+
 
 }

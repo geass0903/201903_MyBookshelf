@@ -6,15 +6,12 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.transition.Slide;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,13 +21,14 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.utils.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.book.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 
 
 public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
@@ -47,7 +45,6 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
-    private Parcelable mListState;
     private String mKeyword;
 
     @Override
@@ -60,30 +57,33 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        if (D) Log.d(TAG, "onCreateView");
         return inflater.inflate(R.layout.fragment_bookshelf, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if(D) Log.d(TAG, "onViewCreated");
-        if(savedInstanceState != null){
-            if(D) Log.d(TAG,"savedInstanceState != null");
-            mKeyword = savedInstanceState.getString(KEY_KEYWORD,null);
-            mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
+        if (D) Log.d(TAG, "onViewCreated");
+        if (getActivity() != null) {
+            getActivity().setTitle(R.string.Navigation_Item_Shelf);
+        }
+        mLayoutManager = new LinearLayoutManager(view.getContext());
+        if (savedInstanceState != null) {
+            if (D) Log.d(TAG, "savedInstanceState != null");
+            mKeyword = savedInstanceState.getString(KEY_KEYWORD, null);
+            Parcelable mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
+            if (mListState != null) {
+                mLayoutManager.onRestoreInstanceState(mListState);
+            }
         }
         List<BookData> mShelfBooks = mApplicationData.getShelfBooks(mKeyword);
-        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(),mShelfBooks,true);
+        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, true);
         mShelfBooksViewAdapter.setClickListener(this);
+
         mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
-        mLayoutManager = new LinearLayoutManager(view.getContext());
-        if(mListState != null){
-            mLayoutManager.onRestoreInstanceState(mListState);
-        }
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mShelfBooksViewAdapter);
-
-
     }
 
     @Override
@@ -127,23 +127,14 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             setClickDisable();
             int view_type = adapter.getItemViewType(position);
             if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
-                FragmentManager fragmentManager = getFragmentManager();
-                if (fragmentManager != null) {
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    BookDetailFragment fragment = new BookDetailFragment();
+                if(getFragmentListener() != null){
                     Bundle bundle = new Bundle();
-                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, data);
-                    fragment.setArguments(bundle);
-                    Slide slide = new Slide();
-                    slide.setSlideEdge(Gravity.BOTTOM);
-                    fragment.setEnterTransition(slide);
-                    fragmentTransaction.replace(R.id.contents_container, fragment, BookDetailFragment.TAG);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
+                    BookData book = new BookData(data);
+                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL,bundle);
                 }
-            }
+           }
         }
-
     }
 
     @Override
@@ -232,8 +223,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     private void searchShelf(String word){
         List<BookData> books = mApplicationData.getShelfBooks(word);
         mShelfBooksViewAdapter.setBooksData(books);
+        scrollTop();
     }
-
-
 
 }

@@ -85,6 +85,7 @@ public class BaseProgressDialogFragment extends DialogFragment{
         }
     }
 
+    @SuppressWarnings("unused")
     public void setProgressMessage(String message){
         if(mTextView_Progress == null){
             mTextView_Progress = getDialog().findViewById(R.id.fragment_progress_dialog_text_progress);

@@ -53,6 +53,24 @@
     <string name="Progress_Import">インポート中…</string>
     <string name="Progress_Unit">件</string>
 
+
+    <!-- Notification-->
+    <string name="Notification_Channel_ID">BookSearchService</string>
+    <string name="Notification_Title_Search">本の検索</string>
+    <string name="Notification_Title_Reload">新刊検索</string>
+    <string name="Notification_Title_Backup">バックアップ</string>
+    <string name="Notification_Title_Restore">リストア</string>
+    <string name="Notification_Title_Export">エクスポート</string>
+    <string name="Notification_Title_Import">インポート</string>
+    <string name="Notification_Message_Search_Start">本を検索しています</string>
+    <string name="Notification_Message_Search_Finish">検索を終了しました</string>
+    <string name="Notification_Message_Reload_Start">更新中…</string>
+    <string name="Notification_Message_Backup_Start">アップロード中…</string>
+    <string name="Notification_Message_Restore_Start">ダウンロード中…</string>
+    <string name="Notification_Message_Export_Start">エクスポート中…</string>
+    <string name="Notification_Message_Import_Start">インポート中…</string>
+
+
     <!-- Dialog -->
     <string name="Dialog_Button_Positive">はい</string>
     <string name="Dialog_Button_Negative">キャンセル</string>
