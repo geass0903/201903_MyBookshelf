@@ -45,6 +45,8 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
     private SearchBooksResult mSearchBooksResult = new SearchBooksResult();
 
+    SearchBooksThread searchBooksThread;
+
 
 
     public class MBinder extends Binder {
@@ -157,16 +159,17 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         setServiceState(STATE_SEARCH_BOOKS_SEARCH_START);
         setSearchKeyword(keyword);
         setSearchPage(page);
-        SearchBooksThread thread = new SearchBooksThread(this,keyword,page,sort);
-        thread.start();
+        searchBooksThread = new SearchBooksThread(this,keyword,page,sort);
+        searchBooksThread.start();
     }
 
-
-
-
-
-
-
+    public void stopSearch(){
+        if(searchBooksThread != null) {
+            searchBooksThread.cancel();
+            setServiceState(STATE_NONE);
+            searchBooksThread = null;
+        }
+    }
 
 
 
@@ -197,18 +200,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public int getSearchPage(){
         return this.mParamSEARCH_PAGE;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     public void setSearchBooksResult(SearchBooksResult result){
         mSearchBooksResult = new SearchBooksResult(result);

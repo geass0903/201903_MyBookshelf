@@ -17,9 +17,10 @@ import java.net.URLEncoder;
 import javax.net.ssl.HttpsURLConnection;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.ErrorStatus;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.SearchBooksResult;
 
+
+@SuppressWarnings({"WeakerAccess","unused"})
 public class SearchBooksThread extends Thread{
     private static final String TAG = SearchBooksThread.class.getSimpleName();
     private static final boolean D = true;
@@ -38,13 +39,12 @@ public class SearchBooksThread extends Thread{
     private boolean isCanceled;
 
 
-    @SuppressWarnings("unused")
     public interface ThreadFinishListener {
         void deliverResult(SearchBooksResult result);
     }
     private ThreadFinishListener mListener;
 
-    @SuppressWarnings("WeakerAccess")
+
     public SearchBooksThread(Context context, String keyword, int page, String sort) {
             this.sort = sort;
             this.keyword = keyword;
@@ -83,7 +83,9 @@ public class SearchBooksThread extends Thread{
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits + urlStockFlag + urlField
                         + urlSort + urlPage + urlKeyword;
                 URL url = new URL(urlString);
-
+                if(isCanceled){
+                    break;
+                }
                 connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setInstanceFollowRedirects(false);
@@ -135,19 +137,15 @@ public class SearchBooksThread extends Thread{
             retried++;
         }
         if (D) Log.d(TAG, "thread finish");
-        if(mListener != null){
+        if(mListener != null && !isCanceled){
             mListener.deliverResult(mResult);
         }
     }
 
-
-    @SuppressWarnings("unused")
     public void cancel(){
+        if (D) Log.d(TAG, "thread cancel");
         isCanceled = true;
     }
-
-
-
 
 
 }

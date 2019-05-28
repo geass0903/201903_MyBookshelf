@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
 
 
     private void checkServiceState() {
+        if (D) Log.d(TAG, "checkServiceState : " + navigation_state);
         switch(navigation_state){
             case 0:
                 Bundle bundle;

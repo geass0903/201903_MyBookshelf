@@ -6,11 +6,9 @@ import android.support.transition.Slide;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
 import android.view.Gravity;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
@@ -43,6 +41,10 @@ public enum MyBookshelfEvent {
     MOVE_OTHER_TO_SHELF_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
+            BookService service = activity.getService();
+            if(service != null){
+                service.stopSearch();
+            }
             Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
             fragment = fragmentManager.findFragmentByTag(BookDetailFragment.TAG);
@@ -101,6 +103,10 @@ public enum MyBookshelfEvent {
     MOVE_OTHER_TO_NEW_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
+            BookService service = activity.getService();
+            if(service != null){
+                service.stopSearch();
+            }
             Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
             fragment = fragmentManager.findFragmentByTag(BookDetailFragment.TAG);
@@ -122,6 +128,10 @@ public enum MyBookshelfEvent {
     MOVE_OTHER_TO_SETTINGS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
+            BookService service = activity.getService();
+            if(service != null){
+                service.stopSearch();
+            }
             Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
             fragment = fragmentManager.findFragmentByTag(BookDetailFragment.TAG);
@@ -159,7 +169,7 @@ public enum MyBookshelfEvent {
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
             Fragment fragment = fragmentManager.findFragmentByTag(SearchBooksFragment.TAG);
             if (fragment instanceof SearchBooksFragment) {
-                ((SearchBooksFragment) fragment).prepareSearch();
+                ((SearchBooksFragment) fragment).checkSearchState();
             }
         }
     },
@@ -171,33 +181,6 @@ public enum MyBookshelfEvent {
             if (fragment instanceof NewBooksFragment) {
                 ((NewBooksFragment) fragment).check();
             }
-        }
-    },
-
-
-    ACTION_SEARCH_BOOKS_FINISH {
-        @Override
-        public void apply(MainActivity activity, Bundle bundle){
-            Fragment fragment;
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            if (fragmentManager != null) {
-                fragment = fragmentManager.findFragmentByTag(SearchBooksFragment.TAG);
-                if (fragment instanceof SearchBooksFragment) {
-                    ((SearchBooksFragment) fragment).onEventSearchBooksFinish();
-                }
-            }
-        }
-    },
-    ACTION_NEW_BOOKS_RELOAD_START {
-        @Override
-        public void apply(MainActivity activity, Bundle bundle){
-
-        }
-    },
-    ACTION_NEW_BOOKS_RELOAD_FINISH {
-        @Override
-        public void apply(MainActivity activity, Bundle bundle){
-
         }
     },
 
