@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -39,7 +38,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicat
 
 public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener{
     private static final String TAG = BaseFragment.class.getSimpleName();
-    private static final boolean D = true;
+    private static final boolean D = false;
 
     public static final int MESSAGE_PROGRESS_SHOW       = 1;
     public static final int MESSAGE_PROGRESS_UPDATE     = 2;
@@ -52,6 +51,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     public static final String FILTER_ACTION_UPDATE_SERVICE_STATE = "FILTER_ACTION_UPDATE_SERVICE_STATE";
     public static final String KEY_UPDATE_SERVICE_STATE = "KEY_UPDATE_SERVICE_STATE";
+    public static final String FILTER_ACTION_UPDATE_PROGRESS = "FILTER_ACTION_UPDATE_PROGRESS";
+    public static final String KEY_UPDATE_PROGRESS = "KEY_UPDATE_PROGRESS";
 
     private static final String KEY_SAVED_REQUEST_PERMISSIONS   = "KEY_SAVED_REQUEST_PERMISSIONS";
     private static final String KEY_IS_SHOW_PROGRESS = "KEY_IS_SHOW_PROGRESS";
@@ -86,7 +87,9 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
         mReceiver = new LocalReceiver();
-        mIntentFilter = new IntentFilter(FILTER_ACTION_UPDATE_SERVICE_STATE);
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(FILTER_ACTION_UPDATE_SERVICE_STATE);
+        mIntentFilter.addAction(FILTER_ACTION_UPDATE_PROGRESS);
 
         if (context instanceof FragmentListener) {
             mFragmentListener = (FragmentListener) context;
@@ -406,8 +409,10 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         break;
                     case MESSAGE_PROGRESS_UPDATE:
                         if (fragment.mProgressFragment != null) {
-                            String progress = (String) msg.obj;
-                            fragment.mProgressFragment.setProgressMessage(progress);
+                            if(msg.obj instanceof String){
+                                String progress = (String) msg.obj;
+                                fragment.mProgressFragment.setProgressMessage(progress);
+                            }
                         }
                         break;
                     case MESSAGE_PROGRESS_DISMISS:

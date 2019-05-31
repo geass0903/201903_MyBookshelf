@@ -56,6 +56,9 @@
 
     <!-- Notification-->
     <string name="Notification_Channel_ID">BookSearchService</string>
+    <string name="Notification_Channel_Title">本の検索</string>
+    <string name="Notification_Channel_Description">検索状況の通知</string>
+
     <string name="Notification_Title_Search">本の検索</string>
     <string name="Notification_Title_Reload">新刊検索</string>
     <string name="Notification_Title_Backup">バックアップ</string>
@@ -65,6 +68,7 @@
     <string name="Notification_Message_Search_Start">本を検索しています</string>
     <string name="Notification_Message_Search_Finish">検索を終了しました</string>
     <string name="Notification_Message_Reload_Start">更新中…</string>
+    <string name="Notification_Message_Reload_Finish">更新終了</string>
     <string name="Notification_Message_Backup_Start">アップロード中…</string>
     <string name="Notification_Message_Restore_Start">ダウンロード中…</string>
     <string name="Notification_Message_Export_Start">エクスポート中…</string>

@@ -67,15 +67,10 @@ public class BaseProgressDialogFragment extends DialogFragment{
         super.onStart();
         mTextView_Title = getDialog().findViewById(R.id.fragment_progress_dialog_text_title);
         mTextView_Progress = getDialog().findViewById(R.id.fragment_progress_dialog_text_progress);
-        if(!TextUtils.isEmpty(mTitle)) {
-            mTextView_Title.setText(mTitle);
-        }
-        if(!TextUtils.isEmpty(mProgress)) {
-            mTextView_Progress.setText(mProgress);
-        }
+        setProgressTitle(mTitle);
+        setProgressMessage(mProgress);
     }
 
-    @SuppressWarnings("unused")
     public void setProgressTitle(String title){
         if(mTextView_Title == null){
             mTextView_Title = getDialog().findViewById(R.id.fragment_progress_dialog_text_title);
@@ -85,7 +80,6 @@ public class BaseProgressDialogFragment extends DialogFragment{
         }
     }
 
-    @SuppressWarnings("unused")
     public void setProgressMessage(String message){
         if(mTextView_Progress == null){
             mTextView_Progress = getDialog().findViewById(R.id.fragment_progress_dialog_text_progress);

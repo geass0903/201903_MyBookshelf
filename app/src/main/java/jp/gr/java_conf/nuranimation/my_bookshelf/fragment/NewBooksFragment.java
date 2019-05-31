@@ -1,15 +1,15 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,57 +19,135 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.AsyncSearchBook;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 
 public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = NewBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
-    private MyBookshelfApplicationData mData;
-    private Context mContext;
+    private static final String KEY_LAYOUT_MANAGER = "KEY_LAYOUT_MANAGER";
+    private static final String KEY_RELOAD_STATE = "KEY_RELOAD_STATE";
+    private static final String KEY_POSITION = "KEY_POSITION";
+    private static final String KEY_BOOK_DATA = "KEY_BOOK_DATA";
 
-    List<String> authors_list = new ArrayList<>();
-    private BooksListViewAdapter mBooksViewAdapter;
-    private Handler mHandler = new Handler();
-    int size = 0;
+    private MyBookshelfApplicationData mApplicationData;
+    private BooksListViewAdapter mNewBooksViewAdapter;
+    private LinearLayoutManager mLayoutManager;
+    private RecyclerView mRecyclerView;
 
-    private Calendar cal_baseDate;
-    private Calendar cal_salesDate;
-    private MyBookshelfDBOpenHelper mDBOpenHelper;
+    private List<BookData> mNewBooks;
+    private int mReloadState = 0;
 
-    private String search_author;
 
     @Override
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mContext = context;
-        mData = (MyBookshelfApplicationData) context.getApplicationContext();
-        mDBOpenHelper = mData.getDatabaseHelper();
+        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_new, container, false);
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if(D) Log.d(TAG, "onViewCreated");
+        if(getActivity() != null) {
+            getActivity().setTitle(R.string.Navigation_Item_NewBooks);
+        }
+        mLayoutManager = new LinearLayoutManager(view.getContext());
+        if (savedInstanceState == null){
+            if(mNewBooks == null) {
+                mNewBooks = mApplicationData.getNewBooks();
+                if (getArguments() != null) {
+                    mReloadState = getArguments().getInt(BookService.KEY_SERVICE_STATE, 0);
+                }
+            }
+        }else {
+            if (D) Log.d(TAG, "savedInstanceState != null");
+            mReloadState = savedInstanceState.getInt(KEY_RELOAD_STATE, 0);
+            mNewBooks = mApplicationData.getNewBooks();
+            Parcelable mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
+            if (mListState != null) {
+                mLayoutManager.onRestoreInstanceState(mListState);
+            }
+        }
+        mNewBooksViewAdapter = new BooksListViewAdapter(getContext(), mNewBooks,true);
+        mNewBooksViewAdapter.setClickListener(this);
+        mRecyclerView = view.findViewById(R.id.fragment_new_recyclerview);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mNewBooksViewAdapter);
+        switch (mReloadState) {
+            case BookService.STATE_NONE:
+                break;
+            case BookService.STATE_NEW_BOOKS_RELOAD_START:
+            case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
+                Bundle progress = new BundleBuilder()
+                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload))
+                        .put(BaseProgressDialogFragment.message, "")
+                        .build();
+                setProgressBundle(progress);
+                break;
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (D) Log.d(TAG, "onActivityCreated");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(D) Log.d(TAG,"onResume()");
+        if(getActivity() instanceof MainActivity){
+            BookService service = ((MainActivity) getActivity()).getService();
+            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_FINISH){
+                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_FINISH;
+                loadNewBooksResult();
+            }
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(D) Log.d(TAG,"onPause()");
+    }
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(D) Log.d(TAG,"onSaveInstanceState");
+        outState.putInt(KEY_RELOAD_STATE, mReloadState);
+        outState.putParcelable(KEY_LAYOUT_MANAGER,mLayoutManager.onSaveInstanceState());
+    }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -87,30 +165,22 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.menu_new_action_reload:
                 if(D) Log.d(TAG,"new action search");
-                if(authors_list.size() > 0){
-                    boolean isSuccess = mDBOpenHelper.deleteTABLE_NEW_BOOKS();
-                    cal_baseDate = Calendar.getInstance();
-                    cal_baseDate.add(Calendar.DAY_OF_MONTH,-14);
-                    cal_salesDate = Calendar.getInstance();
 
-                    String text = "0" + "/" + size;
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload));
-                    bundle.putString(BaseProgressDialogFragment.message, text);
-
-                    PausedHandler mHandler = getPausedHandler();
-
-                    Message msg = mHandler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_SHOW);
-                    msg.setData(bundle);
-                    mHandler.sendMessage(msg);
-                    search_author = authors_list.get(0);
-                    authors_list.remove(0);
-                    AsyncSearchTask(search_author,1);
+                if (getActivity() instanceof MainActivity) {
+                    BookService service = ((MainActivity) getActivity()).getService();
+                    if (service != null) {
+                        Bundle progress = new BundleBuilder()
+                                .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload))
+                                .put(BaseProgressDialogFragment.message, "")
+                                .build();
+                        setProgressBundle(progress);
+                        showProgressDialog();
+                        mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_START;
+                        service.reloadNewBooks(mApplicationData.getAuthors());
+                    }
                 }
                 break;
             default:
@@ -119,281 +189,199 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if(D) Log.d(TAG, "onViewCreated");
-        if(getActivity() != null) {
-            getActivity().setTitle(R.string.Navigation_Item_NewBooks);
-        }
-        authors_list.clear();
-        authors_list.addAll(mData.getDatabaseHelper().getAuthors());
-        size = authors_list.size();
-        initBooksViewAdapter();
-        initRecyclerView(view);
-    }
 
-
-    private void initBooksViewAdapter(){
-        mBooksViewAdapter = new BooksListViewAdapter(getContext(),mData.getNewBooks(),false);
-        mBooksViewAdapter.setClickListener(this);
-    }
-
-
-    private void initRecyclerView(View view){
-        RecyclerView mRecyclerView = view.findViewById(R.id.fragment_new_recyclerview);
-        LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
-        mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.setAdapter(mBooksViewAdapter);
-    }
-
-    public void check(){
-
-    }
-
-
-
-    public void callback(final boolean result, final JSONObject json){
-        LoaderManager manager = LoaderManager.getInstance(this);
-        manager.destroyLoader(0);
-
-
-
-        getPausedHandler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
-                List<BookData> dataset = new ArrayList<>();
-
-
-                int count = 0;
-                int last = 0;
-
-                mBooksViewAdapter.setFooter(null);
-                mDBOpenHelper.getWritableDatabase().beginTransaction();
-                if(result) {
-                    try {
-                        if(json.has("Items")) {
-                            JSONArray jsonArray = json.getJSONArray("Items");
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject data = jsonArray.getJSONObject(i);
-                                if(D) Log.d(TAG,"sb: " + data.toString());
-                                BookData book = new BookData();
-                                book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
-
-                                String isbn = getParam(data,"isbn");
-                                book.setISBN(isbn);
-                                String imageUrl = getParam(data,"largeImageUrl");
-                                book.setImage(imageUrl);
-                                String title = getParam(data,"KEY_TITLE");
-                                book.setTitle(title);
-                                String author = getParam(data,"author");
-                                book.setAuthor(author);
-                                String publisher = getParam(data,"publisherName");
-                                book.setPublisher(publisher);
-                                String salesDate = getParam(data,"salesDate");
-                                book.setSalesDate(salesDate);
-                                String itemPrice = getParam(data,"itemPrice");
-                                book.setItemPrice(itemPrice);
-                                String rating = getParam(data,"reviewAverage");
-                                book.setRating(rating);
-                                String readStatus = "0"; // Unregistered
-                                book.setReadStatus(readStatus);
-
-                                if(checkNewBook(book)){
-
-                                    if(D) Log.d(TAG,"Add Book KEY_TITLE: " + book.getTitle());
-                                    if(D) Log.d(TAG,"Add Book author: " + book.getAuthor());
-                                    if(D) Log.d(TAG,"Add Book search: " + search_author);
-//                                    mDBOpenHelper.addNewBook(book);
-                                    mDBOpenHelper.registerToNewBooks(book);
-                                }
-
-//                                dataset.add(book);
-                            }
-
-
-
-/*
-                            if(json.has("count")) {
-                                count = json.getInt("count");
-                                if (D) Log.d(TAG, "count: " + count);
-                            }
-
-                            if(json.has("last")) {
-                                last = json.getInt("last");
-                                if (D) Log.d(TAG, "last: " + last);
-                            }
-
-                            mBooksViewAdapter.addBooksData(dataset);
-
-                            if(count - last > 0){
-                                BookData footer = new BookData();
-                                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
-                                mBooksViewAdapter.setFooter(footer);
-//                        mBooksViewAdapter.setLoadNext();
-                            }else{
-                                mBooksViewAdapter.setFooter(null);
-                            }
-*/
-                        }
-
-
-
-
-                    }catch (JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-                mDBOpenHelper.getWritableDatabase().setTransactionSuccessful();
-                mDBOpenHelper.getWritableDatabase().endTransaction();
-                if(authors_list.size() > 0){
-                    int now = size - authors_list.size();
-                    String text = now + "/" + size;
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, text).sendToTarget();
-
-                    search_author = authors_list.get(0);
-                    authors_list.remove(0);
-                    AsyncSearchTask(search_author,1);
-                }else{
-//                    mData.updateList_NewBooks();
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
-
-                }
-            }
-        },1200);
-    }
-
-    boolean checkNewBook(BookData book){
-        if (checkAuthor(book)) {
-            return checkSalesDate(book);
-        }
-        return false;
-    }
-
-
-    boolean checkAuthor(BookData book){
-        String book_author = book.getAuthor();
-        book_author = book_author.replaceAll("[\\x20\\u3000]","");
-        return book_author.contains(search_author);
-    }
-
-    boolean checkSalesDate(BookData book){
-        String salesDate = book.getSalesDate();
-        int year;
-        int month;
-        int day;
-        int startIdx;
-        int endIdx;
-
-        startIdx = salesDate.indexOf("年");
-        if(startIdx != -1){
-            year = Integer.parseInt(salesDate.substring(0,startIdx));
-            if(D) Log.d(TAG,"year: " + year);
-            endIdx = startIdx+1;
-            startIdx = salesDate.indexOf("月",endIdx);
-            if(startIdx != -1){
-                month = Integer.parseInt(salesDate.substring(endIdx,startIdx));
-                if(D) Log.d(TAG,"month: " + month);
-                endIdx = startIdx+1;
-                startIdx = salesDate.indexOf("日",endIdx);
-                if(startIdx != -1){
-                    day = Integer.parseInt(salesDate.substring(endIdx,startIdx));
-                    if(D) Log.d(TAG,"day: " + day);
-                    cal_salesDate.set(year,month-1,day);
-                }else{
-                    cal_salesDate.set(year,month-1,cal_salesDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-                }
-                if(D) Log.d(TAG,"nowDate: " + cal_baseDate.getTime());
-                if(D) Log.d(TAG,"textView_SalesDate: " + cal_salesDate.getTime());
-                return cal_salesDate.compareTo(cal_baseDate) >= 0;
-            }
-        }
-        return false;
-    }
-
-
-
-
-    String getParam(JSONObject json, String keyword){
-        try {
-            if (json.has(keyword)) {
-                String param = json.getString(keyword);
-                if(D) Log.d(TAG,keyword + ": " + param);
-                return param;
-            }
-        }catch (JSONException e){
-            if(D) Log.d(TAG,"JSONException");
-            return "";
-        }
-        return "";
-    }
-
-
-
-
-
-
-    public void AsyncSearchTask(String search, int page) {
-//        new NewBooksFragment.AsyncSearch(this,search,page).execute();
-
-        Bundle bundle = new Bundle();
-        bundle.putString("search",search);
-        bundle.putInt("page",page);
-
-        LoaderManager manager = LoaderManager.getInstance(this);
-
-
-        manager.initLoader(0,bundle,mCallback);
-
-    }
 
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
-
+        if(isClickable()) {
+            setClickDisable();
+            int view_type = adapter.getItemViewType(position);
+            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+                if (getFragmentListener() != null) {
+                    Bundle bundle = new Bundle();
+                    BookData registered = mApplicationData.searchInShelfBooks(data);
+                    if (registered != null) {
+                        bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(registered));
+                    } else {
+                        bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(data));
+                    }
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
+                }
+            }
+        }
     }
 
     @Override
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
+        if (isClickable()) {
+            setClickDisable();
+            int view_type = adapter.getItemViewType(position);
+            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+                Bundle bundle;
+                Bundle bundle_book = new Bundle();
+                bundle_book.putInt(KEY_POSITION, position);
+                BookData book = new BookData(data);
+                bundle_book.putParcelable(KEY_BOOK_DATA, book);
+
+                if (data.getReadStatus().equals("0")) {
+                    // unregistered. register Dialog
+                    bundle = new BundleBuilder()
+                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Register_Book_Title))
+                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Register_Book_Message))
+                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
+                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK)
+                            .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
+                            .put(BaseDialogFragment.KEY_CANCELABLE, true)
+                            .build();
+                } else {
+                    // registered. delete Dialog
+                    bundle = new BundleBuilder()
+                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Book_Title))
+                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
+                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
+                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DELETE_BOOK)
+                            .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
+                            .put(BaseDialogFragment.KEY_CANCELABLE, true)
+                            .build();
+                }
+                if (getActivity() != null) {
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
+                    fragment.show(manager, BaseDialogFragment.TAG);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+        if (resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
+            switch (requestCode) {
+                case REQUEST_CODE_REGISTER_BOOK:
+                    int position_register = params.getInt(KEY_POSITION, -1);
+                    BookData book_register = params.getParcelable(KEY_BOOK_DATA);
+                    if (book_register != null) {
+                        BookData book = new BookData(book_register);
+                        Calendar calendar = Calendar.getInstance();
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
+                        String registerDate = sdf.format(calendar.getTime());
+                        book.setRegisterDate(registerDate);
+                        book.setRating("0.0");
+                        book.setReadStatus("5");
+                        mApplicationData.registerToShelfBooks(book);
+                        boolean isSuccess = true;
+                        if (isSuccess) {
+                            mNewBooksViewAdapter.registerBook(position_register);
+                            Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    break;
+                case REQUEST_CODE_DELETE_BOOK:
+                    int position_unregister = params.getInt(KEY_POSITION, -1);
+                    BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
+                    if (book_unregister != null) {
+                        mApplicationData.deleteFromShelfBooks(book_unregister.getISBN());
+                        boolean isSuccess = true;
+                        if (isSuccess) {
+                            mNewBooksViewAdapter.unregisterBook(position_unregister);
+                            Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onBaseDialogCancelled(int requestCode, Bundle params) {
+        super.onBaseDialogCancelled(requestCode,params);
     }
 
 
-    private LoaderManager.LoaderCallbacks<AsyncSearchBook.Result> mCallback = new LoaderManager.LoaderCallbacks<AsyncSearchBook.Result>() {
-        @NonNull
-        @Override
-        public Loader<AsyncSearchBook.Result> onCreateLoader(int i, @Nullable Bundle bundle) {
-            String sort = "standard";
-            String code = mData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending));
-            if(code != null) {
-                if (code.equals(getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Ascending))) {
-                    sort = "+releaseDate";
-                }
-                if (code.equals(getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending))) {
-                    sort = "-releaseDate";
-                }
+    @Override
+    public void onReceiveBroadcast(Context context, Intent intent){
+//        if (D) Log.d(TAG, "onReceive");
+        String action = intent.getAction();
+        if(action != null){
+            switch (action){
+                case FILTER_ACTION_UPDATE_SERVICE_STATE:
+                    int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
+                    switch (state) {
+                        case BookService.STATE_NONE:
+                            if (D) Log.d(TAG, "STATE_NONE");
+                            mReloadState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+                        case BookService.STATE_NEW_BOOKS_RELOAD_START:
+                            if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_START");
+                            break;
+                        case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
+                            if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_FINISH");
+                            loadNewBooksResult();
+                            break;
+                    }
+                    break;
+                case FILTER_ACTION_UPDATE_PROGRESS:
+                    String progress = intent.getStringExtra(KEY_UPDATE_PROGRESS);
+                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_UPDATE, progress).sendToTarget();
+                    break;
             }
-            String keyword = "";
-            int page = 1;
-            if(bundle != null){
-                keyword = bundle.getString("search","error");
-                page = bundle.getInt("page",1);
+        }
+    }
+
+
+    public void checkReloadState(){
+        if(getActivity() instanceof MainActivity){
+            BookService service = ((MainActivity) getActivity()).getService();
+            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_FINISH){
+                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_FINISH;
+                loadNewBooksResult();
             }
-            return new AsyncSearchBook(getContext(),sort,keyword,page);
         }
+    }
 
-        @Override
-        public void onLoadFinished(@NonNull Loader<AsyncSearchBook.Result> loader, AsyncSearchBook.Result result) {
+    private void loadNewBooksResult() {
+        mNewBooksViewAdapter.setBooksData(mApplicationData.getNewBooks());
+        mReloadState = BookService.STATE_NONE;
+        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+    }
+
+    public void scrollTop(){
+        mRecyclerView.scrollToPosition(0);
+    }
 
 
 
-//            callback(isSuccess.isSuccess,isSuccess.json);
-        }
 
-        @Override
-        public void onLoaderReset(@NonNull Loader<AsyncSearchBook.Result> loader) {
 
-        }
-    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

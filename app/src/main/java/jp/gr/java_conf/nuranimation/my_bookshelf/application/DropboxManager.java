@@ -59,13 +59,13 @@ public class DropboxManager {
 
             File file_books = new File(dirPath + FILENAME_BOOKSHELF);
             if (!file_books.exists()) {
-                if (D) Log.e(TAG, "file_books not found");
+                if (D) Log.e(TAG, "file_books not success");
                 error = ErrorStatus.Error_File_Bookshelf_not_found;
                 return error;
             }
             File file_authors = new File(dirPath + FILENAME_AUTHORS);
             if (!file_authors.exists()) {
-                if (D) Log.e(TAG, "file_authors not found");
+                if (D) Log.e(TAG, "file_authors not success");
                 error = ErrorStatus.Error_File_Authors_not_found;
                 return error;
             }
@@ -98,7 +98,7 @@ public class DropboxManager {
                 }
             }
             if(metadataBookshelf == null){
-                if(D) Log.d(TAG,"metadataBookshelf not found");
+                if(D) Log.d(TAG,"metadataBookshelf not success");
                 error = ErrorStatus.Error_File_Bookshelf_not_found;
                 return error;
             }
@@ -114,7 +114,7 @@ public class DropboxManager {
                 }
             }
             if(metadataAuthors == null){
-                if(D) Log.e(TAG,"metadataAuthors not found");
+                if(D) Log.e(TAG,"metadataAuthors not success");
                 error = ErrorStatus.Error_File_Authors_not_found;
                 return error;
             }

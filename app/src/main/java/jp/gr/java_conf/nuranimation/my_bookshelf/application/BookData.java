@@ -7,6 +7,16 @@ import android.support.annotation.Nullable;
 
 @SuppressWarnings("WeakerAccess")
 public class BookData implements Parcelable {
+    public static final String STATUS_UNREGISTERED = "0";
+    public static final String STATUS_INTERESTED = "1";
+    public static final String STATUS_UNREAD = "2";
+    public static final String STATUS_READING = "3";
+    public static final String STATUS_ALREADY_READ = "4";
+    public static final String STATUS_NONE = "5";
+
+
+
+
     private int view_type;
     private String ISBN;
     private String image;

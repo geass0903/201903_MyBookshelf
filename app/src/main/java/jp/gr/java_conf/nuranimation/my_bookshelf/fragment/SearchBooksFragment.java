@@ -7,14 +7,11 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.transition.Slide;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,20 +19,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.SearchBooksResult;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.background.SearchBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
@@ -69,11 +63,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     private String mTempKeyword;
     private String mKeyword;
     private int mSearchPage = 1;
-    private int mState = 0;
+    private int mSearchState = 0;
     private boolean hasResultData = false;
     private boolean hasButtonLoadNext = false;
-
-
 
 
     @Override
@@ -131,7 +123,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         if(getActivity() instanceof MainActivity){
             BookService service = ((MainActivity) getActivity()).getService();
             if(service != null && service.getServiceState() == BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH){
-                mState = BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH;
+                mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH;
                 loadSearchBooksResult();
             }
         }
@@ -149,7 +141,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if(D) Log.d(TAG,"onSaveInstanceState");
-        outState.putInt(KEY_SEARCH_STATE, mState);
+        outState.putInt(KEY_SEARCH_STATE, mSearchState);
         outState.putString(KEY_TEMP_KEYWORD, mTempKeyword);
         outState.putString(KEY_KEYWORD, mKeyword);
         outState.putInt(KEY_PAGE, mSearchPage);
@@ -168,35 +160,25 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
-        if(isClickable()){
+        if(isClickable()) {
             setClickDisable();
             int view_type = adapter.getItemViewType(position);
             if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
-                FragmentManager fragmentManager = getFragmentManager();
-                if (fragmentManager != null) {
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    BookDetailFragment fragment = new BookDetailFragment();
+                if (getFragmentListener() != null) {
                     Bundle bundle = new Bundle();
-                    BookData registered = mApplicationData.searchInShelfBooks(data.getISBN());
-                    if(registered != null){
+                    BookData registered = mApplicationData.searchInShelfBooks(data);
+                    if (registered != null) {
                         bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(registered));
-                    }else{
+                    } else {
                         bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(data));
                     }
-                    fragment.setArguments(bundle);
-                    Slide slide = new Slide();
-                    slide.setSlideEdge(Gravity.BOTTOM);
-                    fragment.setEnterTransition(slide);
-                    fragmentTransaction.replace(R.id.contents_container, fragment, BookDetailFragment.TAG);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
                 }
             } else {
                 if (view_type == BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD) {
                     searchBooks(mKeyword, mSearchPage);
                 }
             }
-
         }
     }
 
@@ -261,7 +243,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         book.setRegisterDate(registerDate);
                         book.setRating("0.0");
                         book.setReadStatus("5");
-                        boolean isSuccess = mApplicationData.registerToShelfBooks(book);
+                        mApplicationData.registerToShelfBooks(book);
+                        boolean isSuccess = true;
                         if (isSuccess) {
                             mSearchBooksViewAdapter.registerBook(position_register);
                             Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
@@ -274,7 +257,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
-                        boolean isSuccess = mApplicationData.deleteFromShelfBooks(book_unregister.getISBN());
+                        mApplicationData.deleteFromShelfBooks(book_unregister.getISBN());
+                        boolean isSuccess = true;
                         if (isSuccess) {
                             mSearchBooksViewAdapter.unregisterBook(position_unregister);
                             Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
@@ -301,6 +285,10 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 case FILTER_ACTION_UPDATE_SERVICE_STATE:
                     int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
                     switch (state) {
+                        case BookService.STATE_NONE:
+                            if (D) Log.d(TAG, "STATE_NONE");
+                            mSearchState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
                         case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
                             if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_START");
                             break;
@@ -343,12 +331,12 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         List<BookData> books = new ArrayList<>();
         if (savedInstanceState == null) {
             if (getArguments() != null) {
-                mState = getArguments().getInt(BookService.KEY_SERVICE_STATE, 0);
+                mSearchState = getArguments().getInt(BookService.KEY_SERVICE_STATE, 0);
                 mSearchPage = getArguments().getInt(BookService.KEY_PARAM_SEARCH_PAGE, 1);
                 mTempKeyword = getArguments().getString(BookService.KEY_PARAM_SEARCH_KEYWORD, null);
                 mKeyword = mTempKeyword;
             }
-            switch (mState) {
+            switch (mSearchState) {
                 case BookService.STATE_NONE:
                     break;
                 case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
@@ -368,7 +356,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     break;
             }
         } else {
-            mState = savedInstanceState.getInt(KEY_SEARCH_STATE, 0);
+            mSearchState = savedInstanceState.getInt(KEY_SEARCH_STATE, 0);
             mTempKeyword = savedInstanceState.getString(KEY_TEMP_KEYWORD, null);
             mKeyword = savedInstanceState.getString(KEY_KEYWORD, null);
             mSearchPage = savedInstanceState.getInt(KEY_PAGE, 1);
@@ -378,7 +366,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             if(hasResultData) {
                 books = mApplicationData.getSearchBooks();
             }
-            switch (mState) {
+            switch (mSearchState) {
                 case BookService.STATE_NONE:
                     if (hasResultData && hasButtonLoadNext) {
                         BookData footer = new BookData();
@@ -409,7 +397,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         if(getActivity() instanceof MainActivity){
             BookService service = ((MainActivity) getActivity()).getService();
             if(service != null && service.getServiceState() == BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH){
-                mState = BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH;
+                mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH;
                 loadSearchBooksResult();
             }
         }
@@ -422,10 +410,17 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     }
 
     public void searchBooks(String keyword, int page) {
-        if (!MyBookshelfUtils.isValid(keyword)) {
+        try{
+            if(!MyBookshelfUtils.isValid(keyword)){
+                Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Keyword), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (PatternSyntaxException e){
+            if(D) Log.d(TAG,"PatternSyntaxException");
             Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Keyword), Toast.LENGTH_SHORT).show();
             return;
         }
+
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service == null) {
@@ -447,113 +442,52 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
                 mSearchBooksViewAdapter.setFooter(footer);
             }
-            mState = BookService.STATE_SEARCH_BOOKS_SEARCH_START;
-            service.searchBooks(keyword, page, mApplicationData.getSearchBooksSortSetting());
+            mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_START;
+            service.searchBooks(keyword, page);
         }
     }
 
-    public void loadSearchBooksResult(){
-        if(D) Log.d(TAG,"loadSearchBooksResult");
+    public void loadSearchBooksResult() {
+        if (D) Log.d(TAG, "loadSearchBooksResult");
         mSearchBooksViewAdapter.setFooter(null);
-        if(getActivity() instanceof MainActivity){
+        if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null) {
-                SearchBooksResult result = service.getSearchBooksResult();
-                if(!result.isSuccess()){
-                    if(D) Log.d(TAG,"Error No : " + result.getErrorStatus());
-                    Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Unknown), Toast.LENGTH_SHORT).show();
-                }else{
-                    switch (result.getErrorStatus()){
-                        case HttpURLConnection.HTTP_BAD_REQUEST:     // 400 wrong parameter
-                            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_400), Toast.LENGTH_SHORT).show();
-                            break;
-                        case HttpURLConnection.HTTP_NOT_FOUND:      // 404 not found
-                            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_404), Toast.LENGTH_SHORT).show();
-                            break;
-                        case 429: // 429 too many requests
-                            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_429), Toast.LENGTH_SHORT).show();
-                            break;
-                        case HttpURLConnection.HTTP_INTERNAL_ERROR: // 500 system error
-                            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_500), Toast.LENGTH_SHORT).show();
-                            break;
-                        case HttpURLConnection.HTTP_UNAVAILABLE:    // 503 service unavailable
-                            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_HTTP_503), Toast.LENGTH_SHORT).show();
-                            break;
-                        case HttpURLConnection.HTTP_OK:
-                            saveResult(result.getJSONObject());
-                            break;
-                        default:
-                            if(D) Log.d(TAG,"Error No : " + result.getErrorStatus());
+            if (service != null) {
+                SearchBooksThread.Result result = service.loadSearchBooksResult();
+                if (result.isSuccess()) {
+                    hasButtonLoadNext = result.hasNext();
+                    List<BookData> books = result.getBooks();
+
+                    if (books.size() > 0) {
+                        boolean isSuccess = mApplicationData.registerToSearchBooks(books);
+                        if (D) Log.d(TAG, "isSuccess : " + isSuccess);
+                        if (isSuccess) {
+                            if (hasButtonLoadNext) {
+                                mSearchPage++;
+                                BookData footer = new BookData();
+                                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+                                books.add(footer);
+                            }
+                            mSearchBooksViewAdapter.addBooksData(books);
+                            hasResultData = true;
+                        } else {
+                            if (D) Log.d(TAG, "register error");
+                            hasButtonLoadNext = false;
                             Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Unknown), Toast.LENGTH_SHORT).show();
-                            break;
+                        }
+                    } else {
+                        Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Book_not_found), Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(getContext(), result.getErrorMessage(), Toast.LENGTH_SHORT).show();
                 }
                 service.setServiceState(BookService.STATE_NONE);
                 service.stopForeground(false);
                 service.stopSelf();
             }
         }
-        mState = BookService.STATE_NONE;
+        mSearchState = BookService.STATE_NONE;
         getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
-    }
-
-    private void saveResult(JSONObject json){
-        List<BookData> books = new ArrayList<>();
-        int count = 0;
-        int last = 0;
-        try {
-            if (json.has("Items")) {
-                List<BookData> tmp = new ArrayList<>();
-                JSONArray jsonArray = json.getJSONArray("Items");
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject data = jsonArray.getJSONObject(i);
-                    if (D) Log.d(TAG, "sb: " + data.toString());
-                    BookData book = MyBookshelfUtils.getBook(data);
-                    BookData registered = mApplicationData.searchInShelfBooks(book.getISBN());
-                    if(registered != null){
-                        book.setRegisterDate(registered.getRegisterDate());
-                        book.setReadStatus(registered.getReadStatus());
-                    }
-                    tmp.add(book);
-                }
-
-                if (json.has("count")) {
-                    count = json.getInt("count");
-                    if (D) Log.d(TAG, "count: " + count);
-                }
-
-                if (json.has("last")) {
-                    last = json.getInt("last");
-                    if (D) Log.d(TAG, "last: " + last);
-                }
-
-                hasButtonLoadNext = count - last > 0;
-                books = new ArrayList<>(tmp);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        if (books.size() > 0) {
-            boolean isSuccess = mApplicationData.registerToSearchBooks(books);
-            if (D) Log.d(TAG, "isSuccess : " + isSuccess);
-            if (isSuccess) {
-                if (hasButtonLoadNext) {
-                    mSearchPage++;
-                    BookData footer = new BookData();
-                    footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
-                    books.add(footer);
-                }
-                mSearchBooksViewAdapter.addBooksData(books);
-                hasResultData = true;
-            }else{
-                if (D) Log.d(TAG, "register error");
-                hasButtonLoadNext = false;
-                Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Unknown), Toast.LENGTH_SHORT).show();
-            }
-        }else {
-            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Book_not_found), Toast.LENGTH_SHORT).show();
-        }
     }
 
 

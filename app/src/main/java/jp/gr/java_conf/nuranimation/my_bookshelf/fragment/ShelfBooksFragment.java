@@ -172,7 +172,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
             if (book != null) {
-                boolean isSuccess = mApplicationData.deleteFromShelfBooks(book.getISBN());
+                mApplicationData.deleteFromShelfBooks(book.getISBN());
+                boolean isSuccess = true;
                 if(isSuccess) {
                     mShelfBooksViewAdapter.deleteBook(position);
                     Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();

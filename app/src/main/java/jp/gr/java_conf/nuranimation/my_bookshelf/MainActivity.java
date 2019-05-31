@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         public void onServiceConnected(ComponentName name, IBinder binder) {
             if (D) Log.d(TAG, "onServiceConnected");
             mBookService = ((BookService.MBinder)binder).getService();
+            mBookService.endForeground();
             checkServiceState();
         }
 
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             Intent intent = new Intent(this, BookService.class);
             bindService(intent,connection, Service.BIND_AUTO_CREATE);
         }else{
-            mBookService.stopForeground(true);
+            mBookService.endForeground();
             checkServiceState();
         }
     }
@@ -181,8 +182,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                         navigation_state = R.id.navigation_new;
                         bundle = new BundleBuilder()
                                 .put(BookService.KEY_SERVICE_STATE,mBookService.getServiceState())
-                                .put(BookService.KEY_PARAM_SEARCH_KEYWORD, 1)
-                                .put(BookService.KEY_PARAM_SEARCH_PAGE, 1)
                                 .build();
                         if (D) Log.d(TAG, "MOVE_OTHER_TO_SEARCH_BOOKS bundle: " + bundle);
                         onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_NEW_BOOKS, bundle);

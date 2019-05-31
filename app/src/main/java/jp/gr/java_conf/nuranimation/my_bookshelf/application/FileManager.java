@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.SettingsFragment;
@@ -117,14 +118,14 @@ public class FileManager {
         String dirPath = extDir.getPath() + Application_DirectoryPath;
         File file_bookshelf = new File(dirPath + FileName_Bookshelf);
         if (!file_bookshelf.exists()){
-            if (D) Log.d(TAG, "file_bookshelf not found");
+            if (D) Log.d(TAG, "file_bookshelf not success");
             error = ErrorStatus.Error_File_Bookshelf_not_found;
             return error;
         }
 
         File file_authors = new File(dirPath + FileName_Authors);
         if (!file_authors.exists()){
-            if (D) Log.d(TAG, "file_authors not found");
+            if (D) Log.d(TAG, "file_authors not success");
             error = ErrorStatus.Error_File_Authors_not_found;
             return error;
         }
@@ -134,8 +135,7 @@ public class FileManager {
 
         try {
             // insert BookData from CSV
-            boolean isSuccess = helper.deleteTABLE_SHELF_BOOKS();
-            if(D) Log.d(TAG,"delete: " + isSuccess);
+            helper.deleteTABLE_SHELF_BOOKS();
             // count line
             InputStream pre_is_bookshelf = MyBookshelfUtils.getStreamSkipBOM(new FileInputStream(file_bookshelf),Charset.forName("UTF-8"));
             InputStreamReader pre_isr_bookshelf = new InputStreamReader(pre_is_bookshelf, Charset.forName("UTF-8"));
@@ -179,8 +179,7 @@ public class FileManager {
             size = 0;
             count = 0;
             // insert Author from CSV file
-            isSuccess = helper.deleteTABLE_AUTHORS();
-            if(D) Log.d(TAG,"delete: " + isSuccess);
+            helper.deleteTABLE_AUTHORS();
             // count line
             InputStream pre_is_authors = new FileInputStream(file_authors);
             InputStreamReader pre_isr_authors = new InputStreamReader(pre_is_authors);
@@ -209,7 +208,10 @@ public class FileManager {
             if(D) Log.e(TAG,"Error");
             error = ErrorStatus.Error_File_not_found;
         } catch (IOException e) {
-            if(D) Log.e(TAG,"Error");
+            if (D) Log.e(TAG, "Error");
+            error = ErrorStatus.Error_IO_Error;
+        } catch (PatternSyntaxException e){
+            if (D) Log.e(TAG, "Error");
             error = ErrorStatus.Error_IO_Error;
         } finally {
             helper.getWritableDatabase().endTransaction();

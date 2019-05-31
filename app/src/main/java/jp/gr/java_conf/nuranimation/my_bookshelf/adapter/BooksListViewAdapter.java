@@ -242,19 +242,19 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         Drawable icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_0_24dp, null);
         if(status != null) {
             switch (status) {
-                case "1":
+                case BookData.STATUS_INTERESTED:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_1_24dp, null);
                     break;
-                case "2":
+                case BookData.STATUS_UNREAD:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_2_24dp, null);
                     break;
-                case "3":
+                case BookData.STATUS_READING:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_2_24dp, null);
                     break;
-                case "4":
+                case BookData.STATUS_ALREADY_READ:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_4_24dp, null);
                     break;
-                case "5":
+                case BookData.STATUS_NONE:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_5_24dp, null);
                     break;
                 default:

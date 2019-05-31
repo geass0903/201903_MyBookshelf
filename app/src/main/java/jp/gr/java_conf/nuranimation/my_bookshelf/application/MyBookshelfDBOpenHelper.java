@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -14,7 +15,7 @@ import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 
-@SuppressWarnings({"WeakerAccess","unused","UnusedReturnValue"})
+@SuppressWarnings({"WeakerAccess","unused"})
 public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     public static final String TAG = MyBookshelfDBOpenHelper.class.getSimpleName();
     private static final boolean D = true;
@@ -47,8 +48,11 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     private static final String DROP_TABLE_SEARCH_BOOKS = "drop table " + TABLE_SEARCH_BOOKS + ";";
     private static final String DROP_TABLE_NEW_BOOKS    = "drop table " + TABLE_NEW_BOOKS + ";";
 
-
-    private static final String CREATE_TABLE_SHELF = "create table " + TABLE_SHELF_BOOKS + " ("
+    private static final String CREATE_TABLE_AUTHOR = "create table " + TABLE_AUTHORS + " ("
+            + "_id integer primary key" // id
+            + ", " + KEY_AUTHOR + " text"  // 著者
+            + ");";
+    private static final String CREATE_TABLE_SHELF_BOOKS = "create table " + TABLE_SHELF_BOOKS + " ("
             + "_id integer primary key" // id
             + ", " + KEY_ISBN + " text"  // ISBN
             + ", " + KEY_TITLE + " text"  // タイトル
@@ -63,10 +67,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + KEY_TAGS + " text"  // タグ
             + ", " + KEY_FINISH_READ_DATE + " text"  // 読了日
             + ", " + KEY_REGISTER_DATE + " text"  // 登録日
-            + ");";
-    private static final String CREATE_TABLE_AUTHOR = "create table " + TABLE_AUTHORS + " ("
-            + "_id integer primary key" // id
-            + ", " + KEY_AUTHOR + " text"  // 著者
             + ");";
     private static final String CREATE_TABLE_SEARCH_BOOKS = "create table " + TABLE_SEARCH_BOOKS + " ("
             + "_id integer primary key" // id
@@ -113,71 +113,115 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         if (D) Log.d(TAG, "onCreate");
-        db.execSQL(CREATE_TABLE_SHELF);
         db.execSQL(CREATE_TABLE_AUTHOR);
+        db.execSQL(CREATE_TABLE_SHELF_BOOKS);
         db.execSQL(CREATE_TABLE_SEARCH_BOOKS);
         db.execSQL(CREATE_TABLE_NEW_BOOKS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(DROP_TABLE_SHELF);
-        db.execSQL(DROP_TABLE_AUTHOR);
-        db.execSQL(DROP_TABLE_SEARCH_BOOKS);
-        db.execSQL(DROP_TABLE_NEW_BOOKS);
-        onCreate(db);
+        dropTable(TABLE_AUTHORS);
+        dropTable(TABLE_SHELF_BOOKS);
+        dropTable(TABLE_SEARCH_BOOKS);
+        dropTable(TABLE_NEW_BOOKS);
     }
 
-    public boolean deleteTABLE_AUTHORS() {
-        boolean isSuccess = false;
-        try {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.execSQL(DROP_TABLE_AUTHOR);
-            db.execSQL(CREATE_TABLE_AUTHOR);
-            isSuccess = true;
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException" + e);
+    private void dropTable(String table){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String drop = "drop table " + table + ";";
+        db.execSQL(drop);
+        switch(table){
+            case TABLE_AUTHORS:
+                db.execSQL(CREATE_TABLE_AUTHOR);
+                break;
+            case TABLE_SHELF_BOOKS:
+                db.execSQL(CREATE_TABLE_SHELF_BOOKS);
+                break;
+            case TABLE_SEARCH_BOOKS:
+                db.execSQL(CREATE_TABLE_SEARCH_BOOKS);
+                break;
+            case TABLE_NEW_BOOKS:
+                db.execSQL(CREATE_TABLE_NEW_BOOKS);
+                break;
         }
-        return isSuccess;
     }
+
+
+    private void registerBook(String table, BookData book) {
+        if (book != null && !TextUtils.isEmpty(book.getISBN())) {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(KEY_ISBN, book.getISBN());// ISBN
+            insertValues.put(KEY_TITLE, book.getTitle());// タイトル
+            insertValues.put(KEY_AUTHOR, book.getAuthor()); // 著者
+            insertValues.put(KEY_PUBLISHER, book.getPublisher());// 出版社
+            insertValues.put(KEY_RELEASE_DATE, book.getSalesDate());// 発売日
+            insertValues.put(KEY_PRICE, book.getItemPrice());// 定価
+            insertValues.put(KEY_RAKUTEN_URL, book.getRakutenUrl());// URL
+            insertValues.put(KEY_IMAGES, book.getImage());// 商品画像URL
+            insertValues.put(KEY_RATING, book.getRating()); // レーティング
+            insertValues.put(KEY_READ_STATUS, book.getReadStatus());// ステータス
+            insertValues.put(KEY_TAGS, book.getTags());// タグ
+            insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate()); // 読了日
+            insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());// 登録日
+
+            SQLiteDatabase db = this.getWritableDatabase();
+            String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
+            Cursor c = db.rawQuery(sql, new String[]{book.getISBN()});
+            boolean mov = c.moveToFirst();
+            if (mov) {
+                if (D) Log.d(TAG, "update Books: " + book.getTitle());
+                String sql_ISBN = KEY_ISBN + " = ?";
+                db.update(table, insertValues, sql_ISBN, new String[]{book.getISBN()});
+            } else {
+                if (D) Log.d(TAG, "register Books: " + book.getTitle());
+                db.insert(table, "", insertValues);
+            }
+            c.close();
+        }
+    }
+
+
+
+
+    public void deleteTABLE_AUTHORS() {
+        dropTable(TABLE_AUTHORS);
+    }
+
+    public void deleteTABLE_SHELF_BOOKS(){
+        dropTable(TABLE_SHELF_BOOKS);
+    }
+
+    public void deleteTABLE_SEARCH_BOOKS() {
+        dropTable(TABLE_SEARCH_BOOKS);
+    }
+
+    public void deleteTABLE_NEW_BOOKS(){
+        dropTable(TABLE_NEW_BOOKS);
+    }
+
+
 
     public List<String> getAuthors() {
         List<String> authors = new ArrayList<>();
-        Cursor c = null;
-        try {
-            List<String> tmp = new ArrayList<>();
-            SQLiteDatabase db = this.getReadableDatabase();
-            String sql = "select * from " + TABLE_AUTHORS + " order by " + KEY_AUTHOR + " asc" + ";";
-            c = db.rawQuery(sql, null);
-            boolean mov = c.moveToFirst();
-            while (mov) {
-                tmp.add(c.getString(c.getColumnIndex(KEY_AUTHOR)));
-                mov = c.moveToNext();
-            }
-            authors = new ArrayList<>(tmp);
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException");
-            e.printStackTrace();
-        } finally {
-            if (c != null) {
-                c.close();
-            }
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "select * from " + TABLE_AUTHORS + " order by " + KEY_AUTHOR + " asc" + ";";
+        Cursor c = db.rawQuery(sql, null);
+        boolean mov = c.moveToFirst();
+        while (mov) {
+            authors.add(c.getString(c.getColumnIndex(KEY_AUTHOR)));
+            mov = c.moveToNext();
         }
-        return authors;
+        c.close();
+        return new ArrayList<>(authors);
     }
 
-    public boolean registerToAuthors(String author){
-        boolean isSuccess = false;
-        if(TextUtils.isEmpty(author)){
-            if (D) Log.d(TAG, "empty author");
-            return false;
-        }
-        Cursor c = null;
-        try{
-            author = author.replaceAll("[\\x20\\u3000]",""); // replace Half and Full width space
+    public void registerToAuthors(String author) {
+        if (!TextUtils.isEmpty(author)) {
+            author = author.replaceAll("[\\x20\\u3000]", ""); // replace Half and Full width space
             SQLiteDatabase db = this.getWritableDatabase();
             String sql = "select * from " + TABLE_AUTHORS + " where " + KEY_AUTHOR + " = ?;";
-            c = db.rawQuery(sql, new String[]{author});
+            Cursor c = db.rawQuery(sql, new String[]{author});
             boolean mov = c.moveToFirst();
             if (mov) {
                 if (D) Log.d(TAG, "already registered: " + author);
@@ -188,53 +232,24 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 insertValues.put(KEY_AUTHOR, author);
                 db.insert(TABLE_AUTHORS, "", insertValues);
             }
-            isSuccess = true;
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException");
-            e.printStackTrace();
-        } finally {
-            if (c != null) {
-                c.close();
-            }
+            c.close();
         }
-        return isSuccess;
     }
 
-    public boolean registerToAuthors(List<String> authors) {
-        boolean isSuccess = false;
+    public void registerToAuthors(List<String> authors) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         for (String author : authors) {
-            isSuccess = registerToAuthors(author);
-            if(!isSuccess){
-                break;
-            }
+            registerToAuthors(author);
         }
-        if (isSuccess) {
-            db.setTransactionSuccessful();
-        }
+        db.setTransactionSuccessful();
         db.endTransaction();
-        return isSuccess;
     }
 
 
 
-
-    public boolean deleteTABLE_SHELF_BOOKS(){
-        boolean isSuccess = false;
-        try {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.execSQL(DROP_TABLE_SHELF);
-            db.execSQL(CREATE_TABLE_SHELF);
-            isSuccess = true;
-        }catch (SQLException e){
-            if(D) Log.d(TAG,"SQLException" + e);
-        }
-        return isSuccess;
-    }
 
     public List<BookData> getShelfBooks(String word) {
-        List<BookData> books = new ArrayList<>();
         String where = "";
         if (!TextUtils.isEmpty(word)) {
             where = " where "
@@ -243,45 +258,42 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                     + KEY_ISBN + " = " + "'" + word + "'";
         }
         String order = mApplicationData.getShelfBooksSortSetting();
-        Cursor c = null;
-        try {
-            List<BookData> tmp = new ArrayList<>();
-            SQLiteDatabase db = this.getReadableDatabase();
-            String sql = "select * from " + TABLE_SHELF_BOOKS + where + order + ";";
-            c = db.rawQuery(sql, null);
-            boolean mov = c.moveToFirst();
-            while (mov) {
-                BookData book = new BookData();
-                book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
-                book.setISBN(c.getString(c.getColumnIndex(KEY_ISBN)));
-                book.setImage(c.getString(c.getColumnIndex(KEY_IMAGES)));
-                book.setTitle(c.getString(c.getColumnIndex(KEY_TITLE)));
-                book.setAuthor(c.getString(c.getColumnIndex(KEY_AUTHOR)));
-                book.setPublisher(c.getString(c.getColumnIndex(KEY_PUBLISHER)));
-                book.setSalesDate(c.getString(c.getColumnIndex(KEY_RELEASE_DATE)));
-                book.setItemPrice(c.getString(c.getColumnIndex(KEY_PRICE)));
-                book.setRakutenUrl(c.getString(c.getColumnIndex(KEY_RAKUTEN_URL)));
-                book.setRating(c.getString(c.getColumnIndex(KEY_RATING)));
-                book.setReadStatus(c.getString(c.getColumnIndex(KEY_READ_STATUS)));
-                book.setTags(c.getString(c.getColumnIndex(KEY_TAGS)));
-                book.setFinishReadDate(c.getString(c.getColumnIndex(KEY_FINISH_READ_DATE)));
-                book.setRegisterDate(c.getString(c.getColumnIndex(KEY_REGISTER_DATE)));
-                tmp.add(book);
-                mov = c.moveToNext();
-            }
-            books = new ArrayList<>(tmp);
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException");
-            e.printStackTrace();
-        } finally {
-            if (c != null) {
-                c.close();
-            }
+        List<BookData> books = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "select * from " + TABLE_SHELF_BOOKS + where + order + ";";
+        Cursor c = db.rawQuery(sql, null);
+        boolean mov = c.moveToFirst();
+        while (mov) {
+            BookData book = new BookData();
+            book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+            book.setISBN(c.getString(c.getColumnIndex(KEY_ISBN)));
+            book.setImage(c.getString(c.getColumnIndex(KEY_IMAGES)));
+            book.setTitle(c.getString(c.getColumnIndex(KEY_TITLE)));
+            book.setAuthor(c.getString(c.getColumnIndex(KEY_AUTHOR)));
+            book.setPublisher(c.getString(c.getColumnIndex(KEY_PUBLISHER)));
+            book.setSalesDate(c.getString(c.getColumnIndex(KEY_RELEASE_DATE)));
+            book.setItemPrice(c.getString(c.getColumnIndex(KEY_PRICE)));
+            book.setRakutenUrl(c.getString(c.getColumnIndex(KEY_RAKUTEN_URL)));
+            book.setRating(c.getString(c.getColumnIndex(KEY_RATING)));
+            book.setReadStatus(c.getString(c.getColumnIndex(KEY_READ_STATUS)));
+            book.setTags(c.getString(c.getColumnIndex(KEY_TAGS)));
+            book.setFinishReadDate(c.getString(c.getColumnIndex(KEY_FINISH_READ_DATE)));
+            book.setRegisterDate(c.getString(c.getColumnIndex(KEY_REGISTER_DATE)));
+            books.add(book);
+            mov = c.moveToNext();
         }
-        return books;
+        c.close();
+        return new ArrayList<>(books);
     }
 
-    public BookData searchInShelfBooks(String ISBN){
+    public BookData searchInShelfBooks(BookData search){
+        if(search == null) {
+            return null;
+        }
+        if(TextUtils.isEmpty(search.getISBN())){
+            return null;
+        }
+        String ISBN = search.getISBN();
         BookData book = null;
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "select * from " + TABLE_SHELF_BOOKS + " where " + KEY_ISBN + " = ?;";
@@ -308,116 +320,41 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         return book;
     }
 
-    public boolean registerToShelfBooks(BookData book) {
-        boolean isSuccess = false;
-        if (TextUtils.isEmpty(book.getISBN())) {
-            if (D) Log.d(TAG, "No ISBN");
-            return false;
-        }
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(KEY_ISBN, book.getISBN());// ISBN
-        insertValues.put(KEY_TITLE, book.getTitle());// タイトル
-        insertValues.put(KEY_AUTHOR, book.getAuthor()); // 著者
-        insertValues.put(KEY_PUBLISHER, book.getPublisher());// 出版社
-        insertValues.put(KEY_RELEASE_DATE, book.getSalesDate());// 発売日
-        insertValues.put(KEY_PRICE, book.getItemPrice());// 定価
-        insertValues.put(KEY_RAKUTEN_URL, book.getRakutenUrl());// URL
-        insertValues.put(KEY_IMAGES, book.getImage());// 商品画像URL
-        insertValues.put(KEY_RATING, book.getRating()); // レーティング
-        insertValues.put(KEY_READ_STATUS, book.getReadStatus());// ステータス
-        insertValues.put(KEY_TAGS, book.getTags());// タグ
-        insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate()); // 読了日
-        insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());// 登録日
-        Cursor c = null;
-        try {
-            SQLiteDatabase db = this.getWritableDatabase();
-            String sql = "select * from " + TABLE_SHELF_BOOKS + " where " + KEY_ISBN + " = ?;";
-            c = db.rawQuery(sql, new String[]{book.getISBN()});
-            boolean mov = c.moveToFirst();
-            if (mov) {
-                if (D) Log.d(TAG, "update Books: " + book.getTitle());
-                String sql_ISBN = KEY_ISBN + " = ?";
-                db.update(TABLE_SHELF_BOOKS, insertValues, sql_ISBN, new String[]{book.getISBN()});
-            } else {
-                if (D) Log.d(TAG, "register Books: " + book.getTitle());
-                db.insert(TABLE_SHELF_BOOKS, "", insertValues);
-            }
-            isSuccess = true;
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException");
-            e.printStackTrace();
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        return isSuccess;
+    public void registerToShelfBooks(BookData book) {
+        registerBook(TABLE_SHELF_BOOKS, book);
     }
 
-    public boolean registerToShelfBooks(List<BookData> books) {
-        boolean isSuccess = false;
+    public void registerToShelfBooks(List<BookData> books) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
-
         for (BookData book : books) {
-            isSuccess = registerToShelfBooks(book);
-            if (!isSuccess) {
-                break;
-            }
+            registerToShelfBooks(book);
         }
-        if (isSuccess) {
-            db.setTransactionSuccessful();
-        }
+        db.setTransactionSuccessful();
         db.endTransaction();
-        return isSuccess;
     }
 
-    public boolean deleteFromShelfBooks(String ISBN) {
-        boolean isSuccess = false;
-        if (TextUtils.isEmpty(ISBN)) {
-            if (D) Log.d(TAG, "No ISBN");
-            return false;
-        }
-        Cursor c = null;
-        try {
+    public void deleteFromShelfBooks(String ISBN) {
+        if (!TextUtils.isEmpty(ISBN)) {
             SQLiteDatabase db = this.getWritableDatabase();
             String sql = "select * from " + TABLE_SHELF_BOOKS + " where " + KEY_ISBN + " = ?;";
-            c = db.rawQuery(sql, new String[]{ISBN});
+            Cursor c = db.rawQuery(sql, new String[]{ISBN});
             boolean mov = c.moveToFirst();
             if (mov) {
                 if (D) Log.d(TAG, "delete Books ISBN: " + ISBN);
                 String sql_ISBN = KEY_ISBN + " = ?";
                 db.delete(TABLE_SHELF_BOOKS, sql_ISBN, new String[]{ISBN});
             } else {
-                if (D) Log.d(TAG, "not found Books ISBN: " + ISBN);
+                if (D) Log.d(TAG, "not success Books ISBN: " + ISBN);
             }
-            isSuccess = true;
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException");
-            e.printStackTrace();
-        } finally {
-            if (c != null) {
-                c.close();
-            }
+            c.close();
         }
-        return isSuccess;
     }
 
 
 
 
-    public boolean deleteTABLE_SEARCH_BOOKS(){
-        boolean isSuccess = false;
-        try {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.execSQL(DROP_TABLE_SEARCH_BOOKS);
-            db.execSQL(CREATE_TABLE_SEARCH_BOOKS);
-            isSuccess = true;
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException" + e);
-        }
-        return isSuccess;
-    }
+
 
     public List<BookData> getSearchBooks(){
         List<BookData> books = new ArrayList<>();
@@ -525,20 +462,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
 
 
-    public boolean deleteTABLE_NEW_BOOKS(){
-        boolean isSuccess = false;
-        try {
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.execSQL(DROP_TABLE_NEW_BOOKS);
-            db.execSQL(CREATE_TABLE_NEW_BOOKS);
-            isSuccess = true;
-        } catch (SQLException e) {
-            if (D) Log.d(TAG, "SQLException");
-            e.printStackTrace();
-        }
-        return isSuccess;
-    }
-
     public List<BookData> getNewBooks(){
         List<BookData> books = new ArrayList<>();
         Cursor c = null;
@@ -609,7 +532,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 insertValues.put(KEY_TAGS, book.getTags());// タグ
                 insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate()); // 読了日
                 insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());// 登録日
-                db.insert(TABLE_SHELF_BOOKS, "", insertValues);
+                db.insert(TABLE_NEW_BOOKS, "", insertValues);
             }
             isSuccess = true;
         } catch (SQLException e) {
@@ -627,7 +550,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         boolean isSuccess = false;
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
-
+        deleteTABLE_NEW_BOOKS();
         for (BookData book : books) {
             isSuccess = registerToNewBooks(book);
             if (!isSuccess) {

@@ -3,13 +3,12 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -34,11 +33,16 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
 
     private MyBookshelfDBOpenHelper mDatabaseHelper;
 
+
     @Override
     public void onCreate(){
         super.onCreate();
         if(D) Log.d(TAG,"onCreate");
         Fresco.initialize(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannelManager.create(getApplicationContext(),getString(R.string.Notification_Channel_ID), R.string.Notification_Channel_Title, R.string.Notification_Channel_Description);
+        }
+
         mPreferences = getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
         mDatabaseHelper = new MyBookshelfDBOpenHelper(getApplicationContext());
         isCheckedPermissions = false;
@@ -73,52 +77,52 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
 
 
 
-    public boolean deleteTABLE_AUTHORS(){
-        return mDatabaseHelper.deleteTABLE_AUTHORS();
+    public void deleteTABLE_AUTHORS(){
+        mDatabaseHelper.deleteTABLE_AUTHORS();
     }
 
     public List<String> getAuthors(){
         return mDatabaseHelper.getAuthors();
     }
 
-    public boolean registerToAuthors(String author){
-        return mDatabaseHelper.registerToAuthors(author);
+    public void registerToAuthors(String author) {
+        mDatabaseHelper.registerToAuthors(author);
     }
 
-    public boolean registerToAuthors(List<String> authors){
-        return mDatabaseHelper.registerToAuthors(authors);
+    public void registerToAuthors(List<String> authors){
+        mDatabaseHelper.registerToAuthors(authors);
     }
 
 
 
-    public boolean deleteTABLE_SHELF_BOOKS(){
-        return mDatabaseHelper.deleteTABLE_SHELF_BOOKS();
+    public void deleteTABLE_SHELF_BOOKS(){
+        mDatabaseHelper.deleteTABLE_SHELF_BOOKS();
     }
 
     public List<BookData> getShelfBooks(String word){
         return mDatabaseHelper.getShelfBooks(word);
     }
 
-    public BookData searchInShelfBooks(String ISBN){
-        return mDatabaseHelper.searchInShelfBooks(ISBN);
+    public BookData searchInShelfBooks(BookData book){
+        return mDatabaseHelper.searchInShelfBooks(book);
     }
 
-    public boolean registerToShelfBooks(BookData book){
-        return mDatabaseHelper.registerToShelfBooks(book);
+    public void registerToShelfBooks(BookData book){
+        mDatabaseHelper.registerToShelfBooks(book);
     }
 
-    public boolean registerToShelfBooks(List<BookData> books){
-        return mDatabaseHelper.registerToShelfBooks(books);
+    public void registerToShelfBooks(List<BookData> books){
+        mDatabaseHelper.registerToShelfBooks(books);
     }
 
-    public boolean deleteFromShelfBooks(String ISBN){
-        return mDatabaseHelper.deleteFromShelfBooks(ISBN);
+    public void deleteFromShelfBooks(String ISBN){
+        mDatabaseHelper.deleteFromShelfBooks(ISBN);
     }
 
 
 
-    public boolean deleteTABLE_SEARCH_BOOKS(){
-        return mDatabaseHelper.deleteTABLE_SEARCH_BOOKS();
+    public void deleteTABLE_SEARCH_BOOKS(){
+        mDatabaseHelper.deleteTABLE_SEARCH_BOOKS();
     }
 
     public List<BookData> getSearchBooks(){
@@ -133,17 +137,14 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         return mDatabaseHelper.registerToSearchBooks(books);
     }
 
-    public boolean deleteTABLE_NEW_BOOKS(){
-        return mDatabaseHelper.deleteTABLE_NEW_BOOKS();
+    public void deleteTABLE_NEW_BOOKS(){
+        mDatabaseHelper.deleteTABLE_NEW_BOOKS();
     }
 
     public List<BookData> getNewBooks(){
         return mDatabaseHelper.getNewBooks();
     }
 
-    public boolean registerToNewBooks(BookData book){
-        return mDatabaseHelper.registerToNewBooks(book);
-    }
 
     public boolean registerToNewBooks(List<BookData> books){
         return mDatabaseHelper.registerToNewBooks(books);

@@ -43,7 +43,7 @@ public enum MyBookshelfEvent {
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
             if(service != null){
-                service.stopSearch();
+                service.cancelSearch();
             }
             Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -98,6 +98,12 @@ public enum MyBookshelfEvent {
             if (fragment instanceof BookDetailFragment) {
                 fragmentManager.popBackStack();
             }
+
+            fragment = fragmentManager.findFragmentByTag(NewBooksFragment.TAG);
+            if (fragment instanceof NewBooksFragment) {
+                ((NewBooksFragment) fragment).scrollTop();
+            }
+
         }
     },
     MOVE_OTHER_TO_NEW_BOOKS {
@@ -105,7 +111,7 @@ public enum MyBookshelfEvent {
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
             if(service != null){
-                service.stopSearch();
+                service.cancelSearch();
             }
             Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -130,7 +136,7 @@ public enum MyBookshelfEvent {
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
             if(service != null){
-                service.stopSearch();
+                service.cancelSearch();
             }
             Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -179,7 +185,7 @@ public enum MyBookshelfEvent {
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
             Fragment fragment = fragmentManager.findFragmentByTag(NewBooksFragment.TAG);
             if (fragment instanceof NewBooksFragment) {
-                ((NewBooksFragment) fragment).check();
+                ((NewBooksFragment) fragment).checkReloadState();
             }
         }
     },
