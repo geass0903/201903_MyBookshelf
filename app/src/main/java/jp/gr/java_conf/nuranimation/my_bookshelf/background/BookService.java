@@ -127,6 +127,9 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_START:
                 saveSearchBooksResult(result);
+                if(result.isSuccess()) {
+                    mApplicationData.registerToSearchBooks(result.getBooks());
+                }
                 setServiceState(STATE_SEARCH_BOOKS_SEARCH_FINISH);
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_FINISH:
@@ -139,8 +142,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                     searchBooksThread = new SearchBooksThread(this, author, page, getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending));
                     searchBooksThread.start();
                 }else{
-                    List<BookData> books = checkRegistered(resultNewBooks);
-                    mApplicationData.registerToNewBooks(books);
+                    mApplicationData.registerToNewBooks(resultNewBooks);
                     setServiceState(STATE_NEW_BOOKS_RELOAD_FINISH);
                 }
                 break;
@@ -242,12 +244,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private void saveSearchBooksResult(SearchBooksThread.Result result){
         switch(mState){
             case STATE_SEARCH_BOOKS_SEARCH_START:
-                if(result.isSuccess()){
-                    List<BookData> books = checkRegistered(result.getBooks());
-                    mSearchBooksResult = SearchBooksThread.Result.success(result.hasNext(),books);
-                }else{
-                    mSearchBooksResult = result;
-                }
+                mSearchBooksResult = result;
                 break;
             case STATE_NEW_BOOKS_RELOAD_START:
                 if(result.isSuccess()){
@@ -296,9 +293,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 updateProgress();
                 break;
         }
-
-
-
     }
 
     private Notification createNotification(int state){
@@ -361,17 +355,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
             Notification notification = createNotification(state);
             mNotificationManager.notify(notifyId,notification);
         }
-    }
-
-    private List<BookData> checkRegistered(List<BookData> result){
-        for(BookData book : result){
-            BookData registered = mApplicationData.searchInShelfBooks(book);
-            if(registered != null){
-                book.setRegisterDate(registered.getRegisterDate());
-                book.setReadStatus(registered.getReadStatus());
-            }
-        }
-        return result;
     }
 
     private boolean isNewBook(BookData book){

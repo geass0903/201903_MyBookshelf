@@ -15,7 +15,7 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 
-@SuppressWarnings({"WeakerAccess","unused","UnusedReturnValue"})
+@SuppressWarnings({"WeakerAccess","unused"})
 public class MyBookshelfApplicationData extends MultiDexApplication {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
@@ -27,11 +27,12 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
 
 
     private SharedPreferences mPreferences;
-
     private static final String[] Use_Permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private boolean isCheckedPermissions;
+    private UpdateBookData mUpdateBookData;
 
     private MyBookshelfDBOpenHelper mDatabaseHelper;
+
 
 
     @Override
@@ -77,34 +78,28 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
 
 
 
-    public void deleteTABLE_AUTHORS(){
-        mDatabaseHelper.deleteTABLE_AUTHORS();
+
+    public void dropTableAuthorsList(){
+        mDatabaseHelper.dropTableAuthorsList();
     }
 
-    public List<String> getAuthors(){
-        return mDatabaseHelper.getAuthors();
+    public void registerToAuthorsList(String author) {
+        mDatabaseHelper.registerToAuthorsList(author);
     }
 
-    public void registerToAuthors(String author) {
-        mDatabaseHelper.registerToAuthors(author);
+    public void registerToAuthorsList(List<String> authors){
+        mDatabaseHelper.registerToAuthorsList(authors);
     }
 
-    public void registerToAuthors(List<String> authors){
-        mDatabaseHelper.registerToAuthors(authors);
+    public List<String> loadAuthorsList(){
+        return mDatabaseHelper.loadAuthorsList();
     }
 
 
 
-    public void deleteTABLE_SHELF_BOOKS(){
-        mDatabaseHelper.deleteTABLE_SHELF_BOOKS();
-    }
 
-    public List<BookData> getShelfBooks(String word){
-        return mDatabaseHelper.getShelfBooks(word);
-    }
-
-    public BookData searchInShelfBooks(BookData book){
-        return mDatabaseHelper.searchInShelfBooks(book);
+    public void dropTableShelfBooks(){
+        mDatabaseHelper.dropTableShelfBooks();
     }
 
     public void registerToShelfBooks(BookData book){
@@ -115,39 +110,69 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         mDatabaseHelper.registerToShelfBooks(books);
     }
 
-    public void deleteFromShelfBooks(String ISBN){
-        mDatabaseHelper.deleteFromShelfBooks(ISBN);
+    public List<BookData> loadShelfBooks(String keyword){
+        return mDatabaseHelper.loadShelfBooks(keyword);
+    }
+
+    public BookData loadBookDataFromShelfBooks(BookData book){
+        return mDatabaseHelper.loadBookDataFromShelfBooks(book);
+    }
+
+    public void unregisterFromShelfBooks(BookData book){
+        mDatabaseHelper.unregisterFromShelfBooks(book);
     }
 
 
 
-    public void deleteTABLE_SEARCH_BOOKS(){
-        mDatabaseHelper.deleteTABLE_SEARCH_BOOKS();
+
+    public void dropTableSearchBooks(){
+        mDatabaseHelper.dropTableSearchBooks();
     }
 
-    public List<BookData> getSearchBooks(){
-        return mDatabaseHelper.getSearchBooks();
+    public void registerToSearchBooks(BookData book){
+        mDatabaseHelper.registerToSearchBooks(book);
     }
 
-    public boolean registerToSearchBooks(BookData book){
-        return mDatabaseHelper.registerToSearchBooks(book);
+    public void registerToSearchBooks(List<BookData> books){
+        mDatabaseHelper.registerToSearchBooks(books);
     }
 
-    public boolean registerToSearchBooks(List<BookData> books){
-        return mDatabaseHelper.registerToSearchBooks(books);
+    public List<BookData> loadSearchBooks(){
+        return mDatabaseHelper.loadSearchBooks();
     }
 
-    public void deleteTABLE_NEW_BOOKS(){
-        mDatabaseHelper.deleteTABLE_NEW_BOOKS();
+    public BookData loadBookDataFromSearchBooks(BookData book){
+        return mDatabaseHelper.loadBookDataFromSearchBooks(book);
     }
 
-    public List<BookData> getNewBooks(){
-        return mDatabaseHelper.getNewBooks();
+    public void unregisterFromSearchBooks(BookData book){
+        mDatabaseHelper.unregisterFromSearchBooks(book);
     }
 
 
-    public boolean registerToNewBooks(List<BookData> books){
-        return mDatabaseHelper.registerToNewBooks(books);
+
+    public void dropTableNewBooks(){
+        mDatabaseHelper.dropTableNewBooks();
+    }
+
+    public void registerToNewBooks(BookData book){
+        mDatabaseHelper.registerToNewBooks(book);
+    }
+
+    public void registerToNewBooks(List<BookData> books){
+        mDatabaseHelper.registerToNewBooks(books);
+    }
+
+    public List<BookData> loadNewBooks(){
+        return mDatabaseHelper.loadNewBooks();
+    }
+
+    public BookData loadBookDataFromNewBooks(BookData book){
+        return mDatabaseHelper.loadBookDataFromNewBooks(book);
+    }
+
+    public void unregisterFromNewBooks(BookData book){
+        mDatabaseHelper.unregisterFromNewBooks(book);
     }
 
 
@@ -168,6 +193,36 @@ public class MyBookshelfApplicationData extends MultiDexApplication {
         }
         return sort;
     }
+
+
+
+    public static final class UpdateBookData {
+        private final int position;
+        private final BookData book;
+
+        private UpdateBookData(int position, BookData book) {
+            this.position = position;
+            this.book = book;
+        }
+
+        public BookData getBookData(){
+            return new BookData(book);
+        }
+
+        public int getPosition(){
+            return position;
+        }
+
+        public static UpdateBookData set(int position, BookData book){
+            return new UpdateBookData(position, book);
+        }
+
+    }
+
+
+
+
+
 
 
 }

@@ -12,7 +12,7 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 @SuppressWarnings("WeakerAccess")
-public class BooksListViewHolder extends RecyclerView.ViewHolder {
+public class BooksViewHolder extends RecyclerView.ViewHolder {
 
     private TextView textView_Title;
     private TextView textView_Author;
@@ -24,7 +24,7 @@ public class BooksListViewHolder extends RecyclerView.ViewHolder {
     private RatingBar ratingBar;
     private ImageView image_ReadStatus;
 
-    BooksListViewHolder(@NonNull View itemView) {
+    BooksViewHolder(@NonNull View itemView) {
         super(itemView);
         draweeView_Image = itemView.findViewById(R.id.Item_Book_Image);
         textView_Title = itemView.findViewById(R.id.Item_Book_Title);

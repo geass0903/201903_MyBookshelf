@@ -61,7 +61,7 @@ public class FileManager {
         }
 
         try {
-            List<BookData> books = helper.getShelfBooks(null);
+            List<BookData> books = helper.loadShelfBooks(null);
             int recodeCount = books.size();
             if(D) Log.d(TAG,"recodeCount : " + recodeCount);
 
@@ -85,7 +85,7 @@ public class FileManager {
             }
             bw_bookshelf.close();
 
-            List<String> authors = helper.getAuthors();
+            List<String> authors = helper.loadAuthorsList();
             recodeCount = authors.size();
             if(D) Log.d(TAG,"recodeCount : " + recodeCount);
             count = 0;
@@ -135,7 +135,7 @@ public class FileManager {
 
         try {
             // insert BookData from CSV
-            helper.deleteTABLE_SHELF_BOOKS();
+            helper.dropTableShelfBooks();
             // count line
             InputStream pre_is_bookshelf = MyBookshelfUtils.getStreamSkipBOM(new FileInputStream(file_bookshelf),Charset.forName("UTF-8"));
             InputStreamReader pre_isr_bookshelf = new InputStreamReader(pre_is_bookshelf, Charset.forName("UTF-8"));
@@ -179,7 +179,7 @@ public class FileManager {
             size = 0;
             count = 0;
             // insert Author from CSV file
-            helper.deleteTABLE_AUTHORS();
+            helper.dropTableAuthorsList();
             // count line
             InputStream pre_is_authors = new FileInputStream(file_authors);
             InputStreamReader pre_isr_authors = new InputStreamReader(pre_is_authors);
@@ -195,7 +195,7 @@ public class FileManager {
             BufferedReader br_authors = new BufferedReader(isr_authors);
             String str_line_authors;
             while ((str_line_authors = br_authors.readLine()) != null) {
-                helper.registerToAuthors(str_line_authors);
+                helper.registerToAuthorsList(str_line_authors);
                 count++;
                 String progress = count + "/" + size;
                 mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, progress).sendToTarget();

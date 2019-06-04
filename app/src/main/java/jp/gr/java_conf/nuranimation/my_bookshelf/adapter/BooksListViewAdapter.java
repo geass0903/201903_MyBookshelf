@@ -29,7 +29,10 @@ import javax.net.ssl.HttpsURLConnection;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 
+
+@SuppressWarnings({"unused"})
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
     private static final String TAG = BooksListViewAdapter.class.getSimpleName();
     private static final boolean D = true;
@@ -38,10 +41,10 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     public static final int VIEW_TYPE_BUTTON_LOAD  = 2;
     public static final int VIEW_TYPE_LOADING      = 3;
 
-
     private List<BookData> list;
 
     private Context mContext;
+    private MyBookshelfApplicationData mApplicationData;
     private RecyclerView mRecyclerView;
     private OnBookClickListener mListener;
 
@@ -53,6 +56,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         this.mContext = context;
         this.list = list;
         this.downloadFlg = download;
+        mApplicationData = (MyBookshelfApplicationData) mContext.getApplicationContext();
         File dir = Environment.getExternalStorageDirectory();
         String dirPath = dir.getPath() + "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/BookImage";
         downloadDir = new File(dirPath);
@@ -92,33 +96,43 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
             inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_load_next,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
-            return new ShelfLoadViewHolder(inflate);
+            return new LoadViewHolder(inflate);
         }
         if(viewType == VIEW_TYPE_LOADING){
             inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_loading,viewGroup,false);
             inflate.setOnClickListener(this);
             inflate.setOnLongClickListener(this);
-            return new ShelfLoadingViewHolder(inflate);
+            return new LoadingViewHolder(inflate);
         }
         inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_book,viewGroup,false);
         inflate.setOnClickListener(this);
         inflate.setOnLongClickListener(this);
-        return new BooksListViewHolder(inflate);
+        return new BooksViewHolder(inflate);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksListViewHolder){
-            BooksListViewHolder viewHolder = (BooksListViewHolder) holder;
+        if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksViewHolder){
+            BooksViewHolder viewHolder = (BooksViewHolder) holder;
+
             viewHolder.getImageView().setImageURI(getUri(list.get(position)));
             viewHolder.getTitleView().setText(list.get(position).getTitle());
             viewHolder.getAuthorView().setText(list.get(position).getAuthor());
             viewHolder.getPublisherView().setText(list.get(position).getPublisher());
             viewHolder.getSalesDateView().setText(list.get(position).getSalesDate());
             viewHolder.getItemPriceView().setText(list.get(position).getItemPrice());
-            viewHolder.getRatingView().setRating(getRating(list.get(position).getRating()));
-            viewHolder.getReadStatusView().setText(getReadStatus(list.get(position).getReadStatus()));
-            viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+
+
+            BookData book = mApplicationData.loadBookDataFromShelfBooks(list.get(position));
+            if(book != null){
+                viewHolder.getRatingView().setRating(getRating(book.getRating()));
+                viewHolder.getReadStatusView().setText(getReadStatus(book.getReadStatus()));
+                viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
+            }else{
+                viewHolder.getRatingView().setRating(getRating(list.get(position).getRating()));
+                viewHolder.getReadStatusView().setText(getReadStatus(list.get(position).getReadStatus()));
+                viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+            }
         }
     }
 
@@ -147,14 +161,14 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         return false;
     }
 
-    public class ShelfLoadViewHolder extends RecyclerView.ViewHolder {
-        ShelfLoadViewHolder(@NonNull View itemView) {
+    public class LoadViewHolder extends RecyclerView.ViewHolder {
+        LoadViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }
 
-    public class ShelfLoadingViewHolder extends RecyclerView.ViewHolder {
-        ShelfLoadingViewHolder(@NonNull View itemView) {
+    public class LoadingViewHolder extends RecyclerView.ViewHolder {
+        LoadingViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }
@@ -163,6 +177,90 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         void onBookClick(BooksListViewAdapter adapter, int position, BookData data);
         void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data);
     }
+
+    public void replaceBooksData(List<BookData> books){
+        list.clear();
+        list.addAll(books);
+        notifyDataSetChanged();
+    }
+
+    public void addBookData(BookData book){
+        int position = list.size();
+        list.add(book);
+        notifyItemInserted(position);
+    }
+
+    public void addBooksData(List<BookData> books){
+        int start = list.size();
+        int count = books.size();
+        list.addAll(books);
+        notifyItemRangeInserted(start,count);
+    }
+
+    public void updateBook(int position){
+        if(position >= 0 && position < list.size()){
+            notifyItemChanged(position);
+        }
+    }
+
+    public void deleteBook(int position){
+        if(position >= 0 && position < list.size()) {
+            list.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public void clearBooksData(){
+        list.clear();
+        notifyDataSetChanged();
+    }
+
+
+    public void setFooter(BookData footer){
+        if(list.size() > 0) {
+            int lastPosition = list.size() - 1;
+            // delete old footer
+            if (list.get(lastPosition).getView_type() != VIEW_TYPE_BOOK) {
+                if (D) Log.d(TAG, "remove footer type: " + list.get(lastPosition).getView_type());
+                list.remove(lastPosition);
+                notifyItemRemoved(lastPosition);
+            }
+            // add new footer
+            if (footer != null) {
+                if (D) Log.d(TAG, "add footer type: " + footer.getView_type());
+                list.add(footer);
+                notifyItemInserted(lastPosition);
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private Uri getUri(BookData book){
         String isbn = book.getISBN();
@@ -266,68 +364,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
 
-    public void setBooksData(List<BookData> books){
-        list.clear();
-        list.addAll(books);
-        notifyDataSetChanged();
-    }
-
-    public void addBooksData(List<BookData> books){
-        int size = list.size();
-        int add_size = books.size();
-        list.addAll(books);
-        notifyItemRangeInserted(size,add_size);
-    }
-
-    public void deleteBook(int position){
-        if(position >= 0 && position < list.size()) {
-            list.remove(position);
-            notifyItemRemoved(position);
-        }
-    }
-
-    public void registerBook(int position){
-        if(position >= 0 && position < list.size()) {
-            BookData book = list.get(position);
-            book.setReadStatus("5");
-            list.set(position,book);
-            notifyItemChanged(position);
-        }
-    }
-
-    public void unregisterBook(int position){
-        if(position >= 0 && position < list.size()) {
-            BookData book = list.get(position);
-            book.setReadStatus("0");
-            list.set(position,book);
-            notifyItemChanged(position);
-        }
-    }
-
-
-    public void clearBooksData(){
-        list.clear();
-        notifyDataSetChanged();
-    }
-
-
-    public void setFooter(BookData footer){
-        if(list.size() > 0) {
-            int lastPosition = list.size() - 1;
-            // delete old footer
-            if (list.get(lastPosition).getView_type() != VIEW_TYPE_BOOK) {
-                if (D) Log.d(TAG, "remove footer type: " + list.get(lastPosition).getView_type());
-                list.remove(lastPosition);
-                notifyItemRemoved(lastPosition);
-            }
-            // add new footer
-            if (footer != null) {
-                if (D) Log.d(TAG, "add footer type: " + footer.getView_type());
-                list.add(footer);
-                notifyItemInserted(lastPosition);
-            }
-        }
-    }
 
 
 
@@ -353,9 +389,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                 if(D) Log.d(TAG,"uri.toString(): " + uri.toString());
 
                 URL url = new URL(uri.toString());
-
-
-//                URL url = new URL("");
                 connection = (HttpsURLConnection)url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setInstanceFollowRedirects(false);

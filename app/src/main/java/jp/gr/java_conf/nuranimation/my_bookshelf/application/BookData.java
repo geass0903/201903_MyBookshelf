@@ -14,9 +14,6 @@ public class BookData implements Parcelable {
     public static final String STATUS_ALREADY_READ = "4";
     public static final String STATUS_NONE = "5";
 
-
-
-
     private int view_type;
     private String ISBN;
     private String image;

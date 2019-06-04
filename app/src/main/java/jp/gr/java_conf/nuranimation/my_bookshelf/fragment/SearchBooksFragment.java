@@ -166,12 +166,14 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
                 if (getFragmentListener() != null) {
                     Bundle bundle = new Bundle();
-                    BookData registered = mApplicationData.searchInShelfBooks(data);
-                    if (registered != null) {
-                        bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(registered));
-                    } else {
-                        bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(data));
+                    bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
+                    BookData book = mApplicationData.loadBookDataFromShelfBooks(data);
+                    if(book == null){
+                        book = new BookData(data);
+                        book.setRating("0.0");
+                        book.setReadStatus("5");
                     }
+                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
                 }
             } else {
@@ -194,7 +196,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
 
-                if (data.getReadStatus().equals("0")) {
+                if (mApplicationData.loadBookDataFromShelfBooks(data) == null){
                     // unregistered. register Dialog
                     bundle = new BundleBuilder()
                             .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Register_Book_Title))
@@ -244,27 +246,17 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         book.setRating("0.0");
                         book.setReadStatus("5");
                         mApplicationData.registerToShelfBooks(book);
-                        boolean isSuccess = true;
-                        if (isSuccess) {
-                            mSearchBooksViewAdapter.registerBook(position_register);
-                            Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
-                        }
+                        mSearchBooksViewAdapter.updateBook(position_register);
+                        Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case REQUEST_CODE_DELETE_BOOK:
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
-                        mApplicationData.deleteFromShelfBooks(book_unregister.getISBN());
-                        boolean isSuccess = true;
-                        if (isSuccess) {
-                            mSearchBooksViewAdapter.unregisterBook(position_unregister);
-                            Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
-                        }
+                        mApplicationData.unregisterFromShelfBooks(book_unregister);
+                        mSearchBooksViewAdapter.updateBook(position_unregister);
+                        Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
@@ -289,6 +281,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                             if (D) Log.d(TAG, "STATE_NONE");
                             mSearchState = BookService.STATE_NONE;
                             getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+                            break;
                         case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
                             if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_START");
                             break;
@@ -342,7 +335,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
                 case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
                     if (mSearchPage > 1) {
-                        books = mApplicationData.getSearchBooks();
+                        books = mApplicationData.loadSearchBooks();
                         BookData footer = new BookData();
                         footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
                         books.add(footer);
@@ -364,7 +357,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             hasButtonLoadNext = savedInstanceState.getBoolean(KEY_HAS_BUTTON_LOAD_NEXT, false);
 
             if(hasResultData) {
-                books = mApplicationData.getSearchBooks();
+                books = mApplicationData.loadSearchBooks();
             }
             switch (mSearchState) {
                 case BookService.STATE_NONE:
@@ -427,7 +420,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 return;
             }
             if (page == 1) {
-                mApplicationData.deleteTABLE_SEARCH_BOOKS();
+                mApplicationData.dropTableSearchBooks();
                 mSearchBooksViewAdapter.clearBooksData();
                 hasResultData = false;
                 hasButtonLoadNext = false;
@@ -459,22 +452,14 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     List<BookData> books = result.getBooks();
 
                     if (books.size() > 0) {
-                        boolean isSuccess = mApplicationData.registerToSearchBooks(books);
-                        if (D) Log.d(TAG, "isSuccess : " + isSuccess);
-                        if (isSuccess) {
-                            if (hasButtonLoadNext) {
-                                mSearchPage++;
-                                BookData footer = new BookData();
-                                footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
-                                books.add(footer);
-                            }
-                            mSearchBooksViewAdapter.addBooksData(books);
-                            hasResultData = true;
-                        } else {
-                            if (D) Log.d(TAG, "register error");
-                            hasButtonLoadNext = false;
-                            Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Unknown), Toast.LENGTH_SHORT).show();
+                        if (hasButtonLoadNext) {
+                            mSearchPage++;
+                            BookData footer = new BookData();
+                            footer.setView_type(BooksListViewAdapter.VIEW_TYPE_BUTTON_LOAD);
+                            books.add(footer);
                         }
+                        mSearchBooksViewAdapter.addBooksData(books);
+                        hasResultData = true;
                     } else {
                         Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Book_not_found), Toast.LENGTH_SHORT).show();
                     }

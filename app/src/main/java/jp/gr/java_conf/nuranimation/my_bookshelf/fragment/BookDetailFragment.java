@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.ReadStatusSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDatePickerFragment;
@@ -55,7 +54,9 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private static final int REQUEST_CODE_READ_DATE  = 101;
 
     public static final String KEY_BUNDLE_BOOK = "KEY_BUNDLE_BOOK";
+    public static final String KEY_BUNDLE_POSITION = "KEY_BUNDLE_POSITION";
     public static final String KEY_SAVED_BOOK = "KEY_SAVED_BOOK";
+    public static final String KEY_SAVED_POSITION = "KEY_SAVED_POSITION";
 
     private MyBookshelfApplicationData mApplicationData;
 
@@ -66,6 +67,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
 
     private BookData detailBook = new BookData();
+    private int position;
 
 
 /*
@@ -96,6 +98,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             if(savedInstanceState.getParcelable(KEY_SAVED_BOOK) != null) {
                 detailBook = savedInstanceState.getParcelable(KEY_SAVED_BOOK);
             }
+            position = savedInstanceState.getInt(KEY_SAVED_POSITION, -1);
             initView(view,detailBook);
         }else{
             Bundle bundle = getArguments();
@@ -103,6 +106,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
                 if(bundle.getParcelable(KEY_BUNDLE_BOOK) != null) {
                     detailBook = bundle.getParcelable(KEY_BUNDLE_BOOK);
                 }
+                position = bundle.getInt(KEY_BUNDLE_POSITION, -1);
             }
             initView(view,detailBook);
         }
@@ -132,6 +136,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(KEY_SAVED_BOOK,detailBook);
+        outState.putInt(KEY_SAVED_POSITION, position);
     }
 
 
@@ -160,10 +165,9 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
                 String registerDate = sdf.format(calendar.getTime());
                 book.setRegisterDate(registerDate);
-                MyBookshelfDBOpenHelper helper = mApplicationData.getDatabaseHelper();
-                helper.registerToShelfBooks(book);
+                mApplicationData.registerToShelfBooks(book);
                 Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
-
+                if(D) Log.d(TAG,"detail action register");
                 Fragment fragment;
                 FragmentManager fragmentManager = getFragmentManager();
                 if (fragmentManager != null) {

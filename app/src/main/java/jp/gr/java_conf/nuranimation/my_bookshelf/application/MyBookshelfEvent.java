@@ -34,7 +34,7 @@ public enum MyBookshelfEvent {
             }
             fragment = fragmentManager.findFragmentByTag(ShelfBooksFragment.TAG);
             if (fragment instanceof ShelfBooksFragment) {
-                ((ShelfBooksFragment) fragment).scrollTop();
+                ((ShelfBooksFragment) fragment).scrollToTop();
             }
         }
     },
@@ -101,7 +101,7 @@ public enum MyBookshelfEvent {
 
             fragment = fragmentManager.findFragmentByTag(NewBooksFragment.TAG);
             if (fragment instanceof NewBooksFragment) {
-                ((NewBooksFragment) fragment).scrollTop();
+                ((NewBooksFragment) fragment).scrollToTop();
             }
 
         }

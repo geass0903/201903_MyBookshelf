@@ -46,6 +46,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     private String mKeyword;
+    private List<BookData> mShelfBooks;
+
 
     @Override
     public void onAttach (Context context) {
@@ -77,10 +79,11 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-        List<BookData> mShelfBooks = mApplicationData.getShelfBooks(mKeyword);
+        if(mShelfBooks == null) {
+            mShelfBooks = mApplicationData.loadShelfBooks(mKeyword);
+        }
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, true);
         mShelfBooksViewAdapter.setClickListener(this);
-
         mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mShelfBooksViewAdapter);
@@ -131,6 +134,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                     Bundle bundle = new Bundle();
                     BookData book = new BookData(data);
                     bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
+                    bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL,bundle);
                 }
            }
@@ -172,14 +176,9 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
             if (book != null) {
-                mApplicationData.deleteFromShelfBooks(book.getISBN());
-                boolean isSuccess = true;
-                if(isSuccess) {
-                    mShelfBooksViewAdapter.deleteBook(position);
-                    Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
-                }
+                mApplicationData.unregisterFromShelfBooks(book);
+                mShelfBooksViewAdapter.deleteBook(position);
+                Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -204,27 +203,27 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             @Override
             public boolean onQueryTextSubmit(String searchWord) {
                 mSearchView.clearFocus();
-                searchShelf(searchWord);
+                searchBooksInShelf(searchWord);
                 return false;
             }
             @Override
             public boolean onQueryTextChange(String word) {
                 if(D) Log.d(TAG,"QueryTextChange: " + word);
                 mKeyword = word;
-                searchShelf(word);
+                searchBooksInShelf(word);
                 return false;
             }
         });
     }
 
-    public void scrollTop(){
+    public void scrollToTop(){
         mRecyclerView.scrollToPosition(0);
     }
 
-    private void searchShelf(String word){
-        List<BookData> books = mApplicationData.getShelfBooks(word);
-        mShelfBooksViewAdapter.setBooksData(books);
-        scrollTop();
+    private void searchBooksInShelf(String keyword){
+        scrollToTop();
+        List<BookData> books = mApplicationData.loadShelfBooks(keyword);
+        mShelfBooksViewAdapter.replaceBooksData(books);
     }
 
 }

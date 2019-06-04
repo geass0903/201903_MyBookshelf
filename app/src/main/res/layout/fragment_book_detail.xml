@@ -27,6 +27,11 @@
                 android:layout_alignParentStart="true" />
             <Button
                 android:id="@+id/book_detail_button_reload_book"
+                android:layout_margin="@dimen/margin_small"
+                android:paddingStart="@dimen/padding_small"
+                android:paddingLeft="@dimen/padding_small"
+                android:paddingRight="@dimen/padding_small"
+                android:paddingEnd="@dimen/padding_small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/book_detail_image"
@@ -34,9 +39,16 @@
                 android:layout_alignParentTop="true"
                 android:drawableLeft="@drawable/ic_vector_file_download_24dp"
                 android:drawableStart="@drawable/ic_vector_file_download_24dp"
+                android:background="@drawable/selector_button"
+                android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Reload_Book" />
             <Button
                 android:id="@+id/book_detail_button_reload_image"
+                android:layout_margin="@dimen/margin_small"
+                android:paddingStart="@dimen/padding_small"
+                android:paddingLeft="@dimen/padding_small"
+                android:paddingRight="@dimen/padding_small"
+                android:paddingEnd="@dimen/padding_small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/book_detail_image"
@@ -44,9 +56,16 @@
                 android:layout_below="@id/book_detail_button_reload_book"
                 android:drawableLeft="@drawable/ic_vector_reload_24dp"
                 android:drawableStart="@drawable/ic_vector_reload_24dp"
+                android:background="@drawable/selector_button"
+                android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Reload_Image" />
             <Button
                 android:id="@+id/book_detail_button_rakutenUrl"
+                android:layout_margin="@dimen/margin_small"
+                android:paddingStart="@dimen/padding_small"
+                android:paddingLeft="@dimen/padding_small"
+                android:paddingRight="@dimen/padding_small"
+                android:paddingEnd="@dimen/padding_small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/book_detail_image"
@@ -54,8 +73,9 @@
                 android:layout_below="@id/book_detail_button_reload_image"
                 android:drawableLeft="@drawable/ic_vector_web_24dp"
                 android:drawableStart="@drawable/ic_vector_web_24dp"
-                android:text="@string/Label_RakutenUrl"
-                />
+                android:background="@drawable/selector_button"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/Label_RakutenUrl" />
         </RelativeLayout>
 
 

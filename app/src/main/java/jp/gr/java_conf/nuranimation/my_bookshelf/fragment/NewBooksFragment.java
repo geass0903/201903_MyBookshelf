@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
+
 
 public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = NewBooksFragment.class.getSimpleName();
@@ -80,7 +82,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         mLayoutManager = new LinearLayoutManager(view.getContext());
         if (savedInstanceState == null){
             if(mNewBooks == null) {
-                mNewBooks = mApplicationData.getNewBooks();
+                mNewBooks = mApplicationData.loadNewBooks();
                 if (getArguments() != null) {
                     mReloadState = getArguments().getInt(BookService.KEY_SERVICE_STATE, 0);
                 }
@@ -88,7 +90,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         }else {
             if (D) Log.d(TAG, "savedInstanceState != null");
             mReloadState = savedInstanceState.getInt(KEY_RELOAD_STATE, 0);
-            mNewBooks = mApplicationData.getNewBooks();
+            mNewBooks = mApplicationData.loadNewBooks();
             Parcelable mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
             if (mListState != null) {
                 mLayoutManager.onRestoreInstanceState(mListState);
@@ -153,6 +155,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_new,menu);
+        if(D) Log.d(TAG,"onCreateOptionsMenu");
     }
 
     @Override
@@ -179,7 +182,15 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         setProgressBundle(progress);
                         showProgressDialog();
                         mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_START;
-                        service.reloadNewBooks(mApplicationData.getAuthors());
+
+                        List<String> authorsList = new ArrayList<>();
+                        authorsList.add("金田一蓮十郎");
+                        authorsList.add("田丸雅智");
+
+                        service.reloadNewBooks(authorsList);
+
+
+//                        service.reloadNewBooks(mApplicationData.loadAuthorsList());
                     }
                 }
                 break;
@@ -199,12 +210,14 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
             if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
                 if (getFragmentListener() != null) {
                     Bundle bundle = new Bundle();
-                    BookData registered = mApplicationData.searchInShelfBooks(data);
-                    if (registered != null) {
-                        bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(registered));
-                    } else {
-                        bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, new BookData(data));
+                    bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
+                    BookData book = mApplicationData.loadBookDataFromShelfBooks(data);
+                    if(book == null){
+                        book = new BookData(data);
+                        book.setRating("0.0");
+                        book.setReadStatus("5");
                     }
+                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
                 }
             }
@@ -223,7 +236,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
 
-                if (data.getReadStatus().equals("0")) {
+                if (mApplicationData.loadBookDataFromShelfBooks(data) == null){
                     // unregistered. register Dialog
                     bundle = new BundleBuilder()
                             .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Register_Book_Title))
@@ -272,27 +285,17 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         book.setRating("0.0");
                         book.setReadStatus("5");
                         mApplicationData.registerToShelfBooks(book);
-                        boolean isSuccess = true;
-                        if (isSuccess) {
-                            mNewBooksViewAdapter.registerBook(position_register);
-                            Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
-                        }
+                        mNewBooksViewAdapter.updateBook(position_register);
+                        Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case REQUEST_CODE_DELETE_BOOK:
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
-                        mApplicationData.deleteFromShelfBooks(book_unregister.getISBN());
-                        boolean isSuccess = true;
-                        if (isSuccess) {
-                            mNewBooksViewAdapter.unregisterBook(position_unregister);
-                            Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), getString(R.string.Toast_Failed), Toast.LENGTH_SHORT).show();
-                        }
+                        mApplicationData.unregisterFromShelfBooks(book_unregister);
+                        mNewBooksViewAdapter.updateBook(position_unregister);
+                        Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
@@ -307,7 +310,6 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
 
     @Override
     public void onReceiveBroadcast(Context context, Intent intent){
-//        if (D) Log.d(TAG, "onReceive");
         String action = intent.getAction();
         if(action != null){
             switch (action){
@@ -318,6 +320,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                             if (D) Log.d(TAG, "STATE_NONE");
                             mReloadState = BookService.STATE_NONE;
                             getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+                            break;
                         case BookService.STATE_NEW_BOOKS_RELOAD_START:
                             if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_START");
                             break;
@@ -347,18 +350,35 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     }
 
     private void loadNewBooksResult() {
-        mNewBooksViewAdapter.setBooksData(mApplicationData.getNewBooks());
-        mReloadState = BookService.STATE_NONE;
-        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+        if(D) Log.d(TAG, "loadNewBooksResult()");
+        scrollToTop();
+        mNewBooksViewAdapter.replaceBooksData(mApplicationData.loadNewBooks());
+        getPausedHandler().removeCallbacks(delayLoadNewBooksResult);
+        getPausedHandler().postDelayed(delayLoadNewBooksResult,1000);
     }
 
-    public void scrollTop(){
+    public void scrollToTop(){
         mRecyclerView.scrollToPosition(0);
     }
 
 
 
-
+    Runnable delayLoadNewBooksResult = new Runnable() {
+        @Override
+        public void run() {
+            if(D) Log.d(TAG, "delayLoadNewBooksResult()");
+            if (getActivity() instanceof MainActivity) {
+                BookService service = ((MainActivity) getActivity()).getService();
+                if (service != null) {
+                    service.setServiceState(BookService.STATE_NONE);
+                    service.stopForeground(false);
+                    service.stopSelf();
+                }
+            }
+            mReloadState = BookService.STATE_NONE;
+            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+        }
+    };
 
 
 
