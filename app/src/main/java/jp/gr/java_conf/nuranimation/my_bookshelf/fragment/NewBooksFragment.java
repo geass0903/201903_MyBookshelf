@@ -23,7 +23,6 @@ import android.widget.Toast;
 
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -125,13 +124,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     public void onResume() {
         super.onResume();
         if(D) Log.d(TAG,"onResume()");
-        if(getActivity() instanceof MainActivity){
-            BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_FINISH){
-                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_FINISH;
-                loadNewBooksResult();
-            }
-        }
+        checkReloadState();
     }
 
 
@@ -182,15 +175,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         setProgressBundle(progress);
                         showProgressDialog();
                         mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_START;
-
-                        List<String> authorsList = new ArrayList<>();
-                        authorsList.add("金田一蓮十郎");
-                        authorsList.add("田丸雅智");
-
-                        service.reloadNewBooks(authorsList);
-
-
-//                        service.reloadNewBooks(mApplicationData.loadAuthorsList());
+                        service.reloadNewBooks(mApplicationData.loadAuthorsList());
                     }
                 }
                 break;
@@ -254,7 +239,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                             .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
                             .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
                             .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
-                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DELETE_BOOK)
+                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                             .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                             .put(BaseDialogFragment.KEY_CANCELABLE, true)
                             .build();
@@ -289,7 +274,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case REQUEST_CODE_DELETE_BOOK:
+                case REQUEST_CODE_UNREGISTER_BOOK:
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
@@ -319,7 +304,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         case BookService.STATE_NONE:
                             if (D) Log.d(TAG, "STATE_NONE");
                             mReloadState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
                             break;
                         case BookService.STATE_NEW_BOOKS_RELOAD_START:
                             if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_START");
@@ -332,7 +317,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     break;
                 case FILTER_ACTION_UPDATE_PROGRESS:
                     String progress = intent.getStringExtra(KEY_UPDATE_PROGRESS);
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_UPDATE, progress).sendToTarget();
+                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, progress).sendToTarget();
                     break;
             }
         }
@@ -376,7 +361,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 }
             }
             mReloadState = BookService.STATE_NONE;
-            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
         }
     };
 

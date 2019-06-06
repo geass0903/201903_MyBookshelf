@@ -1,15 +1,12 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -33,9 +30,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
@@ -46,7 +44,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 
 
-public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener {
+public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener, BaseDialogFragment.OnBaseDialogListener{
     public static final String TAG = BookDetailFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -60,7 +58,15 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private MyBookshelfApplicationData mApplicationData;
 
-
+    private SimpleDraweeView mBookImageView;
+    private ReadStatusSpinnerArrayAdapter mArrayAdapter;
+    private Spinner mSpinnerReadStatus;
+    private RatingBar mRatingBar;
+    private EditText titleView;
+    private EditText authorView;
+    private EditText publisherView;
+    private EditText itemPriceView;
+    private EditText isbnView;
     private TextView salesDateView;
     private TextView readDateView;
     private TextView mRatingText;
@@ -86,7 +92,6 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_book_detail, container, false);
     }
 
@@ -128,6 +133,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     @Override
     public void onPause() {
         super.onPause();
+        detailBook = getBookData();
         if(D) Log.d(TAG,"onPause()");
     }
 
@@ -143,15 +149,12 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        if(D) Log.d(TAG,"onCreateOptionsMenu()");
         inflater.inflate(R.menu.menu_detail,menu);
     }
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        menu.findItem(R.id.menu_detail_action_register).getIcon().setColorFilter(Color.argb(255,255,255,255), PorterDuff.Mode.SRC_ATOP);
-        if(D) Log.d(TAG,"onPrepareOptionsMenu()");
     }
 
 
@@ -160,21 +163,15 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         switch (item.getItemId()) {
             case R.id.menu_detail_action_register:
                 if(D) Log.d(TAG,"detail action register");
-                BookData book = new BookData(detailBook);
+                BookData book = getBookData();
                 Calendar calendar = Calendar.getInstance();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
                 String registerDate = sdf.format(calendar.getTime());
                 book.setRegisterDate(registerDate);
                 mApplicationData.registerToShelfBooks(book);
                 Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
-                if(D) Log.d(TAG,"detail action register");
-                Fragment fragment;
-                FragmentManager fragmentManager = getFragmentManager();
-                if (fragmentManager != null) {
-                    fragment = getFragmentManager().findFragmentByTag(BookDetailFragment.TAG);
-                    if (fragment instanceof BookDetailFragment) {
-                        getFragmentManager().popBackStack();
-                    }
+                if(getFragmentListener() != null){
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK_BOOK_DETAIL, null);
                 }
                 break;
             default:
@@ -183,36 +180,81 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDataSet(int requestCode, Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
+        switch (requestCode) {
+            case REQUEST_CODE_SALES_DATE:
+                String sales_date = sdf.format(calendar.getTime());
+                if (D) Log.d(TAG, "sales_date: " + sales_date);
+                detailBook.setSalesDate(sales_date);
+                salesDateView.setText(sales_date);
+                break;
+            case REQUEST_CODE_READ_DATE:
+                String read_date = sdf.format(calendar.getTime());
+                if (D) Log.d(TAG, "read_date: " + read_date);
+                detailBook.setFinishReadDate(read_date);
+                readDateView.setText(read_date);
+                break;
+        }
+    }
+
+    @Override
+    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+        if(resultCode == DialogInterface.BUTTON_POSITIVE){
+            switch (requestCode){
+                case REQUEST_CODE_SALES_DATE:
+                    salesDateView.setText(getString(R.string.Label_No_Data));
+                    break;
+                case REQUEST_CODE_READ_DATE:
+                    readDateView.setText(getString(R.string.Label_No_Data));
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onBaseDialogCancelled(int requestCode, Bundle params) {
+        super.onBaseDialogCancelled(requestCode,params);
+    }
+
+
+
     private void initView(View view,BookData book) {
-        SimpleDraweeView mBookImageView = view.findViewById(R.id.book_detail_image);
-        EditText titleView = view.findViewById(R.id.book_detail_title);
-        EditText authorView = view.findViewById(R.id.book_detail_author);
-        EditText publisherView = view.findViewById(R.id.book_detail_publisher);
+        mBookImageView = view.findViewById(R.id.book_detail_image);
+        titleView = view.findViewById(R.id.book_detail_title);
+        authorView = view.findViewById(R.id.book_detail_author);
+        publisherView = view.findViewById(R.id.book_detail_publisher);
         salesDateView = view.findViewById(R.id.book_detail_sales_date);
-        salesDateView.setOnClickListener(listener_DateButton);
-        EditText itemPriceView = view.findViewById(R.id.book_detail_price);
-        EditText isbnView = view.findViewById(R.id.book_detail_isbn);
+        salesDateView.setOnClickListener(dateButtonOnClickListener);
+        salesDateView.setOnLongClickListener(dateButtonOnLongClickListener);
+        itemPriceView = view.findViewById(R.id.book_detail_price);
+        isbnView = view.findViewById(R.id.book_detail_isbn);
         readDateView = view.findViewById(R.id.book_detail_read_date);
-        readDateView.setOnClickListener(listener_DateButton);
-        Spinner mSpinnerReadStatus = view.findViewById(R.id.book_detail_spinner_read_status);
-        ReadStatusSpinnerArrayAdapter mArrayAdapter = new ReadStatusSpinnerArrayAdapter(this.getContext(), R.layout.litem_spinner_read_status, getSpinnerItem_ReadStatus());
+        readDateView.setOnClickListener(dateButtonOnClickListener);
+        readDateView.setOnLongClickListener(dateButtonOnLongClickListener);
+        mSpinnerReadStatus = view.findViewById(R.id.book_detail_spinner_read_status);
+        mArrayAdapter = new ReadStatusSpinnerArrayAdapter(this.getContext(), R.layout.litem_spinner_read_status, getSpinnerItem_ReadStatus());
         mSpinnerReadStatus.setAdapter(mArrayAdapter);
         mSpinnerReadStatus.setOnItemSelectedListener(listener_ReadStatus);
         mRatingText = view.findViewById(R.id.book_detail_rating_text);
-        RatingBar mRatingBar = view.findViewById(R.id.book_detail_rating);
+        mRatingBar = view.findViewById(R.id.book_detail_rating);
         mRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                String rate = String.format(Locale.JAPAN,"%.1f",rating);
                 String ratingText = String.format(Locale.JAPAN, "%.1f / 5.0", rating);
-                detailBook.setRating(rate);
+                detailBook.setRating(rating);
                 mRatingText.setText(ratingText);
             }
         });
+        setBookData(book);
+    }
 
 
+    private void setBookData(BookData book){
         if(book != null) {
-            mBookImageView.setImageURI(getImageUri(book.getImage()));
+            mBookImageView.setImageURI(MyBookshelfUtils.getImageUri(book.getImage()));
             titleView.setText(book.getTitle());
             authorView.setText(book.getAuthor());
             publisherView.setText(book.getPublisher());
@@ -224,63 +266,33 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             if(!TextUtils.isEmpty(book.getFinishReadDate())) {
                 readDateView.setText(book.getFinishReadDate());
             }
-            mSpinnerReadStatus.setSelection(mArrayAdapter.getPosition(book.getReadStatus()), false);
-            mRatingBar.setRating(getRating(book.getRating()));
-            String ratingText = String.format(Locale.JAPAN, "%.1f / 5.0", getRating(book.getRating()));
-            mRatingText.setText(ratingText);
+            mSpinnerReadStatus.setSelection(mArrayAdapter.getPosition(String.valueOf(book.getReadStatus())), false);
+            mRatingBar.setRating(Float.parseFloat(book.getRating()));
         }
     }
 
 
-    private float getRating(String value){
-        float rating = 0.0f;
-        try {
-            rating = Float.parseFloat(value);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return rating;
-    }
-
-
-    private Uri getImageUri(String url){
-        if(TextUtils.isEmpty(url)){
-            return null;
-        }
-        String REGEX_CSV_COMMA = ",";
-        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
-        String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
-
-        Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
-        Matcher matcher = sdqPattern.matcher(url);
-        url = matcher.replaceAll("");
-        Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
-        matcher = sbPattern.matcher(url);
-        url = matcher.replaceAll("");
-        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
-        String[] arr = cPattern.split(url, -1);
-        return Uri.parse(arr[0]);
+    private BookData getBookData(){
+        BookData book = new BookData(detailBook);
+//        book.setImage(detailBook.getImage());
+        book.setTitle(titleView.getText().toString());
+        book.setAuthor(authorView.getText().toString());
+        book.setPublisher(publisherView.getText().toString());
+        book.setSalesDate(salesDateView.getText().toString());
+        book.setItemPrice(itemPriceView.getText().toString());
+        book.setISBN(isbnView.getText().toString());
+        book.setFinishReadDate(readDateView.getText().toString());
+        BaseSpinnerItem item = (BaseSpinnerItem)mSpinnerReadStatus.getSelectedItem();
+        book.setReadStatus(item.getCode());
+        book.setRating(mRatingBar.getRating());
+        return book;
     }
 
 
 
 
-    void showDatePicker(int requestCode,String date){
-        if(getActivity() != null){
-            Bundle mBundle_SalesDateDialog = new BundleBuilder()
-                    .put(BaseDatePickerFragment.KEY_DATE,date)
-                    .put(BaseDatePickerFragment.KEY_REQUEST_CODE,requestCode)
-                    .build();
-            FragmentManager manager = getActivity().getSupportFragmentManager();
-            BaseDatePickerFragment mSalesDateDialog = BaseDatePickerFragment.newInstance(this,mBundle_SalesDateDialog);
-            mSalesDateDialog.show(manager, BookDetailFragment.TAG);
-        }
-    }
 
-
-
-
-    View.OnClickListener listener_DateButton = new View.OnClickListener() {
+    private View.OnClickListener dateButtonOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             int id = v.getId();
@@ -299,7 +311,26 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         }
     };
 
-    AdapterView.OnItemSelectedListener listener_ReadStatus = new AdapterView.OnItemSelectedListener() {
+
+    private View.OnLongClickListener dateButtonOnLongClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            int id = v.getId();
+            switch (id){
+                case R.id.book_detail_sales_date:
+                    if (D) Log.d(TAG, "SalesDate on LongClick");
+                    showDeleteDateDialog(REQUEST_CODE_SALES_DATE);
+                    return true;
+                case R.id.book_detail_read_date:
+                    if (D) Log.d(TAG, "ReadDate on LongClick");
+                    showDeleteDateDialog(REQUEST_CODE_READ_DATE);
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    private AdapterView.OnItemSelectedListener listener_ReadStatus = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapter,
                                    View v, int position, long id) {
@@ -312,6 +343,37 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         public void onNothingSelected(AdapterView<?> adapter) {
         }
     };
+
+    private void showDatePicker(int requestCode,String date){
+        if(getActivity() != null){
+            Bundle mBundle_DatePicker = new BundleBuilder()
+                    .put(BaseDatePickerFragment.KEY_DATE,date)
+                    .put(BaseDatePickerFragment.KEY_REQUEST_CODE,requestCode)
+                    .build();
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            BaseDatePickerFragment mDatePicker = BaseDatePickerFragment.newInstance(this,mBundle_DatePicker);
+            mDatePicker.show(manager, BaseDatePickerFragment.TAG);
+        }
+    }
+
+    private void showDeleteDateDialog(int requestCode) {
+        if (getActivity() != null) {
+            Bundle bundle = new BundleBuilder()
+                    .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Date_Title))
+                    .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Date_Message))
+                    .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
+                    .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                    .put(BaseDialogFragment.KEY_REQUEST_CODE, requestCode)
+                    .put(BaseDialogFragment.KEY_CANCELABLE, true)
+                    .build();
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
+            fragment.show(manager, BaseDialogFragment.TAG);
+        }
+    }
+
+
+
 
 
     private List<BaseSpinnerItem> getSpinnerItem_ReadStatus() {
@@ -329,32 +391,4 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         return list;
     }
 
-    @Override
-    public void onDataSet(int requestCode, Calendar calendar)
-    {
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYY年MM月dd日",Locale.JAPAN);
-        switch (requestCode){
-            case REQUEST_CODE_SALES_DATE:
-                try {
-                    String date = sdf.format(calendar.getTime());
-                    if(D) Log.d(TAG,"date: " + date);
-                    detailBook.setSalesDate(date);
-                    salesDateView.setText(date);
-                }catch (IllegalArgumentException e){
-                    e.printStackTrace();
-                }
-                break;
-            case REQUEST_CODE_READ_DATE:
-                try {
-                    String date = sdf.format(calendar.getTime());
-                    if(D) Log.d(TAG,"date: " + date);
-                    detailBook.setFinishReadDate(date);
-                    readDateView.setText(date);
-                }catch (IllegalArgumentException e){
-                    e.printStackTrace();
-                }
-                break;
-        }
-
-    }
 }

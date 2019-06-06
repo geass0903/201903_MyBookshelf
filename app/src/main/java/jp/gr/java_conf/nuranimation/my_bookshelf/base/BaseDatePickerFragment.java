@@ -14,6 +14,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 
 public class BaseDatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+    public static final String TAG = BaseDatePickerFragment.class.getSimpleName();
     public static final String KEY_DATE = "KEY_DATE";
     public static final String KEY_REQUEST_CODE = "KEY_REQUEST_CODE";
 

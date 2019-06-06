@@ -79,9 +79,9 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-        if(mShelfBooks == null) {
+//        if(mShelfBooks == null) {
             mShelfBooks = mApplicationData.loadShelfBooks(mKeyword);
-        }
+//        }
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, true);
         mShelfBooksViewAdapter.setClickListener(this);
         mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
@@ -132,9 +132,12 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
                 if(getFragmentListener() != null){
                     Bundle bundle = new Bundle();
-                    BookData book = new BookData(data);
-                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
                     bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
+                    BookData book = mApplicationData.loadBookDataFromShelfBooks(data);
+                    if(book == null){
+                        book = new BookData(data);
+                    }
+                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL,bundle);
                 }
            }
@@ -156,7 +159,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                         .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
                         .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
                         .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
-                        .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DELETE_BOOK)
+                        .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                         .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                         .put(BaseDialogFragment.KEY_CANCELABLE, true)
                         .build();
@@ -172,7 +175,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
         super.onBaseDialogSucceeded(requestCode, resultCode, params);
-        if (requestCode == REQUEST_CODE_DELETE_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
+        if (requestCode == REQUEST_CODE_UNREGISTER_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
             if (book != null) {

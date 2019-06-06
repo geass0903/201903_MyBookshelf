@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
@@ -167,7 +168,17 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
-
+    POP_BACK_STACK_BOOK_DETAIL {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle){
+            Fragment fragment;
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            fragment = fragmentManager.findFragmentByTag(BookDetailFragment.TAG);
+            if (fragment instanceof BookDetailFragment) {
+                fragmentManager.popBackStack();
+            }
+        }
+    },
 
     ACTION_CHECK_SEARCH_STATE {
         @Override
@@ -189,7 +200,16 @@ public enum MyBookshelfEvent {
             }
         }
     },
-
+    ACTION_CHECK_SETTINGS_STATE {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle){
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(SettingsFragment.TAG);
+            if (fragment instanceof SettingsFragment) {
+                ((SettingsFragment) fragment).checkSettingsState();
+            }
+        }
+    },
 
 
 

@@ -84,7 +84,8 @@
     <string name="Dialog_Delete_Book_Message">この本を削除しますか？</string>
     <string name="Dialog_Register_Book_Title">登録の確認</string>
     <string name="Dialog_Register_Book_Message">この本を登録しますか？</string>
-
+    <string name="Dialog_Delete_Date_Title">日付のクリア</string>
+    <string name="Dialog_Delete_Date_Message">日付をクリアしますか？</string>
 
 
     <!-- Other -->

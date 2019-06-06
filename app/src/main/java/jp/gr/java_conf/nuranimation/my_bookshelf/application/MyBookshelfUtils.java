@@ -1,5 +1,6 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -155,7 +156,24 @@ public class MyBookshelfUtils {
 
 
 
+    public static Uri getImageUri(String url){
+        if(TextUtils.isEmpty(url)){
+            return null;
+        }
+        String REGEX_CSV_COMMA = ",";
+        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
+        String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
 
+        Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
+        Matcher matcher = sdqPattern.matcher(url);
+        url = matcher.replaceAll("");
+        Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
+        matcher = sbPattern.matcher(url);
+        url = matcher.replaceAll("");
+        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
+        String[] arr = cPattern.split(url, -1);
+        return Uri.parse(arr[0]);
+    }
 
 
 

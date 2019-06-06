@@ -81,7 +81,7 @@ public class FileManager {
                 bw_bookshelf.write(str_book);
                 count++;
                 String progress = count + "/" + recodeCount;
-                mHandler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, progress).sendToTarget();
+                mHandler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, -1, -1, progress).sendToTarget();
             }
             bw_bookshelf.close();
 
@@ -99,7 +99,7 @@ public class FileManager {
                 bw_authors.write(author+ "\r\n");
                 count++;
                 String progress = count + "/" + recodeCount;
-                mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, progress).sendToTarget();
+                mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, -1, -1, progress).sendToTarget();
             }
             bw_authors.close();
         } catch (IOException e){
@@ -161,7 +161,7 @@ public class FileManager {
                     helper.registerToShelfBooks(book);
                     count++;
                     String progress = count + "/" + size;
-                    mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, progress).sendToTarget();
+                    mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, -1, -1, progress).sendToTarget();
                 }
             }
             if(idx_bookshelf.length == 20){
@@ -171,7 +171,7 @@ public class FileManager {
                     import_MYBOOKSHELF_CSV(split);
                     count++;
                     String progress = count + "/" + size;
-                    mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, progress).sendToTarget();
+                    mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, -1, -1, progress).sendToTarget();
                 }
             }
             br_bookshelf.close();
@@ -198,7 +198,7 @@ public class FileManager {
                 helper.registerToAuthorsList(str_line_authors);
                 count++;
                 String progress = count + "/" + size;
-                mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_UPDATE, -1, -1, progress).sendToTarget();
+                mHandler.obtainMessage(SettingsFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, -1, -1, progress).sendToTarget();
             }
             br_authors.close();
 

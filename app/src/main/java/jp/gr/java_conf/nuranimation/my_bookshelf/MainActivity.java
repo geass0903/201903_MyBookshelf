@@ -181,10 +181,27 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                         mBottomNavigationView.getMenu().findItem(R.id.navigation_new).setChecked(true);
                         navigation_state = R.id.navigation_new;
                         bundle = new BundleBuilder()
-                                .put(BookService.KEY_SERVICE_STATE,mBookService.getServiceState())
+                                .put(BookService.KEY_SERVICE_STATE, mBookService.getServiceState())
                                 .build();
                         if (D) Log.d(TAG, "MOVE_OTHER_TO_SEARCH_BOOKS bundle: " + bundle);
                         onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_NEW_BOOKS, bundle);
+                        break;
+                    case BookService.STATE_EXPORT_START:
+                    case BookService.STATE_EXPORT_FINISH:
+                    case BookService.STATE_IMPORT_START:
+                    case BookService.STATE_IMPORT_FINISH:
+                    case BookService.STATE_BACKUP_START:
+                    case BookService.STATE_BACKUP_FINISH:
+                    case BookService.STATE_RESTORE_START:
+                    case BookService.STATE_RESTORE_FINISH:
+                    case BookService.STATE_DROPBOX_LOGIN:
+                        mBottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
+                        navigation_state = R.id.navigation_settings;
+                        bundle = new BundleBuilder()
+                                .put(BookService.KEY_SERVICE_STATE, mBookService.getServiceState())
+                                .build();
+                        if (D) Log.d(TAG, "MOVE_OTHER_TO_SETTINGS bundle: " + bundle);
+                        onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_SETTINGS, bundle);
                         break;
                 }
                 break;
@@ -209,6 +226,20 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 }
                 break;
             case R.id.navigation_settings:
+                switch (mBookService.getServiceState()) {
+                    case BookService.STATE_EXPORT_START:
+                    case BookService.STATE_EXPORT_FINISH:
+                    case BookService.STATE_IMPORT_START:
+                    case BookService.STATE_IMPORT_FINISH:
+                    case BookService.STATE_BACKUP_START:
+                    case BookService.STATE_BACKUP_FINISH:
+                    case BookService.STATE_RESTORE_START:
+                    case BookService.STATE_RESTORE_FINISH:
+                    case BookService.STATE_DROPBOX_LOGIN:
+                        if (D) Log.d(TAG, "ACTION_CHECK_SETTINGS_STATE");
+                        onActivityEvent(MyBookshelfEvent.ACTION_CHECK_SETTINGS_STATE, null);
+                        break;
+                }
                 break;
         }
 

@@ -120,13 +120,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     public void onResume() {
         super.onResume();
         if(D) Log.d(TAG,"onResume()");
-        if(getActivity() instanceof MainActivity){
-            BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null && service.getServiceState() == BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH){
-                mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH;
-                loadSearchBooksResult();
-            }
-        }
+        checkSearchState();
     }
 
 
@@ -214,7 +208,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                             .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
                             .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
                             .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
-                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DELETE_BOOK)
+                            .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                             .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                             .put(BaseDialogFragment.KEY_CANCELABLE, true)
                             .build();
@@ -250,7 +244,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case REQUEST_CODE_DELETE_BOOK:
+                case REQUEST_CODE_UNREGISTER_BOOK:
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
@@ -280,7 +274,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         case BookService.STATE_NONE:
                             if (D) Log.d(TAG, "STATE_NONE");
                             mSearchState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
                             break;
                         case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
                             if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_START");
@@ -472,7 +466,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             }
         }
         mSearchState = BookService.STATE_NONE;
-        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DISMISS).sendToTarget();
+        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
     }
 
 

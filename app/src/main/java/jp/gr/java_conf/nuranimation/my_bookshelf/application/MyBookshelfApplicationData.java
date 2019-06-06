@@ -1,10 +1,10 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,7 +16,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 
 @SuppressWarnings({"WeakerAccess","unused"})
-public class MyBookshelfApplicationData extends MultiDexApplication {
+public class MyBookshelfApplicationData extends Application {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;
 

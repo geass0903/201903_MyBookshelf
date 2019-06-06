@@ -14,7 +14,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 public class BaseProgressDialogFragment extends DialogFragment{
     private static final boolean D = true;
-    private static final String TAG = BaseProgressDialogFragment.class.getSimpleName();
+    public static final String TAG = BaseProgressDialogFragment.class.getSimpleName();
 
     public static final String title = "KEY_TITLE";
     public static final String message = "KEY_MESSAGE";

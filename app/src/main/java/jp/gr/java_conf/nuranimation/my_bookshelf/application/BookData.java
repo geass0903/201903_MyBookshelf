@@ -5,6 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
+import java.util.Locale;
+
 @SuppressWarnings("WeakerAccess")
 public class BookData implements Parcelable {
     public static final String STATUS_UNREGISTERED = "0";
@@ -120,69 +122,74 @@ public class BookData implements Parcelable {
         return publisher;
     }
 
-    public String getSalesDate() {
-        return salesDate;
-    }
-
     public void setSalesDate(String salesDate) {
         this.salesDate = salesDate;
     }
 
-    public String getItemPrice() {
-        return itemPrice;
+    public String getSalesDate() {
+        return salesDate;
     }
 
     public void setItemPrice(String itemPrice) {
         this.itemPrice = itemPrice;
     }
 
-    public String getRakutenUrl() {
-        return rakutenUrl;
+    public String getItemPrice() {
+        return itemPrice;
     }
 
     public void setRakutenUrl(String rakutenUrl) {
         this.rakutenUrl = rakutenUrl;
     }
 
-    public String getReadStatus() {
-        return readStatus;
+    public String getRakutenUrl() {
+        return rakutenUrl;
     }
 
     public void setReadStatus(String readStatus) {
         this.readStatus = readStatus;
     }
 
-    public String getTags() {
-        return tags;
+    public String getReadStatus() {
+        return readStatus;
     }
 
     public void setTags(String tags) {
         this.tags = tags;
     }
 
-    public String getFinishReadDate() {
-        return finishReadDate;
+    public String getTags() {
+        return tags;
     }
 
     public void setFinishReadDate(String finishReadDate) {
         this.finishReadDate = finishReadDate;
     }
 
-    public String getRegisterDate() {
-        return registerDate;
+    public String getFinishReadDate() {
+        return finishReadDate;
     }
 
     public void setRegisterDate(String registerDate) {
         this.registerDate = registerDate;
     }
 
-    public String getRating() {
-        return rating;
+    public String getRegisterDate() {
+        return registerDate;
     }
 
     public void setRating(String rating) {
         this.rating = rating;
     }
+
+    public void setRating(float value){
+        this.rating = String.format(Locale.JAPAN,"%.1f",value);
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
 
 
     protected BookData(Parcel in) {

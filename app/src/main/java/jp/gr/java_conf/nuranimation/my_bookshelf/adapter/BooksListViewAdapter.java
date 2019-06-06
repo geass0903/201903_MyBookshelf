@@ -22,20 +22,18 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 
-@SuppressWarnings({"unused"})
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
     private static final String TAG = BooksListViewAdapter.class.getSimpleName();
-    private static final boolean D = true;
+    private static final boolean D = false;
 
     public static final int VIEW_TYPE_BOOK         = 1;
     public static final int VIEW_TYPE_BUTTON_LOAD  = 2;
@@ -48,21 +46,24 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     private RecyclerView mRecyclerView;
     private OnBookClickListener mListener;
 
-    private boolean downloadFlg;
+    private boolean doDownload;
     private File downloadDir;
 
 
     public BooksListViewAdapter(Context context, List<BookData> list, boolean download) {
         this.mContext = context;
         this.list = list;
-        this.downloadFlg = download;
+        this.doDownload = download;
         mApplicationData = (MyBookshelfApplicationData) mContext.getApplicationContext();
         File dir = Environment.getExternalStorageDirectory();
         String dirPath = dir.getPath() + "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/BookImage";
         downloadDir = new File(dirPath);
         if(!downloadDir.exists()){
-            boolean success = downloadDir.mkdirs();
-            if(D) Log.d(TAG,"mkdirs(): " + success);
+            boolean isSuccess = downloadDir.mkdirs();
+            if(D) Log.d(TAG,"mkdirs(): " + isSuccess);
+            if(!isSuccess){
+                doDownload = false;
+            }
         }
     }
 
@@ -112,7 +113,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksViewHolder){
+        if (holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksViewHolder) {
             BooksViewHolder viewHolder = (BooksViewHolder) holder;
 
             viewHolder.getImageView().setImageURI(getUri(list.get(position)));
@@ -124,13 +125,13 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
 
             BookData book = mApplicationData.loadBookDataFromShelfBooks(list.get(position));
-            if(book != null){
-                viewHolder.getRatingView().setRating(getRating(book.getRating()));
-                viewHolder.getReadStatusView().setText(getReadStatus(book.getReadStatus()));
+            if (book != null) {
+                viewHolder.getRatingView().setRating(Float.parseFloat(book.getRating()));
+                viewHolder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
                 viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
-            }else{
-                viewHolder.getRatingView().setRating(getRating(list.get(position).getRating()));
-                viewHolder.getReadStatusView().setText(getReadStatus(list.get(position).getReadStatus()));
+            } else {
+                viewHolder.getRatingView().setRating(Float.parseFloat(list.get(position).getRating()));
+                viewHolder.getReadStatusView().setText(getReadStatusText(list.get(position).getReadStatus()));
                 viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
             }
         }
@@ -184,12 +185,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyDataSetChanged();
     }
 
-    public void addBookData(BookData book){
-        int position = list.size();
-        list.add(book);
-        notifyItemInserted(position);
-    }
-
     public void addBooksData(List<BookData> books){
         int start = list.size();
         int count = books.size();
@@ -234,34 +229,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private Uri getUri(BookData book){
         String isbn = book.getISBN();
         String image = book.getImage();
@@ -274,58 +241,34 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
             return Uri.fromFile(file);
         }
 
-        Uri uri = getImageUri(image);
-        if(downloadFlg) {
+        Uri uri = MyBookshelfUtils.getImageUri(image);
+        if(doDownload) {
             new AsyncDownload(uri, file).execute();
         }
         return uri;
     }
 
 
-
-    private Uri getImageUri(String url){
-        String REGEX_CSV_COMMA = ",";
-        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
-        String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
-
-        Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
-        Matcher matcher = sdqPattern.matcher(url);
-        url = matcher.replaceAll("");
-        Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
-        matcher = sbPattern.matcher(url);
-        url = matcher.replaceAll("");
-        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
-        String[] arr = cPattern.split(url, -1);
-        return Uri.parse(arr[0]);
-    }
-
-    private float getRating(String value){
-        float rating = 0.0f;
-        try {
-            rating = Float.parseFloat(value);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return rating;
-    }
-
-    private String getReadStatus(String status){
+    private String getReadStatusText(String status) {
         String readStatus = mContext.getString(R.string.Item_ReadStatus_0);
         if(status != null) {
             switch (status) {
-                case "1":
+                case BookData.STATUS_UNREGISTERED:
+                    readStatus = mContext.getString(R.string.Item_ReadStatus_0);
+                    break;
+                case BookData.STATUS_INTERESTED:
                     readStatus = mContext.getString(R.string.Item_ReadStatus_1);
                     break;
-                case "2":
+                case BookData.STATUS_UNREAD:
                     readStatus = mContext.getString(R.string.Item_ReadStatus_2);
                     break;
-                case "3":
+                case BookData.STATUS_READING:
                     readStatus = mContext.getString(R.string.Item_ReadStatus_2);
                     break;
-                case "4":
+                case BookData.STATUS_ALREADY_READ:
                     readStatus = mContext.getString(R.string.Item_ReadStatus_4);
                     break;
-                case "5":
+                case BookData.STATUS_NONE:
                     readStatus = mContext.getString(R.string.Item_ReadStatus_5);
                     break;
                 default:
@@ -340,6 +283,9 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         Drawable icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_0_24dp, null);
         if(status != null) {
             switch (status) {
+                case BookData.STATUS_UNREGISTERED:
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_0_24dp, null);
+                    break;
                 case BookData.STATUS_INTERESTED:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_1_24dp, null);
                     break;
@@ -347,7 +293,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_2_24dp, null);
                     break;
                 case BookData.STATUS_READING:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_2_24dp, null);
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_3_24dp, null);
                     break;
                 case BookData.STATUS_ALREADY_READ:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_4_24dp, null);
@@ -362,9 +308,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
         return icon;
     }
-
-
-
 
 
     private static class AsyncDownload extends AsyncTask<Void, Void, Boolean> {
@@ -386,8 +329,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
             boolean isSuccess = false;
             HttpsURLConnection connection = null;
             try{
-                if(D) Log.d(TAG,"uri.toString(): " + uri.toString());
-
                 URL url = new URL(uri.toString());
                 connection = (HttpsURLConnection)url.openConnection();
                 connection.setRequestMethod("GET");
@@ -419,7 +360,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                     isSuccess = true;
                 }
             } catch (IOException e){
-     //           if(D) Log.d(TAG,"Error");
                 e.printStackTrace();
             } finally {
                 if(connection != null){
@@ -432,11 +372,8 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         @Override
         protected void onPostExecute(Boolean result) {
             if(D) Log.d(TAG,"download: " + result);
-
         }
     }
-
-
 
 
 }

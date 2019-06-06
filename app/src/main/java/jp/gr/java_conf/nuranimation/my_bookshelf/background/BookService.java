@@ -20,6 +20,8 @@ import java.util.Locale;
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.DropboxManager;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.FileManager;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
@@ -32,11 +34,23 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public static final String KEY_PARAM_SEARCH_KEYWORD = "KEY_PARAM_SEARCH_KEYWORD";
     public static final String KEY_PARAM_SEARCH_PAGE    = "KEY_PARAM_SEARCH_PAGE";
 
-    public static final int STATE_NONE                          = 0;
-    public static final int STATE_SEARCH_BOOKS_SEARCH_START     = 1;
-    public static final int STATE_SEARCH_BOOKS_SEARCH_FINISH    = 2;
-    public static final int STATE_NEW_BOOKS_RELOAD_START        = 3;
-    public static final int STATE_NEW_BOOKS_RELOAD_FINISH       = 4;
+    public static final int STATE_NONE                          =  0;
+    public static final int STATE_SEARCH_BOOKS_SEARCH_START     =  1;
+    public static final int STATE_SEARCH_BOOKS_SEARCH_FINISH    =  2;
+    public static final int STATE_NEW_BOOKS_RELOAD_START        =  3;
+    public static final int STATE_NEW_BOOKS_RELOAD_FINISH       =  4;
+    public static final int STATE_EXPORT_START                  =  5;
+    public static final int STATE_EXPORT_FINISH                 =  6;
+    public static final int STATE_IMPORT_START                  =  7;
+    public static final int STATE_IMPORT_FINISH                 =  8;
+    public static final int STATE_BACKUP_START                  =  9;
+    public static final int STATE_BACKUP_FINISH                 = 10;
+    public static final int STATE_RESTORE_START                 = 11;
+    public static final int STATE_RESTORE_FINISH                = 12;
+    public static final int STATE_DROPBOX_LOGIN                 = 13;
+
+
+
 
     private static final int notifyId = 1;
     private NotificationManager mNotificationManager;
@@ -44,6 +58,10 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private MyBookshelfApplicationData mApplicationData;
     private SearchBooksThread.Result mSearchBooksResult;
     private SearchBooksThread searchBooksThread;
+
+    private DropboxManager mDropboxManager;
+    private FileManager mFileManager;
+
 
     private String mParamSEARCH_KEYWORD;
     private int mParamSEARCH_PAGE;
@@ -92,6 +110,8 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mApplicationData = (MyBookshelfApplicationData) this.getApplicationContext();
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mDropboxManager = new DropboxManager(this);
+        mFileManager = new FileManager(this);
     }
 
 
@@ -377,5 +397,17 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         mLocalBroadcastManager.sendBroadcast(intent);
         updateNotification(mState);
     }
+
+
+
+
+    public void startAuthenticate(){
+        mDropboxManager.startAuthenticate();
+    }
+
+    public String getAccessToken(){
+        return mDropboxManager.getAccessToken();
+    }
+
 
 }
