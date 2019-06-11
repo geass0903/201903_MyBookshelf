@@ -2,6 +2,7 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
@@ -39,7 +40,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicat
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 
 
-public class SettingsFragment extends BaseFragment {
+public class SettingsFragment extends BaseFragment implements View.OnClickListener {
     public static final String TAG = SettingsFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -47,10 +48,6 @@ public class SettingsFragment extends BaseFragment {
     private static final String KEY_IS_ALLOWED_PERMISSIONS = "KEY_IS_ALLOWED_PERMISSIONS";
     private static final String KEY_IS_LOGGED_IN = "KEY_IS_LOGGED_IN";
 
-
-
-
-    private static final String KEY_CURRENT_ACTION = "KEY_CURRENT_ACTION";
 
 
     private enum ButtonAction {
@@ -68,16 +65,16 @@ public class SettingsFragment extends BaseFragment {
     private DropboxManager mDropboxManager;
     private FileManager mFileManager;
 
-    private Button mButton_Export;
-    private Button mButton_Import;
-    private Button mButton_Login;
-    private Button mButton_Logout;
-    private Button mButton_Backup;
-    private Button mButton_Restore;
+    private Button mButtonExport;
+    private Button mButtonImport;
+    private Button mButtonLogin;
+    private Button mButtonLogout;
+    private Button mButtonBackup;
+    private Button mButtonRestore;
 
     private boolean isAllowedPermissions;
     private boolean isLogged_in;
-    private int mSettingsState;
+    private int mSettingsState = BookService.STATE_NONE;
 
     @Override
     public void onAttach(Context context) {
@@ -100,23 +97,6 @@ public class SettingsFragment extends BaseFragment {
         if (getActivity() != null) {
             getActivity().setTitle(R.string.Navigation_Item_Settings);
         }
-
-        mButton_Export = view.findViewById(R.id.settings_button_export);
-        mButton_Export.setOnClickListener(button_exportListener);
-        mButton_Import = view.findViewById(R.id.settings_button_import);
-        mButton_Import.setOnClickListener(button_importListener);
-        mButton_Login = view.findViewById(R.id.settings_button_log_in_dropbox);
-        mButton_Login.setOnClickListener(button_loginListener);
-        mButton_Logout = view.findViewById(R.id.settings_button_log_out_dropbox);
-        mButton_Logout.setOnClickListener(button_logoutListener);
-        mButton_Backup = view.findViewById(R.id.settings_button_backup);
-        mButton_Backup.setOnClickListener(button_backupListener);
-        mButton_Restore = view.findViewById(R.id.settings_button_restore);
-        mButton_Restore.setOnClickListener(button_restoreListener);
-
-        initSpinner_SortSetting_Bookshelf(view);
-        initSpinner_SortSetting_SearchResult(view);
-
         if (savedInstanceState != null) {
             isAllowedPermissions = savedInstanceState.getBoolean(KEY_IS_ALLOWED_PERMISSIONS);
             isLogged_in = savedInstanceState.getBoolean(KEY_IS_LOGGED_IN);
@@ -129,44 +109,9 @@ public class SettingsFragment extends BaseFragment {
                 isLogged_in = true;
             }
         }
-        enableButton(isAllowedPermissions);
-        enableDropboxFunction(isLogged_in);
-
-        Bundle progress;
-        switch (mSettingsState) {
-            case BookService.STATE_EXPORT_START:
-            case BookService.STATE_EXPORT_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Export))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-            case BookService.STATE_IMPORT_START:
-            case BookService.STATE_IMPORT_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Import))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-            case BookService.STATE_BACKUP_START:
-            case BookService.STATE_BACKUP_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Backup))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-            case BookService.STATE_RESTORE_START:
-            case BookService.STATE_RESTORE_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Restore))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-        }
+        initSpinner(view);
+        initButton(view);
+        setProgress(mSettingsState);
     }
 
     @Override
@@ -210,29 +155,12 @@ public class SettingsFragment extends BaseFragment {
                         break;
                 }
                 break;
-            case REQUEST_CODE_ASK_FOR_PERMISSIONS:
-                switch (resultCode) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        if (D) Log.d(TAG, "Permission cancel");
-                        mCurrentAction = ButtonAction.None;
-                        break;
-                }
-                break;
-
         }
-
-
     }
 
     @Override
     public void onBaseDialogCancelled(int requestCode, Bundle params) {
         super.onBaseDialogCancelled(requestCode, params);
-        if (requestCode == REQUEST_CODE_ASK_FOR_PERMISSIONS) {
-            if (D) Log.d(TAG, "Permission cancel");
-            mCurrentAction = ButtonAction.None;
-        }
     }
 
     @Override
@@ -240,48 +168,74 @@ public class SettingsFragment extends BaseFragment {
         super.onAllowPermission(permission);
         isAllowedPermissions = true;
         enableButton(true);
-        mCurrentAction = ButtonAction.None;
     }
 
     @Override
     protected void onDenyPermission(String permission) {
         super.onDenyPermission(permission);
-        isAllowedPermissions = false;
-        enableButton(false);
     }
 
 
-
-
-
-
-    private void checkPermission() {
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-            if (D) Log.i(TAG, "isAllowedAllPermissions");
-        } else {
-            if (D) Log.i(TAG, "requestPermissions");
-            requestPermissions(mApplicationData.getUse_Permissions());
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id){
+            case R.id.settings_button_export:
+                onClickExport();
+                break;
+            case R.id.settings_button_import:
+                onClickImport();
+                break;
+            case R.id.settings_button_backup:
+                onClickBackup();
+                break;
+            case R.id.settings_button_restore:
+                onClickRestore();
+                break;
+            case R.id.settings_button_login_dropbox:
+                onClickLogin();
+                break;
+            case R.id.settings_button_logout_dropbox:
+                onClickLogout();
+                break;
         }
     }
 
-    private void initSpinner_SortSetting_Bookshelf(View view) {
+
+
+    private void initSpinner(View view) {
         Spinner spinner_SortSetting_Bookshelf = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_Bookshelf);
         SettingsSpinnerArrayAdapter arrayAdapter_SortSetting_Bookshelf = new SettingsSpinnerArrayAdapter(this.getContext(), R.layout.item_spinner, getList_Spinner_Sort_Shelf());
         spinner_SortSetting_Bookshelf.setAdapter(arrayAdapter_SortSetting_Bookshelf);
         String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_Registered_Ascending));
         spinner_SortSetting_Bookshelf.setSelection(arrayAdapter_SortSetting_Bookshelf.getPosition(code), false);
         spinner_SortSetting_Bookshelf.setOnItemSelectedListener(listener_SortSetting_Bookshelf);
-    }
 
-
-    private void initSpinner_SortSetting_SearchResult(View view) {
         Spinner spinner_SortSetting_SearchResult = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_SearchResult);
         SettingsSpinnerArrayAdapter arrayAdapter_SortSetting_SearchResult = new SettingsSpinnerArrayAdapter(getContext(), R.layout.item_spinner, getList_Spinner_Sort_SearchResult());
         spinner_SortSetting_SearchResult.setAdapter(arrayAdapter_SortSetting_SearchResult);
-        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending));
-        spinner_SortSetting_SearchResult.setSelection(arrayAdapter_SortSetting_SearchResult.getPosition(code), false);
+        String code_search = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending));
+        spinner_SortSetting_SearchResult.setSelection(arrayAdapter_SortSetting_SearchResult.getPosition(code_search), false);
         spinner_SortSetting_SearchResult.setOnItemSelectedListener(listener_SortSetting_SearchResult);
     }
+
+    private void initButton(View view){
+        mButtonExport = view.findViewById(R.id.settings_button_export);
+        mButtonExport.setOnClickListener(this);
+        mButtonImport = view.findViewById(R.id.settings_button_import);
+        mButtonImport.setOnClickListener(this);
+        mButtonBackup = view.findViewById(R.id.settings_button_backup);
+        mButtonBackup.setOnClickListener(this);
+        mButtonRestore = view.findViewById(R.id.settings_button_restore);
+        mButtonRestore.setOnClickListener(this);
+        mButtonLogin = view.findViewById(R.id.settings_button_login_dropbox);
+        mButtonLogin.setOnClickListener(this);
+        mButtonLogout = view.findViewById(R.id.settings_button_logout_dropbox);
+        mButtonLogout.setOnClickListener(this);
+        enableButton(isAllowedPermissions);
+        enableDropboxFunction(isLogged_in);
+    }
+
 
 
     private List<BaseSpinnerItem> getList_Spinner_Sort_Shelf() {
@@ -346,117 +300,108 @@ public class SettingsFragment extends BaseFragment {
 
     private void enableDropboxFunction(boolean enable){
         if(enable){
-            mButton_Login.setVisibility(View.GONE);
-            mButton_Logout.setVisibility(View.VISIBLE);
-            mButton_Backup.setVisibility(View.VISIBLE);
-            mButton_Restore.setVisibility(View.VISIBLE);
+            mButtonLogin.setVisibility(View.GONE);
+            mButtonLogout.setVisibility(View.VISIBLE);
+            mButtonBackup.setVisibility(View.VISIBLE);
+            mButtonRestore.setVisibility(View.VISIBLE);
         }else{
-            mButton_Login.setVisibility(View.VISIBLE);
-            mButton_Logout.setVisibility(View.GONE);
-            mButton_Backup.setVisibility(View.GONE);
-            mButton_Restore.setVisibility(View.GONE);
+            mButtonLogin.setVisibility(View.VISIBLE);
+            mButtonLogout.setVisibility(View.GONE);
+            mButtonBackup.setVisibility(View.GONE);
+            mButtonRestore.setVisibility(View.GONE);
         }
     }
 
     private void enableButton(boolean enable){
         if(enable){
-            mButton_Export.setBackgroundResource(R.drawable.selector_button);
-            mButton_Import.setBackgroundResource(R.drawable.selector_button);
-            mButton_Backup.setBackgroundResource(R.drawable.selector_button);
-            mButton_Restore.setBackgroundResource(R.drawable.selector_button);
+            mButtonExport.setBackgroundResource(R.drawable.selector_button);
+            mButtonImport.setBackgroundResource(R.drawable.selector_button);
+            mButtonBackup.setBackgroundResource(R.drawable.selector_button);
+            mButtonRestore.setBackgroundResource(R.drawable.selector_button);
         }else{
-            mButton_Export.setBackgroundResource(R.drawable.selector_button_disable);
-            mButton_Import.setBackgroundResource(R.drawable.selector_button_disable);
-            mButton_Backup.setBackgroundResource(R.drawable.selector_button_disable);
-            mButton_Restore.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonExport.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonImport.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonBackup.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonRestore.setBackgroundResource(R.drawable.selector_button_disable);
         }
     }
 
-    View.OnClickListener button_exportListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-                AsyncTaskCSV(ButtonAction.Export_CSV);
-            } else {
-                mCurrentAction = ButtonAction.Export_CSV;
-                checkPermission();
-            }
-        }
-    };
 
-    View.OnClickListener button_importListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-                AsyncTaskCSV(ButtonAction.Import_CSV);
-            } else {
-                mCurrentAction = ButtonAction.Import_CSV;
-                checkPermission();
-            }
-
-        }
-    };
-
-    View.OnClickListener button_backupListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-                if (mApplicationData.getSharedPreferences().contains(MyBookshelfApplicationData.KEY_ACCESS_TOKEN)) {
-                    String token = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, null);
-                    mDropboxManager.setToken(token);
-                    AsyncTaskCSV(ButtonAction.Backup_Dropbox);
-                } else {
-                    callback(ButtonAction.Backup_Dropbox, false);
-                }
-            } else {
-                mCurrentAction = ButtonAction.Backup_Dropbox;
-                checkPermission();
-            }
-
-
-        }
-    };
-
-    View.OnClickListener button_restoreListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-                if (mApplicationData.getSharedPreferences().contains(MyBookshelfApplicationData.KEY_ACCESS_TOKEN)) {
-                    String token = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, null);
-                    mDropboxManager.setToken(token);
-                    AsyncTaskCSV(ButtonAction.Restore_Dropbox);
-                } else {
-                    callback(ButtonAction.Restore_Dropbox, false);
-                }
-            } else {
-                mCurrentAction = ButtonAction.Restore_Dropbox;
-                checkPermission();
-            }
-        }
-    };
-
-    View.OnClickListener button_loginListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
+    private void onClickExport() {
+        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
-                    mSettingsState = BookService.STATE_DROPBOX_LOGIN;
-                    service.setServiceState(BookService.STATE_DROPBOX_LOGIN);
-                    service.startAuthenticate();
+                    mSettingsState = BookService.STATE_EXPORT_START;
+                    service.exportCSV();
                 }
             }
+        } else {
+            requestPermissions(mApplicationData.getUse_Permissions());
         }
-    };
+    }
 
-    View.OnClickListener button_logoutListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            showLogoutDialog();
+    private void onClickImport(){
+        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+            if (getActivity() instanceof MainActivity) {
+                BookService service = ((MainActivity) getActivity()).getService();
+                if (service != null) {
+                    mSettingsState = BookService.STATE_IMPORT_START;
+                    service.importCSV();
+                }
+            }
+        } else {
+            requestPermissions(mApplicationData.getUse_Permissions());
         }
-    };
+    }
 
-    private void showLogoutDialog() {
+    private void onClickBackup(){
+        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+            if (getActivity() instanceof MainActivity) {
+                BookService service = ((MainActivity) getActivity()).getService();
+                if (service != null) {
+                    mSettingsState = BookService.STATE_BACKUP_START;
+                    service.backupCSV();
+                }
+            }
+        } else {
+            requestPermissions(mApplicationData.getUse_Permissions());
+        }
+    }
+
+    private void onClickRestore(){
+        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+            if (getActivity() instanceof MainActivity) {
+                BookService service = ((MainActivity) getActivity()).getService();
+                if (service != null) {
+                    mSettingsState = BookService.STATE_RESTORE_START;
+                    setProgress(BookService.STATE_RESTORE_START);
+                    showProgressDialog();
+                    service.restoreCSV();
+                }
+            }
+        } else {
+            requestPermissions(mApplicationData.getUse_Permissions());
+        }
+    }
+
+
+    private void onClickLogin(){
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                mSettingsState = BookService.STATE_DROPBOX_LOGIN;
+                service.setServiceState(BookService.STATE_DROPBOX_LOGIN);
+                service.startAuthenticate();
+
+
+            }
+        }
+    }
+
+
+
+    private void onClickLogout(){
         Bundle bundle = new Bundle();
         bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Logout_Title));
         bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Logout_Message));
@@ -470,6 +415,56 @@ public class SettingsFragment extends BaseFragment {
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private void setProgress(int state){
+        Bundle progress;
+        switch (state) {
+            case BookService.STATE_EXPORT_START:
+            case BookService.STATE_EXPORT_FINISH:
+                progress = new BundleBuilder()
+                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Export))
+                        .put(BaseProgressDialogFragment.message, "")
+                        .build();
+                setProgressBundle(progress);
+                break;
+            case BookService.STATE_IMPORT_START:
+            case BookService.STATE_IMPORT_FINISH:
+                progress = new BundleBuilder()
+                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Import))
+                        .put(BaseProgressDialogFragment.message, "")
+                        .build();
+                setProgressBundle(progress);
+                break;
+            case BookService.STATE_BACKUP_START:
+            case BookService.STATE_BACKUP_FINISH:
+                progress = new BundleBuilder()
+                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Backup))
+                        .put(BaseProgressDialogFragment.message, "")
+                        .build();
+                setProgressBundle(progress);
+                break;
+            case BookService.STATE_RESTORE_START:
+            case BookService.STATE_RESTORE_FINISH:
+                progress = new BundleBuilder()
+                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Restore))
+                        .put(BaseProgressDialogFragment.message, "")
+                        .build();
+                setProgressBundle(progress);
+                break;
+        }
+    }
 
 
     public void checkSettingsState(){
@@ -523,95 +518,87 @@ public class SettingsFragment extends BaseFragment {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private void checkAction() {
-        switch (mCurrentAction) {
-            case None:
-                if(D) Log.d(TAG,"checkAction None");
-                if (mApplicationData.getSharedPreferences().contains(MyBookshelfApplicationData.KEY_ACCESS_TOKEN)) {
-                    isLogged_in = true;
-                    enableDropboxFunction(true);
-                } else {
-                    isLogged_in = false;
-                    enableDropboxFunction(false);
-                }
-                if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-                    isAllowedPermissions = true;
-                    enableButton(true);
-                } else {
-                    isAllowedPermissions = false;
-                    enableButton(false);
-                }
-                break;
-            case Log_in:
-                if(D) Log.d(TAG,"checkAction Log in");
-                mCurrentAction = ButtonAction.None;
-                try {
-                    String token = mDropboxManager.getAccessToken();
-                    if (token != null) {
-                        // Log-in Success
-                        mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, token).apply();
-                        isLogged_in = true;
-                        enableDropboxFunction(true);
+    @Override
+    public void onReceiveBroadcast(Context context, Intent intent){
+        String action = intent.getAction();
+        if(action != null){
+            switch (action){
+                case FILTER_ACTION_UPDATE_SERVICE_STATE:
+                    int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
+                    switch (state) {
+                        case BookService.STATE_NONE:
+                            if (D) Log.d(TAG, "STATE_NONE");
+                            mSettingsState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            break;
+                        case BookService.STATE_EXPORT_FINISH:
+                            mSettingsState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            break;
+                        case BookService.STATE_IMPORT_FINISH:
+                            mSettingsState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            break;
+                        case BookService.STATE_BACKUP_FINISH:
+                            mSettingsState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            break;
+                        case BookService.STATE_RESTORE_FINISH:
+                            mSettingsState = BookService.STATE_NONE;
+                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            break;
                     }
-                } catch (IllegalStateException e) {
-                    // IllegalStateException
-                    if(D) Log.d(TAG,"IllegalStateException");
-                }
-                break;
-            case Log_out:
-                if(D) Log.d(TAG,"checkAction Log out");
-                mCurrentAction = ButtonAction.None;
-                mApplicationData.getSharedPreferences().edit().remove(MyBookshelfApplicationData.KEY_ACCESS_TOKEN).apply();
-                isLogged_in = false;
-                enableDropboxFunction(false);
-                break;
+                    break;
+                case FILTER_ACTION_UPDATE_PROGRESS:
+                    String progress = intent.getStringExtra(KEY_UPDATE_PROGRESS);
+                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, progress).sendToTarget();
+                    break;
+            }
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public void callback(ButtonAction action, boolean result) {

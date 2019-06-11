@@ -105,8 +105,8 @@ public class SettingsFragment2 extends BaseFragment {
         if (D) Log.d(TAG, "mCurrentAction: " + mCurrentAction);
         mButton_Export = view.findViewById(R.id.settings_button_export);
         mButton_Import = view.findViewById(R.id.settings_button_import);
-        mButton_Login = view.findViewById(R.id.settings_button_log_in_dropbox);
-        mButton_Logout = view.findViewById(R.id.settings_button_log_out_dropbox);
+        mButton_Login = view.findViewById(R.id.settings_button_login_dropbox);
+        mButton_Logout = view.findViewById(R.id.settings_button_logout_dropbox);
         mButton_Backup = view.findViewById(R.id.settings_button_backup);
         mButton_Restore = view.findViewById(R.id.settings_button_restore);
         mButton_Export.setOnClickListener(button_exportListener);

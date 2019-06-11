@@ -12,6 +12,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.dropbox.core.android.Auth;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -26,9 +28,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicat
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
-public class BookService extends Service implements SearchBooksThread.ThreadFinishListener {
+public class BookService extends Service implements SearchBooksThread.ThreadFinishListener,DropboxThread.ThreadFinishListener,FileIOThread.ThreadFinishListener {
     public static final String TAG = BookService.class.getSimpleName();
     private static final boolean D = true;
+
 
     public static final String KEY_SERVICE_STATE = "KEY_SERVICE_STATE";
     public static final String KEY_PARAM_SEARCH_KEYWORD = "KEY_PARAM_SEARCH_KEYWORD";
@@ -58,6 +61,8 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private MyBookshelfApplicationData mApplicationData;
     private SearchBooksThread.Result mSearchBooksResult;
     private SearchBooksThread searchBooksThread;
+    private FileIOThread fileIOThread;
+    private DropboxThread dropboxThread;
 
     private DropboxManager mDropboxManager;
     private FileManager mFileManager;
@@ -140,35 +145,124 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
 
     @Override
-    public void deliverResult(SearchBooksThread.Result result) {
-//        if (D) Log.d(TAG, "deliverResult");
-        switch(mState){
-            case STATE_NONE:
-                break;
+    public void deliverSearchBooksResult(SearchBooksThread.Result result) {
+        switch(mState) {
             case STATE_SEARCH_BOOKS_SEARCH_START:
                 saveSearchBooksResult(result);
-                if(result.isSuccess()) {
+                if (result.isSuccess()) {
                     mApplicationData.registerToSearchBooks(result.getBooks());
                 }
                 setServiceState(STATE_SEARCH_BOOKS_SEARCH_FINISH);
-                break;
-            case STATE_SEARCH_BOOKS_SEARCH_FINISH:
                 break;
             case STATE_NEW_BOOKS_RELOAD_START:
                 saveSearchBooksResult(result);
                 String author = getSearchKeyword();
                 int page = getSearchPage();
-                if(!TextUtils.isEmpty(author) && page > 0){
+                if (!TextUtils.isEmpty(author) && page > 0) {
                     searchBooksThread = new SearchBooksThread(this, author, page, getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending));
                     searchBooksThread.start();
-                }else{
+                } else {
                     mApplicationData.registerToNewBooks(resultNewBooks);
                     setServiceState(STATE_NEW_BOOKS_RELOAD_FINISH);
                 }
                 break;
-            case STATE_NEW_BOOKS_RELOAD_FINISH:
+            default:
+                if (D) Log.d(TAG, "Error");
+                setServiceState(STATE_NONE);
                 break;
         }
+    }
+
+    @Override
+    public void deliverExportResult(FileIOThread.Result result) {
+        switch (mState) {
+            case STATE_EXPORT_START:
+                break;
+            case STATE_BACKUP_START:
+                if(result.isSuccess()) {
+                    String token = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, null);
+                    DropboxThread mDropboxThread = new DropboxThread(this, DropboxThread.TYPE_BACKUP, token);
+                    mDropboxThread.start();
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    @Override
+    public void deliverImportResult(FileIOThread.Result result) {
+        switch(mState) {
+            case STATE_IMPORT_START:
+                if(result.isSuccess()){
+                    setServiceState(STATE_IMPORT_FINISH);
+                }
+                break;
+            case STATE_RESTORE_START:
+                if(result.isSuccess()) {
+                    setServiceState(STATE_RESTORE_FINISH);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    @Override
+    public void deliverBackupResult(DropboxThread.Result result) {
+        switch(mState) {
+            case STATE_BACKUP_START:
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void deliverRestoreResult(DropboxThread.Result result) {
+        switch(mState) {
+            case STATE_RESTORE_START:
+                if(result.isSuccess()) {
+                    fileIOThread = new FileIOThread(this, FileIOThread.TYPE_IMPORT);
+                    fileIOThread.start();
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+
+    public void setServiceState(int state){
+        this.mState = state;
+        Intent intent = new Intent();
+        intent.putExtra(BaseFragment.KEY_UPDATE_SERVICE_STATE, state);
+        intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_SERVICE_STATE);
+        mLocalBroadcastManager.sendBroadcast(intent);
+        updateNotification(mState);
+    }
+
+    public int getServiceState(){
+        return mState;
+    }
+
+    public void setSearchKeyword(String keyword){
+        this.mParamSEARCH_KEYWORD = keyword;
+    }
+
+    public String getSearchKeyword(){
+        return this.mParamSEARCH_KEYWORD;
+    }
+
+    public void setSearchPage(int page){
+        this.mParamSEARCH_PAGE = page;
+    }
+
+    public int getSearchPage(){
+        return this.mParamSEARCH_PAGE;
     }
 
 
@@ -214,8 +308,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         }
     }
 
-
-
     public void cancelReload(){
         if(searchBooksThread != null){
             searchBooksThread.cancel();
@@ -225,34 +317,9 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     }
 
 
-    public void setServiceState(int state){
-        this.mState = state;
-        Intent intent = new Intent();
-        intent.putExtra(BaseFragment.KEY_UPDATE_SERVICE_STATE, state);
-        intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_SERVICE_STATE);
-        mLocalBroadcastManager.sendBroadcast(intent);
-        updateNotification(mState);
-    }
 
-    public int getServiceState(){
-        return mState;
-    }
 
-    public void setSearchKeyword(String keyword){
-        this.mParamSEARCH_KEYWORD = keyword;
-    }
 
-    public String getSearchKeyword(){
-        return this.mParamSEARCH_KEYWORD;
-    }
-
-    public void setSearchPage(int page){
-        this.mParamSEARCH_PAGE = page;
-    }
-
-    public int getSearchPage(){
-        return this.mParamSEARCH_PAGE;
-    }
 
     public SearchBooksThread.Result loadSearchBooksResult(){
         if(mSearchBooksResult == null){
@@ -315,6 +382,77 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         }
     }
 
+
+
+
+
+    public void exportCSV(){
+        setServiceState(STATE_EXPORT_START);
+        fileIOThread = new FileIOThread(this, FileIOThread.TYPE_EXPORT);
+        fileIOThread.start();
+    }
+
+
+    public void importCSV(){
+        setServiceState(STATE_IMPORT_START);
+        fileIOThread = new FileIOThread(this, FileIOThread.TYPE_IMPORT);
+        fileIOThread.start();
+    }
+
+
+    public void backupCSV(){
+        setServiceState(STATE_BACKUP_START);
+        fileIOThread = new FileIOThread(this, FileIOThread.TYPE_EXPORT);
+        fileIOThread.start();
+    }
+
+    public void restoreCSV(){
+        setServiceState(STATE_RESTORE_START);
+        String token = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, null);
+        dropboxThread = new DropboxThread(this, DropboxThread.TYPE_RESTORE, token);
+        dropboxThread.start();
+    }
+
+
+
+
+
+
+
+
+
+
+
+    public void startAuthenticate(){
+        Auth.startOAuth2Authentication(this,getString(R.string.Dropbox_App_Key));
+    }
+
+    public String getAccessToken(){
+        return Auth.getOAuth2Token();
+    }
+
+
+
+
+
+
+    private void updateProgress(){
+        Intent intent = new Intent();
+        String progress = String.format(Locale.JAPAN, "%d / %d", progress_now, progress_last);
+        intent.putExtra(BaseFragment.KEY_UPDATE_PROGRESS, progress);
+        intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
+        mLocalBroadcastManager.sendBroadcast(intent);
+        updateNotification(mState);
+    }
+
+
+    private void updateNotification(int state) {
+        if(mNotificationManager != null && isForeground) {
+            Notification notification = createNotification(state);
+            mNotificationManager.notify(notifyId,notification);
+        }
+    }
+
     private Notification createNotification(int state){
         Notification notification;
         String title = getString(R.string.Notification_Channel_Title);
@@ -370,12 +508,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         return notification;
     }
 
-    private void updateNotification(int state) {
-        if(mNotificationManager != null && isForeground) {
-            Notification notification = createNotification(state);
-            mNotificationManager.notify(notifyId,notification);
-        }
-    }
+
 
     private boolean isNewBook(BookData book){
         Calendar baseDate = Calendar.getInstance();
@@ -389,25 +522,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     }
 
 
-    private void updateProgress(){
-        Intent intent = new Intent();
-        String progress = String.format(Locale.JAPAN, "%d / %d", progress_now, progress_last);
-        intent.putExtra(BaseFragment.KEY_UPDATE_PROGRESS, progress);
-        intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
-        mLocalBroadcastManager.sendBroadcast(intent);
-        updateNotification(mState);
-    }
-
-
-
-
-    public void startAuthenticate(){
-        mDropboxManager.startAuthenticate();
-    }
-
-    public String getAccessToken(){
-        return mDropboxManager.getAccessToken();
-    }
 
 
 }

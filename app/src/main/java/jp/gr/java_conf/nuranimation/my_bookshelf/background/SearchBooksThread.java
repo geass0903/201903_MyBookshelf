@@ -111,7 +111,7 @@ public class SearchBooksThread extends Thread {
     }
 
     public interface ThreadFinishListener {
-        void deliverResult(Result result);
+        void deliverSearchBooksResult(Result result);
     }
 
 
@@ -242,7 +242,7 @@ public class SearchBooksThread extends Thread {
         }
         if (D) Log.d(TAG, "thread finish");
         if (mListener != null && !isCanceled && mResult != null) {
-            mListener.deliverResult(mResult);
+            mListener.deliverSearchBooksResult(mResult);
         }
     }
 

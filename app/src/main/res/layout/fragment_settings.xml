@@ -173,7 +173,7 @@
                     android:background="@color/colorLineMargin" />
             </LinearLayout>
             <Button
-                android:id="@+id/settings_button_log_in_dropbox"
+                android:id="@+id/settings_button_login_dropbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
@@ -181,7 +181,7 @@
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Settings_button_log_in_dropbox" />
             <Button
-                android:id="@+id/settings_button_log_out_dropbox"
+                android:id="@+id/settings_button_logout_dropbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
