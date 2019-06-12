@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
@@ -349,7 +351,35 @@ public class FileIOThread extends Thread {
         bookData.setSalesDate(convertSalesDate(split[11]));
         bookData.setItemPrice(split[12]);
         bookData.setRakutenUrl(split[13]);
-        bookData.setImage(split[17]);
+
+
+        String url = split[17];
+//        String REGEX_CSV_COMMA = ",";
+        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
+        String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
+
+        Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
+        Matcher matcher = sdqPattern.matcher(url);
+        url = matcher.replaceAll("");
+        Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
+        matcher = sbPattern.matcher(url);
+        url = matcher.replaceAll("");
+
+        int index = url.lastIndexOf(".jpg");
+        if(index != -1) {
+            url = url.substring(0, index+4);
+        }else{
+            index = url.lastIndexOf(".gif");
+            if(index != -1){
+                url = url.substring(0, index+4);
+            }
+        }
+
+        if(D) Log.d(TAG,"url: " + url);
+
+
+        bookData.setImage(url);
+//        bookData.setImage(split[17]);
         bookData.setRating(split[18]);
         bookData.setReadStatus(split[19]);
         bookData.setTags(split[23]);

@@ -22,6 +22,8 @@ public class MyBookshelfUtils {
     public static final String TAG = MyBookshelfUtils.class.getSimpleName();
     private static final boolean D = true;
 
+    public static final int IMAGE_TYPE_LARGE = 1;
+    public static final int IMAGE_TYPE_SMALL = 2;
 
 
     public static boolean isValid(String word) throws PatternSyntaxException {
@@ -124,7 +126,7 @@ public class MyBookshelfUtils {
         }
         is.mark(3);
         if( is.available() >= 3 ){
-            byte b[] = {0,0,0};
+            byte[] b = {0, 0, 0};
             int bytes = is.read(b,0,3);
             if(bytes == 3 &&  b[0]!=(byte)0xEF  || b[1]!=(byte)0xBB || b[2]!= (byte)0xBF ){
                 is.reset();
@@ -156,11 +158,11 @@ public class MyBookshelfUtils {
 
 
 
-    public static Uri getImageUri(String url){
+    public static Uri getImageUri(String url, int type){
         if(TextUtils.isEmpty(url)){
             return null;
         }
-        String REGEX_CSV_COMMA = ",";
+//        String REGEX_CSV_COMMA = ",";
         String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
         String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
 
@@ -170,9 +172,34 @@ public class MyBookshelfUtils {
         Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
         matcher = sbPattern.matcher(url);
         url = matcher.replaceAll("");
-        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
-        String[] arr = cPattern.split(url, -1);
-        return Uri.parse(arr[0]);
+
+        int index = url.lastIndexOf(".jpg");
+        if(index != -1) {
+            url = url.substring(0, index+4);
+        }else{
+            index = url.lastIndexOf(".gif");
+            if(index != -1){
+                url = url.substring(0, index+4);
+            }
+        }
+
+        if(D) Log.d(TAG,"url: " + url);
+
+        switch (type){
+            case IMAGE_TYPE_LARGE:
+                url = url + "?_200x200";
+                break;
+            case IMAGE_TYPE_SMALL:
+                url = url + "?_100x100";
+                break;
+        }
+
+
+
+//        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
+//        String[] arr = cPattern.split(url, -1);
+        return Uri.parse(url);
+//        return Uri.parse(arr[0]);
     }
 
 

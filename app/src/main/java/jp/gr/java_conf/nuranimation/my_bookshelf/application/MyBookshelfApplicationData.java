@@ -5,11 +5,17 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.facebook.cache.disk.DiskCacheConfig;
+import com.facebook.drawee.backends.pipeline.DraweeConfig;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerFactory;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
+import java.io.File;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
@@ -39,7 +45,30 @@ public class MyBookshelfApplicationData extends Application {
     public void onCreate(){
         super.onCreate();
         if(D) Log.d(TAG,"onCreate");
-        Fresco.initialize(this);
+
+//        File cacheDir = getCacheDir();
+
+        String APPLICATION_DIRECTORY_PATH = "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
+
+        File dir = Environment.getExternalStorageDirectory();
+        File cacheDir = new File(dir.getPath() + APPLICATION_DIRECTORY_PATH);
+
+
+
+        DiskCacheConfig largeImageCacheConfig = DiskCacheConfig.newBuilder(this)
+                .setBaseDirectoryName("largeImageCache")
+                .setBaseDirectoryPath(cacheDir)
+                .build();
+        DiskCacheConfig smallImageCacheConfig = DiskCacheConfig.newBuilder(this)
+                .setBaseDirectoryName("smallImageCache")
+                .setBaseDirectoryPath(cacheDir)
+                .build();
+        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
+                .setMainDiskCacheConfig(largeImageCacheConfig)
+                .setSmallImageDiskCacheConfig(smallImageCacheConfig)
+                .build();
+
+        Fresco.initialize(this, config);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannelManager.create(getApplicationContext(),getString(R.string.Notification_Channel_ID), R.string.Notification_Channel_Title, R.string.Notification_Channel_Description);
         }

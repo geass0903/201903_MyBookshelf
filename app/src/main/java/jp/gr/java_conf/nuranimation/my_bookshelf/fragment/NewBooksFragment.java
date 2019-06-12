@@ -95,7 +95,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-        mNewBooksViewAdapter = new BooksListViewAdapter(getContext(), mNewBooks, BooksListViewAdapter.LIST_TYPE_NEW_BOOKS, true);
+        mNewBooksViewAdapter = new BooksListViewAdapter(getContext(), mNewBooks, BooksListViewAdapter.LIST_TYPE_NEW_BOOKS);
         mNewBooksViewAdapter.setClickListener(this);
         mRecyclerView = view.findViewById(R.id.fragment_new_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);

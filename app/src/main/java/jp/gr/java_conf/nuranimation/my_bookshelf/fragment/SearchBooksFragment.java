@@ -103,7 +103,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchBooks = loadSearchBooksData(null);
             }
         }
-        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks, BooksListViewAdapter.LIST_TYPE_SEARCH_BOOKS, false);
+        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks, BooksListViewAdapter.LIST_TYPE_SEARCH_BOOKS);
         mSearchBooksViewAdapter.setClickListener(this);
         RecyclerView mRecyclerView = view.findViewById(R.id.fragment_search_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);

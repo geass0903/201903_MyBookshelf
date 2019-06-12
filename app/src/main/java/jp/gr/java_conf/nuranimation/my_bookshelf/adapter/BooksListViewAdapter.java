@@ -3,8 +3,6 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
@@ -13,17 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
-import javax.net.ssl.HttpsURLConnection;
+import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
@@ -33,7 +25,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
     private static final String TAG = BooksListViewAdapter.class.getSimpleName();
-    private static final boolean D = false;
+    private static final boolean D = true;
 
     public static final int LIST_TYPE_SHELF_BOOKS   = 1;
     public static final int LIST_TYPE_SEARCH_BOOKS  = 2;
@@ -50,27 +42,31 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     private RecyclerView mRecyclerView;
     private OnBookClickListener mListener;
 
-    private boolean doDownload;
-    private File downloadDir;
     private int list_type;
 
+    public class LoadViewHolder extends RecyclerView.ViewHolder {
+        LoadViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
 
-    public BooksListViewAdapter(Context context, List<BookData> list, int list_type, boolean download) {
+    public class LoadingViewHolder extends RecyclerView.ViewHolder {
+        LoadingViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    public interface OnBookClickListener{
+        void onBookClick(BooksListViewAdapter adapter, int position, BookData data);
+        void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data);
+    }
+
+
+    public BooksListViewAdapter(Context context, List<BookData> list, int list_type) {
         this.mContext = context;
         this.list = list;
         this.list_type = list_type;
-        this.doDownload = download;
         mApplicationData = (MyBookshelfApplicationData) mContext.getApplicationContext();
-        File dir = Environment.getExternalStorageDirectory();
-        String dirPath = dir.getPath() + "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/BookImage";
-        downloadDir = new File(dirPath);
-        if(!downloadDir.exists()){
-            boolean isSuccess = downloadDir.mkdirs();
-            if(D) Log.d(TAG,"mkdirs(): " + isSuccess);
-            if(!isSuccess){
-                doDownload = false;
-            }
-        }
     }
 
     @Override
@@ -121,57 +117,26 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksViewHolder) {
             BooksViewHolder viewHolder = (BooksViewHolder) holder;
-
-            BookData book = mApplicationData.loadBookDataFromShelfBooks(list.get(position));
-
+            BookData registered_book = mApplicationData.loadBookDataFromShelfBooks(list.get(position));
             switch(list_type) {
                 case LIST_TYPE_SHELF_BOOKS:
-                    if (book != null) {
-                        viewHolder.getImageView().setImageURI(getUri(book));
-                        viewHolder.getTitleView().setText(book.getTitle());
-                        viewHolder.getAuthorView().setText(book.getAuthor());
-                        viewHolder.getPublisherView().setText(book.getPublisher());
-                        viewHolder.getSalesDateView().setText(book.getSalesDate());
-                        viewHolder.getItemPriceView().setText(book.getItemPrice());
-                        viewHolder.getRatingView().setRating(Float.parseFloat(book.getRating()));
-                        viewHolder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
-                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
+                    if (registered_book != null) {
+                        bindViewHolder(viewHolder, registered_book);
                     } else {
-                        viewHolder.getImageView().setImageURI(getUri(list.get(position)));
-                        viewHolder.getTitleView().setText(list.get(position).getTitle());
-                        viewHolder.getAuthorView().setText(list.get(position).getAuthor());
-                        viewHolder.getPublisherView().setText(list.get(position).getPublisher());
-                        viewHolder.getSalesDateView().setText(list.get(position).getSalesDate());
-                        viewHolder.getItemPriceView().setText(list.get(position).getItemPrice());
-                        viewHolder.getRatingView().setRating(Float.parseFloat(list.get(position).getRating()));
-                        viewHolder.getReadStatusView().setText(getReadStatusText(list.get(position).getReadStatus()));
-                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+                        bindViewHolder(viewHolder, list.get(position));
                     }
                     break;
                 case LIST_TYPE_SEARCH_BOOKS:
                 case LIST_TYPE_NEW_BOOKS:
-                    viewHolder.getImageView().setImageURI(getUri(list.get(position)));
-                    viewHolder.getTitleView().setText(list.get(position).getTitle());
-                    viewHolder.getAuthorView().setText(list.get(position).getAuthor());
-                    viewHolder.getPublisherView().setText(list.get(position).getPublisher());
-                    viewHolder.getSalesDateView().setText(list.get(position).getSalesDate());
-                    viewHolder.getItemPriceView().setText(list.get(position).getItemPrice());
-                    if (book != null) {
-                        viewHolder.getRatingView().setRating(Float.parseFloat(book.getRating()));
-                        viewHolder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
-                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
-                    } else {
-                        viewHolder.getRatingView().setRating(Float.parseFloat(list.get(position).getRating()));
-                        viewHolder.getReadStatusView().setText(getReadStatusText(list.get(position).getReadStatus()));
-                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+                    BookData book = new BookData(list.get(position));
+                    if(registered_book != null){
+                        book.setRating(registered_book.getRating());
+                        book.setReadStatus(registered_book.getReadStatus());
                     }
+                    bindViewHolder(viewHolder, book);
                     break;
             }
         }
-    }
-
-    public void setClickListener(OnBookClickListener listener){
-        this.mListener = listener;
     }
 
 
@@ -195,21 +160,8 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         return false;
     }
 
-    public class LoadViewHolder extends RecyclerView.ViewHolder {
-        LoadViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-    }
-
-    public class LoadingViewHolder extends RecyclerView.ViewHolder {
-        LoadingViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-    }
-
-    public interface OnBookClickListener{
-        void onBookClick(BooksListViewAdapter adapter, int position, BookData data);
-        void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data);
+    public void setClickListener(OnBookClickListener listener){
+        this.mListener = listener;
     }
 
     public void replaceBooksData(List<BookData> books){
@@ -260,25 +212,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                 notifyItemInserted(lastPosition);
             }
         }
-    }
-
-    private Uri getUri(BookData book){
-        String isbn = book.getISBN();
-        String image = book.getImage();
-        String filename = isbn + ".jpg";
-
-        File file = new File(downloadDir.getPath() + "/" + filename);
-        if(D) Log.d(TAG,"file: " + file.getPath());
-        if(file.exists()){
-            if(D) Log.d(TAG,"file exist: " + filename);
-            return Uri.fromFile(file);
-        }
-
-        Uri uri = MyBookshelfUtils.getImageUri(image);
-        if(doDownload) {
-            new AsyncDownload(uri, file).execute();
-        }
-        return uri;
     }
 
 
@@ -343,70 +276,31 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
 
-    private static class AsyncDownload extends AsyncTask<Void, Void, Boolean> {
-        final Uri uri;
-        final File file;
 
-        private AsyncDownload(Uri uri, File file){
-            this.uri = uri;
-            this.file = file;
-        }
 
-        @Override
-        protected void onPreExecute() {
 
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            boolean isSuccess = false;
-            HttpsURLConnection connection = null;
-            try{
-                URL url = new URL(uri.toString());
-                connection = (HttpsURLConnection)url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setInstanceFollowRedirects(false);
-                connection.connect();
-
-                int status = connection.getResponseCode();
-                if(status == HttpURLConnection.HTTP_OK){
-                    final InputStream input = connection.getInputStream();
-                    final DataInputStream dataInput = new DataInputStream(input);
-                    // 書き込み用ストリーム
-                    final FileOutputStream fileOutput = new FileOutputStream(file.getPath());
-                    final DataOutputStream dataOut = new DataOutputStream(fileOutput);
-                    // 読み込みデータ単位
-                    final byte[] buffer = new byte[4096];
-                    // 読み込んだデータを一時的に格納しておく変数
-                    int readByte;
-
-                    // ファイルを読み込む
-                    while((readByte = dataInput.read(buffer)) != -1) {
-                        dataOut.write(buffer, 0, readByte);
-                    }
-                    // 各ストリームを閉じる
-                    dataInput.close();
-                    fileOutput.close();
-                    dataInput.close();
-                    input.close();
-                    // 処理成功
-                    isSuccess = true;
-                }
-            } catch (IOException e){
-                e.printStackTrace();
-            } finally {
-                if(connection != null){
-                    connection.disconnect();
-                }
-            }
-            return isSuccess;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            if(D) Log.d(TAG,"download: " + result);
-        }
+    private void bindViewHolder(BooksViewHolder holder, BookData book){
+        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(book.getImage()))
+                .setCacheChoice(ImageRequest.CacheChoice.SMALL)
+                .build();
+//        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(MyBookshelfUtils.getImageUri(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_SMALL))
+//                .setCacheChoice(ImageRequest.CacheChoice.SMALL)
+//                .build();
+        holder.getImageView().setController(
+                Fresco.newDraweeControllerBuilder()
+                        .setOldController(holder.getImageView().getController())
+                        .setImageRequest(request)
+                        .build());
+        holder.getTitleView().setText(book.getTitle());
+        holder.getAuthorView().setText(book.getAuthor());
+        holder.getPublisherView().setText(book.getPublisher());
+        holder.getSalesDateView().setText(book.getSalesDate());
+        holder.getItemPriceView().setText(book.getItemPrice());
+        holder.getRatingView().setRating(Float.parseFloat(book.getRating()));
+        holder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
+        holder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
     }
+
 
 
 }

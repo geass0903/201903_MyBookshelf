@@ -83,7 +83,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         if(mShelfBooks == null) {
             mShelfBooks = mApplicationData.loadShelfBooks(mKeyword);
         }
-        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS, true);
+        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS);
         mShelfBooksViewAdapter.setClickListener(this);
         mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);

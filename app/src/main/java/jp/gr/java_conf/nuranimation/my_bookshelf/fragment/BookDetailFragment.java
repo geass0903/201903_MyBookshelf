@@ -254,7 +254,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private void setBookData(BookData book){
         if(book != null) {
-            mBookImageView.setImageURI(MyBookshelfUtils.getImageUri(book.getImage()));
+            mBookImageView.setImageURI(MyBookshelfUtils.getImageUri(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_LARGE));
             titleView.setText(book.getTitle());
             authorView.setText(book.getAuthor());
             publisherView.setText(book.getPublisher());
