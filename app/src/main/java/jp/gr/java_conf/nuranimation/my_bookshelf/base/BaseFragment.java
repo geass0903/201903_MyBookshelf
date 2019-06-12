@@ -284,8 +284,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                 + getString(R.string.Permission_Message2) + "\n"
                 + getString(R.string.Permission_Message3);
         bundle.putString(BaseDialogFragment.KEY_MESSAGE,message);
-        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Permission_PositiveLabel));
-        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Permission_NegativeLabel));
+        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive));
+        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative));
         bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE,true);
         bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS);
         setPermissionBundle(bundle);

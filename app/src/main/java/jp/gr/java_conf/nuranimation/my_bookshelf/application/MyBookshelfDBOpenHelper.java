@@ -236,7 +236,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
     private List<BookData> loadBooks(final String table, final String keyword) {
-        List<BookData> books = new ArrayList<>();
+        List<BookData> books = new ArrayList<>(1000);
         String where = "";
         String order = "";
 
@@ -377,7 +377,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
     public List<String> loadAuthorsList() {
-        List<String> authors = new ArrayList<>();
+        List<String> authors = new ArrayList<>(100);
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "select * from " + TABLE_AUTHORS + " order by " + KEY_AUTHOR + " asc" + ";";
         Cursor c = db.rawQuery(sql, null);

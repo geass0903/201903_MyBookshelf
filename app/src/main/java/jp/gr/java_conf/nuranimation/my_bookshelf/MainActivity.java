@@ -25,13 +25,9 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean D = true;
 
-    private static final String KEY_NAVIGATION_STATE = "KEY_NAVIGATION_STATE";
-
     private MyBookshelfApplicationData mApplicationData;
     private BookService mBookService;
     private BottomNavigationView mBottomNavigationView;
-    private int navigation_state = 0;
-
 
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -40,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             if (D) Log.d(TAG, "onServiceConnected");
             mBookService = ((BookService.MBinder)binder).getService();
             mBookService.endForeground();
-            checkServiceState();
+            applyFragment(mBookService);
         }
 
         @Override
@@ -60,11 +56,11 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         if (D) Log.e(TAG, "+++ ON CREATE +++");
         setContentView(R.layout.activity_main);
         mApplicationData = (MyBookshelfApplicationData)getApplicationContext();
-
         Toolbar toolbar = findViewById(R.id.activity_main_toolbar);
         setSupportActionBar(toolbar);
         mBottomNavigationView = findViewById(R.id.navigation);
         mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        mBottomNavigationView.setOnNavigationItemReselectedListener(mOnNavigationItemReselectedListener);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new ShelfBooksFragment(), ShelfBooksFragment.TAG).commit();
         }
@@ -91,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             bindService(intent,connection, Service.BIND_AUTO_CREATE);
         }else{
             mBookService.endForeground();
-            checkServiceState();
+            applyFragment(mBookService);
         }
     }
 
@@ -100,14 +96,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
     public synchronized void onPause() {
         super.onPause();
         if (D) Log.e(TAG, "- ON PAUSE - ");
-        if(mBookService != null){
-            if(mBookService.getServiceState() != BookService.STATE_NONE){
-                Intent intent = new Intent(this, BookService.class);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(intent);
-                }else{
-                    startService(intent);
-                }
+        if (mBookService != null && mBookService.getServiceState() != BookService.STATE_NONE) {
+            Intent intent = new Intent(this, BookService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
             }
         }
     }
@@ -131,180 +125,107 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
 
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(KEY_NAVIGATION_STATE, navigation_state);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        navigation_state = savedInstanceState.getInt(KEY_NAVIGATION_STATE, 0);
-    }
-
-
-    @Override
     public void onFragmentEvent(MyBookshelfEvent event, Bundle bundle) {
         event.apply(this,bundle);
     }
 
 
-    private void onActivityEvent(MyBookshelfEvent event, Bundle bundle){
-        event.apply(this,bundle);
-    }
 
+    private void applyFragment(BookService bookService) {
+        Bundle bundle;
+        int navigation_state = mBottomNavigationView.getSelectedItemId();
+        int serviceState = bookService.getServiceState();
 
-    private void checkServiceState() {
-        if (D) Log.d(TAG, "checkServiceState : " + navigation_state);
-        switch(navigation_state){
-            case 0:
-                Bundle bundle;
-                switch (mBookService.getServiceState()) {
-                    case BookService.STATE_NONE:
-                        mBottomNavigationView.getMenu().findItem(R.id.navigation_shelf).setChecked(true);
-                        navigation_state = R.id.navigation_shelf;
-                        break;
-                    case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
-                    case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
-                        mBottomNavigationView.getMenu().findItem(R.id.navigation_search).setChecked(true);
-                        navigation_state = R.id.navigation_search;
-                        bundle = new BundleBuilder()
-                                .put(BookService.KEY_SERVICE_STATE, mBookService.getServiceState())
-                                .put(BookService.KEY_PARAM_SEARCH_KEYWORD, mBookService.getSearchKeyword())
-                                .put(BookService.KEY_PARAM_SEARCH_PAGE, mBookService.getSearchPage())
-                                .build();
-                        if (D) Log.d(TAG, "MOVE_OTHER_TO_SEARCH_BOOKS bundle: " + bundle);
-                        onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_SEARCH_BOOKS, bundle);
-                        break;
-                    case BookService.STATE_NEW_BOOKS_RELOAD_START:
-                    case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
-                        mBottomNavigationView.getMenu().findItem(R.id.navigation_new).setChecked(true);
-                        navigation_state = R.id.navigation_new;
-                        bundle = new BundleBuilder()
-                                .put(BookService.KEY_SERVICE_STATE, mBookService.getServiceState())
-                                .build();
-                        if (D) Log.d(TAG, "MOVE_OTHER_TO_SEARCH_BOOKS bundle: " + bundle);
-                        onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_NEW_BOOKS, bundle);
-                        break;
-                    case BookService.STATE_EXPORT_START:
-                    case BookService.STATE_EXPORT_FINISH:
-                    case BookService.STATE_IMPORT_START:
-                    case BookService.STATE_IMPORT_FINISH:
-                    case BookService.STATE_BACKUP_START:
-                    case BookService.STATE_BACKUP_FINISH:
-                    case BookService.STATE_RESTORE_START:
-                    case BookService.STATE_RESTORE_FINISH:
-                    case BookService.STATE_DROPBOX_LOGIN:
-                        mBottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
-                        navigation_state = R.id.navigation_settings;
-                        bundle = new BundleBuilder()
-                                .put(BookService.KEY_SERVICE_STATE, mBookService.getServiceState())
-                                .build();
-                        if (D) Log.d(TAG, "MOVE_OTHER_TO_SETTINGS bundle: " + bundle);
-                        onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_SETTINGS, bundle);
-                        break;
+        switch(serviceState) {
+            case BookService.STATE_NONE:
+                break;
+            case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
+            case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
+                if (navigation_state != R.id.navigation_search_books) {
+                    mBottomNavigationView.getMenu().findItem(R.id.navigation_search_books).setChecked(true);
+                    bundle = new BundleBuilder()
+                            .put(BookService.KEY_SERVICE_STATE, serviceState)
+                            .put(BookService.KEY_PARAM_SEARCH_KEYWORD, bookService.getSearchKeyword())
+                            .put(BookService.KEY_PARAM_SEARCH_PAGE, bookService.getSearchPage())
+                            .build();
+                    onFragmentEvent(MyBookshelfEvent.SELECT_SEARCH_BOOKS, bundle);
+                }else {
+                    onFragmentEvent(MyBookshelfEvent.CHECK_SEARCH_STATE, null);
                 }
                 break;
-            case R.id.navigation_shelf:
-                break;
-            case R.id.navigation_search:
-                switch(mBookService.getServiceState()){
-                    case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
-                    case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
-                        if (D) Log.d(TAG, "ACTION_CHECK_SEARCH_STATE");
-                        onActivityEvent(MyBookshelfEvent.ACTION_CHECK_SEARCH_STATE,null);
-                        break;
+            case BookService.STATE_NEW_BOOKS_RELOAD_START:
+            case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
+                if (navigation_state != R.id.navigation_new_books) {
+                    mBottomNavigationView.getMenu().findItem(R.id.navigation_new_books).setChecked(true);
+                    bundle = new BundleBuilder()
+                            .put(BookService.KEY_SERVICE_STATE, serviceState)
+                            .build();
+                    onFragmentEvent(MyBookshelfEvent.SELECT_NEW_BOOKS, bundle);
+                }else {
+                    onFragmentEvent(MyBookshelfEvent.CHECK_RELOAD_STATE, null);
                 }
                 break;
-            case R.id.navigation_new:
-                switch(mBookService.getServiceState()){
-                    case BookService.STATE_NEW_BOOKS_RELOAD_START:
-                    case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
-                        if (D) Log.d(TAG, "ACTION_CHECK_RELOAD_STATE");
-                        onActivityEvent(MyBookshelfEvent.ACTION_CHECK_RELOAD_STATE,null);
-                        break;
-                }
-                break;
-            case R.id.navigation_settings:
-                switch (mBookService.getServiceState()) {
-                    case BookService.STATE_EXPORT_START:
-                    case BookService.STATE_EXPORT_FINISH:
-                    case BookService.STATE_IMPORT_START:
-                    case BookService.STATE_IMPORT_FINISH:
-                    case BookService.STATE_BACKUP_START:
-                    case BookService.STATE_BACKUP_FINISH:
-                    case BookService.STATE_RESTORE_START:
-                    case BookService.STATE_RESTORE_FINISH:
-                    case BookService.STATE_DROPBOX_LOGIN:
-                        if (D) Log.d(TAG, "ACTION_CHECK_SETTINGS_STATE");
-                        onActivityEvent(MyBookshelfEvent.ACTION_CHECK_SETTINGS_STATE, null);
-                        break;
+            case BookService.STATE_EXPORT_START:
+            case BookService.STATE_EXPORT_FINISH:
+            case BookService.STATE_IMPORT_START:
+            case BookService.STATE_IMPORT_FINISH:
+            case BookService.STATE_BACKUP_START:
+            case BookService.STATE_BACKUP_FINISH:
+            case BookService.STATE_RESTORE_START:
+            case BookService.STATE_RESTORE_FINISH:
+            case BookService.STATE_DROPBOX_LOGIN:
+                if (navigation_state != R.id.navigation_settings) {
+                    mBottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
+                    bundle = new BundleBuilder()
+                            .put(BookService.KEY_SERVICE_STATE, serviceState)
+                            .build();
+                    onFragmentEvent(MyBookshelfEvent.SELECT_SETTINGS, bundle);
+                }else {
+                    onFragmentEvent(MyBookshelfEvent.CHECK_SETTINGS_STATE, null);
                 }
                 break;
         }
-
     }
-
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_shelf:
-                    switch (navigation_state) {
-                        case R.id.navigation_shelf:
-                            if (D) Log.d(TAG, "GO_TO_SHELF_BOOKS");
-                            onActivityEvent(MyBookshelfEvent.GO_TO_SHELF_BOOKS, null);
-                            break;
-                        default:
-                            if (D) Log.d(TAG, "MOVE_OTHER_TO_SHELF_BOOKS");
-                            onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_SHELF_BOOKS, null);
-                            break;
-                    }
-                    navigation_state = R.id.navigation_shelf;
+        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.navigation_shelf_books:
+                    onFragmentEvent(MyBookshelfEvent.SELECT_SHELF_BOOKS, null);
+                    return true;
+                case R.id.navigation_search_books:
+                    onFragmentEvent(MyBookshelfEvent.SELECT_SEARCH_BOOKS, null);
+                    return true;
+                case R.id.navigation_new_books:
+                    onFragmentEvent(MyBookshelfEvent.SELECT_NEW_BOOKS, null);
+                    return true;
+                case R.id.navigation_settings:
+                    onFragmentEvent(MyBookshelfEvent.SELECT_SETTINGS, null);
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    private BottomNavigationView.OnNavigationItemReselectedListener mOnNavigationItemReselectedListener = new BottomNavigationView.OnNavigationItemReselectedListener() {
+        @Override
+        public void onNavigationItemReselected(@NonNull MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.navigation_shelf_books:
+                    onFragmentEvent(MyBookshelfEvent.RESELECT_SHELF_BOOKS, null);
                     break;
-                case R.id.navigation_search:
-                    switch (navigation_state) {
-                        case R.id.navigation_search:
-                            if (D) Log.d(TAG, "GO_TO_SEARCH_BOOKS");
-                            onActivityEvent(MyBookshelfEvent.GO_TO_SEARCH_BOOKS, null);
-                            break;
-                        default:
-                            if (D) Log.d(TAG, "MOVE_OTHER_TO_SEARCH_BOOKS");
-                            onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_SEARCH_BOOKS, null);
-                            break;
-                    }
-                    navigation_state = R.id.navigation_search;
+                case R.id.navigation_search_books:
+                    onFragmentEvent(MyBookshelfEvent.RESELECT_SEARCH_BOOKS, null);
                     break;
-                case R.id.navigation_new:
-                    switch (navigation_state) {
-                        case R.id.navigation_new:
-                            if (D) Log.d(TAG, "GO_TO_NEW_BOOKS");
-                            onActivityEvent(MyBookshelfEvent.GO_TO_NEW_BOOKS, null);
-                            break;
-                        default:
-                            if (D) Log.d(TAG, "MOVE_OTHER_TO_NEW_BOOKS");
-                            onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_NEW_BOOKS, null);
-                            break;
-                    }
-                    navigation_state = R.id.navigation_new;
+                case R.id.navigation_new_books:
+                    onFragmentEvent(MyBookshelfEvent.RESELECT_NEW_BOOKS, null);
                     break;
                 case R.id.navigation_settings:
-                    switch (navigation_state) {
-                        case R.id.navigation_settings:
-                            if (D) Log.d(TAG, "GO_TO_SETTINGS");
-                            onActivityEvent(MyBookshelfEvent.GO_TO_SETTINGS, null);
-                            break;
-                        default:
-                            if (D) Log.d(TAG, "MOVE_OTHER_TO_SETTINGS");
-                            onActivityEvent(MyBookshelfEvent.MOVE_OTHER_TO_SETTINGS, null);
-                            break;
-                    }
-                    navigation_state = R.id.navigation_settings;
+                    onFragmentEvent(MyBookshelfEvent.RESELECT_SETTINGS, null);
                     break;
             }
-            return true;
         }
     };
 

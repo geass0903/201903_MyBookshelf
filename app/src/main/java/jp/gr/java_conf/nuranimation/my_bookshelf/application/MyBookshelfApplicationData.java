@@ -179,8 +179,8 @@ public class MyBookshelfApplicationData extends Application {
     public String getShelfBooksSortSetting(){
         String sort = mPreferences.getString(KEY_SHELF_BOOKS_ORDER,null);
         if(TextUtils.isEmpty(sort)){
-            sort = getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending);
-            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending)).apply();
+            sort = getString(R.string.ShelfBooksSort_Code_SALES_DATE_DESCENDING);
+            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.ShelfBooksSort_Code_SALES_DATE_DESCENDING)).apply();
         }
         return sort;
     }
@@ -188,8 +188,8 @@ public class MyBookshelfApplicationData extends Application {
     public String getSearchBooksSortSetting(){
         String sort = mPreferences.getString(KEY_SEARCH_BOOKS_ORDER,null);
         if(TextUtils.isEmpty(sort)){
-            sort = getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending);
-            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending)).apply();
+            sort = getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING);
+            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING)).apply();
         }
         return sort;
     }

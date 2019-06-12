@@ -4,7 +4,7 @@
     <item
         android:id="@+id/menu_detail_action_register"
         android:icon="@drawable/ic_vector_register_24dp"
-        android:title="@string/Menu_Action_Register"
+        android:title="@string/MenuButton_Register"
         app:showAsAction="always"
         />
 </menu>

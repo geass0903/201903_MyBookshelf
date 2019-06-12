@@ -35,6 +35,10 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final String TAG = BooksListViewAdapter.class.getSimpleName();
     private static final boolean D = false;
 
+    public static final int LIST_TYPE_SHELF_BOOKS   = 1;
+    public static final int LIST_TYPE_SEARCH_BOOKS  = 2;
+    public static final int LIST_TYPE_NEW_BOOKS     = 3;
+
     public static final int VIEW_TYPE_BOOK         = 1;
     public static final int VIEW_TYPE_BUTTON_LOAD  = 2;
     public static final int VIEW_TYPE_LOADING      = 3;
@@ -48,11 +52,13 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private boolean doDownload;
     private File downloadDir;
+    private int list_type;
 
 
-    public BooksListViewAdapter(Context context, List<BookData> list, boolean download) {
+    public BooksListViewAdapter(Context context, List<BookData> list, int list_type, boolean download) {
         this.mContext = context;
         this.list = list;
+        this.list_type = list_type;
         this.doDownload = download;
         mApplicationData = (MyBookshelfApplicationData) mContext.getApplicationContext();
         File dir = Environment.getExternalStorageDirectory();
@@ -116,23 +122,50 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksViewHolder) {
             BooksViewHolder viewHolder = (BooksViewHolder) holder;
 
-            viewHolder.getImageView().setImageURI(getUri(list.get(position)));
-            viewHolder.getTitleView().setText(list.get(position).getTitle());
-            viewHolder.getAuthorView().setText(list.get(position).getAuthor());
-            viewHolder.getPublisherView().setText(list.get(position).getPublisher());
-            viewHolder.getSalesDateView().setText(list.get(position).getSalesDate());
-            viewHolder.getItemPriceView().setText(list.get(position).getItemPrice());
-
-
             BookData book = mApplicationData.loadBookDataFromShelfBooks(list.get(position));
-            if (book != null) {
-                viewHolder.getRatingView().setRating(Float.parseFloat(book.getRating()));
-                viewHolder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
-                viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
-            } else {
-                viewHolder.getRatingView().setRating(Float.parseFloat(list.get(position).getRating()));
-                viewHolder.getReadStatusView().setText(getReadStatusText(list.get(position).getReadStatus()));
-                viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+
+            switch(list_type) {
+                case LIST_TYPE_SHELF_BOOKS:
+                    if (book != null) {
+                        viewHolder.getImageView().setImageURI(getUri(book));
+                        viewHolder.getTitleView().setText(book.getTitle());
+                        viewHolder.getAuthorView().setText(book.getAuthor());
+                        viewHolder.getPublisherView().setText(book.getPublisher());
+                        viewHolder.getSalesDateView().setText(book.getSalesDate());
+                        viewHolder.getItemPriceView().setText(book.getItemPrice());
+                        viewHolder.getRatingView().setRating(Float.parseFloat(book.getRating()));
+                        viewHolder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
+                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
+                    } else {
+                        viewHolder.getImageView().setImageURI(getUri(list.get(position)));
+                        viewHolder.getTitleView().setText(list.get(position).getTitle());
+                        viewHolder.getAuthorView().setText(list.get(position).getAuthor());
+                        viewHolder.getPublisherView().setText(list.get(position).getPublisher());
+                        viewHolder.getSalesDateView().setText(list.get(position).getSalesDate());
+                        viewHolder.getItemPriceView().setText(list.get(position).getItemPrice());
+                        viewHolder.getRatingView().setRating(Float.parseFloat(list.get(position).getRating()));
+                        viewHolder.getReadStatusView().setText(getReadStatusText(list.get(position).getReadStatus()));
+                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+                    }
+                    break;
+                case LIST_TYPE_SEARCH_BOOKS:
+                case LIST_TYPE_NEW_BOOKS:
+                    viewHolder.getImageView().setImageURI(getUri(list.get(position)));
+                    viewHolder.getTitleView().setText(list.get(position).getTitle());
+                    viewHolder.getAuthorView().setText(list.get(position).getAuthor());
+                    viewHolder.getPublisherView().setText(list.get(position).getPublisher());
+                    viewHolder.getSalesDateView().setText(list.get(position).getSalesDate());
+                    viewHolder.getItemPriceView().setText(list.get(position).getItemPrice());
+                    if (book != null) {
+                        viewHolder.getRatingView().setRating(Float.parseFloat(book.getRating()));
+                        viewHolder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
+                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
+                    } else {
+                        viewHolder.getRatingView().setRating(Float.parseFloat(list.get(position).getRating()));
+                        viewHolder.getReadStatusView().setText(getReadStatusText(list.get(position).getReadStatus()));
+                        viewHolder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(list.get(position).getReadStatus()));
+                    }
+                    break;
             }
         }
     }
@@ -250,29 +283,29 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
 
     private String getReadStatusText(String status) {
-        String readStatus = mContext.getString(R.string.Item_ReadStatus_0);
+        String readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_0);
         if(status != null) {
             switch (status) {
                 case BookData.STATUS_UNREGISTERED:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_0);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_0);
                     break;
                 case BookData.STATUS_INTERESTED:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_1);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_1);
                     break;
                 case BookData.STATUS_UNREAD:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_2);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_2);
                     break;
                 case BookData.STATUS_READING:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_2);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_2);
                     break;
                 case BookData.STATUS_ALREADY_READ:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_4);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_4);
                     break;
                 case BookData.STATUS_NONE:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_5);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_5);
                     break;
                 default:
-                    readStatus = mContext.getString(R.string.Item_ReadStatus_0);
+                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_0);
                     break;
             }
         }

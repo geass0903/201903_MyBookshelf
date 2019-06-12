@@ -41,7 +41,7 @@
                 android:drawableStart="@drawable/ic_vector_file_download_24dp"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Label_Reload_Book" />
+                android:text="@string/Label_Get_BookData_WEB" />
             <Button
                 android:id="@+id/book_detail_button_reload_image"
                 android:layout_margin="@dimen/margin_small"
@@ -58,7 +58,7 @@
                 android:drawableStart="@drawable/ic_vector_reload_24dp"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Label_Reload_Image" />
+                android:text="@string/Label_Get_BookImage_WEB" />
             <Button
                 android:id="@+id/book_detail_button_rakutenUrl"
                 android:layout_margin="@dimen/margin_small"

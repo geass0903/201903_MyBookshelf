@@ -34,7 +34,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/margin_small"
-                    android:text="@string/Label_SortSetting_Shelf"
+                    android:text="@string/Label_ShelfBooksSortSetting"
                     />
                 <View
                     android:layout_width="0dp"
@@ -45,7 +45,7 @@
                     android:background="@color/colorLineMargin" />
             </LinearLayout>
             <Spinner
-                android:id="@+id/SettingsFragment_Spinner_SortSetting_Bookshelf"
+                android:id="@+id/ShelfBooksSortSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/selector_button"
@@ -74,7 +74,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/margin_small"
-                    android:text="@string/Label_SortSetting_SearchResult"
+                    android:text="@string/Label_SearchBooksSortSetting"
                     />
                 <View
                     android:layout_width="0dp"
@@ -85,7 +85,7 @@
                     android:background="@color/colorLineMargin" />
             </LinearLayout>
             <Spinner
-                android:id="@+id/SettingsFragment_Spinner_SortSetting_SearchResult"
+                android:id="@+id/SearchBooksSortSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/selector_button"
@@ -114,7 +114,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/margin_small"
-                    android:text="@string/Settings_title_export_import"
+                    android:text="@string/Label_ExportImport"
                     />
                 <View
                     android:layout_width="0dp"
@@ -131,7 +131,7 @@
                 android:layout_margin="@dimen/margin_small"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Settings_button_export_csv"/>
+                android:text="@string/Label_Export_CSV"/>
             <Button
                 android:id="@+id/settings_button_import"
                 android:layout_width="match_parent"
@@ -139,7 +139,7 @@
                 android:layout_margin="@dimen/margin_small"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Settings_button_import_csv"/>
+                android:text="@string/Label_Import_CSV"/>
         </LinearLayout>
         <!-- end Export/Import -->
         <!-- Dropbox Backup/Restore-->
@@ -162,7 +162,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="@string/Settings_title_dropbox"
+                    android:text="@string/Label_Link_up_Dropbox"
                     />
                 <View
                     android:layout_width="0dp"
@@ -179,7 +179,7 @@
                 android:layout_margin="@dimen/margin_small"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Settings_button_log_in_dropbox" />
+                android:text="@string/Label_Login_Dropbox" />
             <Button
                 android:id="@+id/settings_button_logout_dropbox"
                 android:layout_width="match_parent"
@@ -187,7 +187,7 @@
                 android:layout_margin="@dimen/margin_small"
                 android:background="@drawable/selector_button_logout"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Settings_button_log_out_dropbox" />
+                android:text="@string/Label_Logout_Dropbox" />
             <Button
                 android:id="@+id/settings_button_backup"
                 android:layout_width="match_parent"
@@ -195,7 +195,7 @@
                 android:layout_margin="@dimen/margin_small"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Settings_button_backup" />
+                android:text="@string/Label_Backup" />
             <Button
                 android:id="@+id/settings_button_restore"
                 android:layout_width="match_parent"
@@ -203,7 +203,7 @@
                 android:layout_margin="@dimen/margin_small"
                 android:background="@drawable/selector_button"
                 android:textColor="#FFFFFFFF"
-                android:text="@string/Settings_button_restore" />
+                android:text="@string/Label_Restore" />
         </LinearLayout>
         <!-- end Dropbox Backup/Restore-->
     </LinearLayout>

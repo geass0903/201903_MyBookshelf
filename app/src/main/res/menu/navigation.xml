@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_shelf"
+        android:id="@+id/navigation_shelf_books"
         android:icon="@drawable/ic_vector_shelf_24dp"
-        android:title="@string/Navigation_Item_Shelf" />
+        android:title="@string/Navigation_Item_ShelfBooks" />
 
 
     <item
-        android:id="@+id/navigation_search"
+        android:id="@+id/navigation_search_books"
         android:icon="@drawable/ic_vector_search_24dp"
-        android:title="@string/Navigation_Item_Search" />
+        android:title="@string/Navigation_Item_SearchBooks" />
 
     <item
-        android:id="@+id/navigation_new"
+        android:id="@+id/navigation_new_books"
         android:icon="@drawable/ic_vector_new_24dp"
         android:title="@string/Navigation_Item_NewBooks" />
 

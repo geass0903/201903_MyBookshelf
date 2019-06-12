@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
@@ -68,7 +69,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         super.onViewCreated(view, savedInstanceState);
         if (D) Log.d(TAG, "onViewCreated");
         if (getActivity() != null) {
-            getActivity().setTitle(R.string.Navigation_Item_Shelf);
+            getActivity().setTitle(R.string.Navigation_Item_ShelfBooks);
         }
         mLayoutManager = new LinearLayoutManager(view.getContext());
         if (savedInstanceState != null) {
@@ -79,10 +80,10 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-//        if(mShelfBooks == null) {
+        if(mShelfBooks == null) {
             mShelfBooks = mApplicationData.loadShelfBooks(mKeyword);
-//        }
-        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, true);
+        }
+        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS, true);
         mShelfBooksViewAdapter.setClickListener(this);
         mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -155,10 +156,10 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
                 Bundle bundle = new BundleBuilder()
-                        .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Book_Title))
-                        .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
-                        .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                        .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                        .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Unregister_Book))
+                        .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Unregister_Book))
+                        .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                        .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
                         .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                         .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                         .put(BaseDialogFragment.KEY_CANCELABLE, true)
@@ -181,7 +182,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             if (book != null) {
                 mApplicationData.unregisterFromShelfBooks(book);
                 mShelfBooksViewAdapter.deleteBook(position);
-                Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.Toast_Unregister_Book), Toast.LENGTH_SHORT).show();
             }
         }
     }

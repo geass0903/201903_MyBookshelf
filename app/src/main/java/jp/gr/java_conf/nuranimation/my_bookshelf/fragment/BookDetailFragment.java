@@ -359,10 +359,10 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private void showDeleteDateDialog(int requestCode) {
         if (getActivity() != null) {
             Bundle bundle = new BundleBuilder()
-                    .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Date_Title))
-                    .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Date_Message))
-                    .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                    .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                    .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Clear_Date))
+                    .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Clear_Date))
+                    .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                    .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
                     .put(BaseDialogFragment.KEY_REQUEST_CODE, requestCode)
                     .put(BaseDialogFragment.KEY_CANCELABLE, true)
                     .build();
@@ -379,7 +379,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private List<BaseSpinnerItem> getSpinnerItem_ReadStatus() {
         List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.BookDetail_ReadStatus_SpinnerItem);
+        TypedArray array = res.obtainTypedArray(R.array.ReadStatusSpinner);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {

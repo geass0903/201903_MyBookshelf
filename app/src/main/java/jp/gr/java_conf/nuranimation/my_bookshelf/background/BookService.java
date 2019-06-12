@@ -22,8 +22,6 @@ import java.util.Locale;
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.DropboxManager;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.FileManager;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
@@ -63,9 +61,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private SearchBooksThread searchBooksThread;
     private FileIOThread fileIOThread;
     private DropboxThread dropboxThread;
-
-    private DropboxManager mDropboxManager;
-    private FileManager mFileManager;
 
 
     private String mParamSEARCH_KEYWORD;
@@ -115,8 +110,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mApplicationData = (MyBookshelfApplicationData) this.getApplicationContext();
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mDropboxManager = new DropboxManager(this);
-        mFileManager = new FileManager(this);
     }
 
 
@@ -159,7 +152,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 String author = getSearchKeyword();
                 int page = getSearchPage();
                 if (!TextUtils.isEmpty(author) && page > 0) {
-                    searchBooksThread = new SearchBooksThread(this, author, page, getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending));
+                    searchBooksThread = new SearchBooksThread(this, author, page, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
                     searchBooksThread.start();
                 } else {
                     mApplicationData.registerToNewBooks(resultNewBooks);
@@ -177,6 +170,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public void deliverExportResult(FileIOThread.Result result) {
         switch (mState) {
             case STATE_EXPORT_START:
+
                 break;
             case STATE_BACKUP_START:
                 if(result.isSuccess()) {
@@ -294,13 +288,13 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         if(mAuthorsList.size() > 0) {
             progress_last = mAuthorsList.size();
             progress_now  = 0;
-            updateProgress();
+            updateProgress(progress_now, progress_last);
             String author = mAuthorsList.get(0);
             mAuthorsList.remove(0);
             setSearchKeyword(author);
             setSearchPage(1);
             setServiceState(STATE_NEW_BOOKS_RELOAD_START);
-            searchBooksThread = new SearchBooksThread(this, author, 1, getString(R.string.SearchBooks_SortSetting_Code_SalesDate_Descending));
+            searchBooksThread = new SearchBooksThread(this, author, 1, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
             searchBooksThread.start();
         }else{
             if(D) Log.d(TAG, "No authorsList");
@@ -318,15 +312,18 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
 
 
-
-
-
     public SearchBooksThread.Result loadSearchBooksResult(){
         if(mSearchBooksResult == null){
             return SearchBooksThread.Result.error(SearchBooksThread.ERROR_UNKNOWN,"failed get result");
         }
         return mSearchBooksResult;
     }
+
+
+    public FileIOThread.Result loadFileIOResult(){
+        return null;
+    }
+
 
     private void saveSearchBooksResult(SearchBooksThread.Result result){
         switch(mState){
@@ -377,7 +374,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                         setSearchPage(0);
                     }
                 }
-                updateProgress();
+                updateProgress(progress_now,progress_last);
                 break;
         }
     }
@@ -413,36 +410,19 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         dropboxThread.start();
     }
 
-
-
-
-
-
-
-
-
-
-
     public void startAuthenticate(){
-        Auth.startOAuth2Authentication(this,getString(R.string.Dropbox_App_Key));
+        Auth.startOAuth2Authentication(this,getString(R.string.dropbox_key));
     }
 
     public String getAccessToken(){
         return Auth.getOAuth2Token();
     }
 
-
-
-
-
-
-    private void updateProgress(){
+    private void updateProgress(int progress, int size){
         Intent intent = new Intent();
-        String progress = String.format(Locale.JAPAN, "%d / %d", progress_now, progress_last);
-        intent.putExtra(BaseFragment.KEY_UPDATE_PROGRESS, progress);
+        intent.putExtra(BaseFragment.KEY_UPDATE_PROGRESS,  String.format(Locale.JAPAN, "%d / %d", progress, size));
         intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
         mLocalBroadcastManager.sendBroadcast(intent);
-        updateNotification(mState);
     }
 
 
@@ -463,22 +443,22 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_START:
                 title = getString(R.string.Notification_Title_Search);
-                message = getString(R.string.Notification_Message_Search_Start);
+                message = getString(R.string.Notification_Message_Search_Incomplete);
                 iconId  = R.drawable.ic_vector_search_24dp;
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_FINISH:
                 title = getString(R.string.Notification_Title_Search);
-                message = getString(R.string.Notification_Message_Search_Finish);
+                message = getString(R.string.Notification_Message_Search_Complete);
                 iconId  = R.drawable.ic_vector_search_24dp;
                 break;
             case STATE_NEW_BOOKS_RELOAD_START:
                 title = getString(R.string.Notification_Title_Reload);
-                message = getString(R.string.Notification_Message_Reload_Start);
+                message = getString(R.string.Notification_Message_Reload_Incomplete);
                 iconId  = R.drawable.ic_vector_reload_24dp;
                 break;
             case STATE_NEW_BOOKS_RELOAD_FINISH:
                 title = getString(R.string.Notification_Title_Reload);
-                message = getString(R.string.Notification_Message_Reload_Finish);
+                message = getString(R.string.Notification_Message_Reload_Complete);
                 iconId  = R.drawable.ic_vector_reload_24dp;
                 break;
         }

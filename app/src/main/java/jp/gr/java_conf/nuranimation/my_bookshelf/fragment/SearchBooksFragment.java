@@ -87,7 +87,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         super.onViewCreated(view,savedInstanceState);
         if(D) Log.d(TAG, "onViewCreated");
         if(getActivity() != null) {
-            getActivity().setTitle(R.string.Navigation_Item_Search);
+            getActivity().setTitle(R.string.Navigation_Item_SearchBooks);
         }
         mLayoutManager = new LinearLayoutManager(view.getContext());
 
@@ -103,7 +103,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchBooks = loadSearchBooksData(null);
             }
         }
-        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks,false);
+        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks, BooksListViewAdapter.LIST_TYPE_SEARCH_BOOKS, false);
         mSearchBooksViewAdapter.setClickListener(this);
         RecyclerView mRecyclerView = view.findViewById(R.id.fragment_search_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -193,10 +193,10 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 if (mApplicationData.loadBookDataFromShelfBooks(data) == null){
                     // unregistered. register Dialog
                     bundle = new BundleBuilder()
-                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Register_Book_Title))
-                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Register_Book_Message))
-                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Register_Book))
+                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Register_Book))
+                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
                             .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK)
                             .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                             .put(BaseDialogFragment.KEY_CANCELABLE, true)
@@ -204,10 +204,10 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 } else {
                     // registered. delete Dialog
                     bundle = new BundleBuilder()
-                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Book_Title))
-                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
-                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Unregister_Book))
+                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Unregister_Book))
+                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
                             .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                             .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                             .put(BaseDialogFragment.KEY_CANCELABLE, true)
@@ -250,7 +250,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     if (book_unregister != null) {
                         mApplicationData.unregisterFromShelfBooks(book_unregister);
                         mSearchBooksViewAdapter.updateBook(position_unregister);
-                        Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.Toast_Unregister_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
@@ -335,7 +335,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         books.add(footer);
                     } else if (mSearchPage == 1) {
                         Bundle progress = new BundleBuilder()
-                                .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Search))
+                                .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Search))
                                 .put(BaseProgressDialogFragment.message, "")
                                 .build();
                         setProgressBundle(progress);
@@ -369,7 +369,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         books.add(footer);
                     } else if (mSearchPage == 1) {
                         Bundle progress = new BundleBuilder()
-                                .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Search))
+                                .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Search))
                                 .put(BaseProgressDialogFragment.message, "")
                                 .build();
                         setProgressBundle(progress);
@@ -419,7 +419,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 hasResultData = false;
                 hasButtonLoadNext = false;
                 Bundle progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Search))
+                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Search))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
                 setProgressBundle(progress);

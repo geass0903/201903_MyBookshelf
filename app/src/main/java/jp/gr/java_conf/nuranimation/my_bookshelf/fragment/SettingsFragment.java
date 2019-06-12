@@ -5,9 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
@@ -18,24 +16,18 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
 
-
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.DropboxManager;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.FileManager;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SettingsSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.ErrorStatus;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 
@@ -48,22 +40,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     private static final String KEY_IS_ALLOWED_PERMISSIONS = "KEY_IS_ALLOWED_PERMISSIONS";
     private static final String KEY_IS_LOGGED_IN = "KEY_IS_LOGGED_IN";
 
-
-
-    private enum ButtonAction {
-        None,
-        Log_in,
-        Log_out,
-        Export_CSV,
-        Import_CSV,
-        Backup_Dropbox,
-        Restore_Dropbox,
-    }
-    private ButtonAction mCurrentAction;
-
     private MyBookshelfApplicationData mApplicationData;
-    private DropboxManager mDropboxManager;
-    private FileManager mFileManager;
 
     private Button mButtonExport;
     private Button mButtonImport;
@@ -98,9 +75,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             getActivity().setTitle(R.string.Navigation_Item_Settings);
         }
         if (savedInstanceState != null) {
-            isAllowedPermissions = savedInstanceState.getBoolean(KEY_IS_ALLOWED_PERMISSIONS);
-            isLogged_in = savedInstanceState.getBoolean(KEY_IS_LOGGED_IN);
-            mSettingsState = savedInstanceState.getInt(KEY_CURRENT_STATE, 0);
+            isAllowedPermissions = savedInstanceState.getBoolean(KEY_IS_ALLOWED_PERMISSIONS, false);
+            isLogged_in = savedInstanceState.getBoolean(KEY_IS_LOGGED_IN, false);
+            mSettingsState = savedInstanceState.getInt(KEY_CURRENT_STATE, BookService.STATE_NONE);
         } else {
             if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
                 isAllowedPermissions = true;
@@ -110,7 +87,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             }
         }
         initSpinner(view);
-        initButton(view);
+        initButton(view, isAllowedPermissions, isLogged_in);
         setProgress(mSettingsState);
     }
 
@@ -141,20 +118,18 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     @Override
     public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
         super.onBaseDialogSucceeded(requestCode, resultCode, params);
-        switch (requestCode) {
-            case REQUEST_CODE_DROPBOX_LOGOUT:
-                switch (resultCode) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        if (D) Log.d(TAG, "Log out button pressed");
-                        mApplicationData.getSharedPreferences().edit().remove(MyBookshelfApplicationData.KEY_ACCESS_TOKEN).apply();
-                        isLogged_in = false;
-                        enableDropboxFunction(false);
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        if (D) Log.d(TAG, "Log out button cancel");
-                        break;
-                }
-                break;
+        if (requestCode == REQUEST_CODE_DROPBOX_LOGOUT) {
+            switch (resultCode) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    if (D) Log.d(TAG, "Log out button pressed");
+                    mApplicationData.getSharedPreferences().edit().remove(MyBookshelfApplicationData.KEY_ACCESS_TOKEN).apply();
+                    isLogged_in = false;
+                    enableDropboxFunction(false);
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    if (D) Log.d(TAG, "Log out button cancel");
+                    break;
+            }
         }
     }
 
@@ -204,22 +179,22 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
     private void initSpinner(View view) {
-        Spinner spinner_SortSetting_Bookshelf = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_Bookshelf);
-        SettingsSpinnerArrayAdapter arrayAdapter_SortSetting_Bookshelf = new SettingsSpinnerArrayAdapter(this.getContext(), R.layout.item_spinner, getList_Spinner_Sort_Shelf());
-        spinner_SortSetting_Bookshelf.setAdapter(arrayAdapter_SortSetting_Bookshelf);
-        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_Registered_Ascending));
-        spinner_SortSetting_Bookshelf.setSelection(arrayAdapter_SortSetting_Bookshelf.getPosition(code), false);
-        spinner_SortSetting_Bookshelf.setOnItemSelectedListener(listener_SortSetting_Bookshelf);
+        Spinner mShelfBooksSortSpinner = view.findViewById(R.id.ShelfBooksSortSpinner);
+        SpinnerArrayAdapter mShelfBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getShelfBooksSortSpinnerList());
+        mShelfBooksSortSpinner.setAdapter(mShelfBooksSortAdapter);
+        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooksSort_Code_REGISTERED_ASCENDING));
+        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(code), false);
+        mShelfBooksSortSpinner.setOnItemSelectedListener(mShelfBooksSortSpinnerListener);
 
-        Spinner spinner_SortSetting_SearchResult = view.findViewById(R.id.SettingsFragment_Spinner_SortSetting_SearchResult);
-        SettingsSpinnerArrayAdapter arrayAdapter_SortSetting_SearchResult = new SettingsSpinnerArrayAdapter(getContext(), R.layout.item_spinner, getList_Spinner_Sort_SearchResult());
-        spinner_SortSetting_SearchResult.setAdapter(arrayAdapter_SortSetting_SearchResult);
-        String code_search = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.ShelfBooks_SortSetting_Code_SalesDate_Descending));
-        spinner_SortSetting_SearchResult.setSelection(arrayAdapter_SortSetting_SearchResult.getPosition(code_search), false);
-        spinner_SortSetting_SearchResult.setOnItemSelectedListener(listener_SortSetting_SearchResult);
+        Spinner mSearchBooksSortSpinner = view.findViewById(R.id.SearchBooksSortSpinner);
+        SpinnerArrayAdapter mSearchBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getSearchBooksSortSpinnerList());
+        mSearchBooksSortSpinner.setAdapter(mSearchBooksSortAdapter);
+        code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
+        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(code), false);
+        mSearchBooksSortSpinner.setOnItemSelectedListener(mSearchBooksSortSpinnerListener);
     }
 
-    private void initButton(View view){
+    private void initButton(View view, boolean isAllowedPermissions, boolean isLogged_in){
         mButtonExport = view.findViewById(R.id.settings_button_export);
         mButtonExport.setOnClickListener(this);
         mButtonImport = view.findViewById(R.id.settings_button_import);
@@ -238,10 +213,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
 
-    private List<BaseSpinnerItem> getList_Spinner_Sort_Shelf() {
+    private List<BaseSpinnerItem> getShelfBooksSortSpinnerList() {
         List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.Spinner_ShelfBooks_SortSetting);
+        TypedArray array = res.obtainTypedArray(R.array.ShelfBooksSortSpinner);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
@@ -253,10 +228,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         return list;
     }
 
-    private List<BaseSpinnerItem> getList_Spinner_Sort_SearchResult() {
+    private List<BaseSpinnerItem> getSearchBooksSortSpinnerList() {
         List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.Spinner_SearchBooks_SortSetting);
+        TypedArray array = res.obtainTypedArray(R.array.SearchBooksSortSpinner);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
@@ -269,7 +244,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     }
 
 
-    AdapterView.OnItemSelectedListener listener_SortSetting_Bookshelf = new AdapterView.OnItemSelectedListener() {
+    AdapterView.OnItemSelectedListener mShelfBooksSortSpinnerListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapter,
                                    View v, int position, long id) {
@@ -283,7 +258,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         }
     };
 
-    AdapterView.OnItemSelectedListener listener_SortSetting_SearchResult = new AdapterView.OnItemSelectedListener() {
+    AdapterView.OnItemSelectedListener mSearchBooksSortSpinnerListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapter,
                                    View v, int position, long id) {
@@ -403,10 +378,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     private void onClickLogout(){
         Bundle bundle = new Bundle();
-        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Logout_Title));
-        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Logout_Message));
-        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive));
-        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative));
+        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Logout_Dropbox));
+        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Logout_Dropbox));
+        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive));
+        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative));
         bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
         if (getActivity() != null) {
             FragmentManager manager = getActivity().getSupportFragmentManager();
@@ -434,7 +409,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             case BookService.STATE_EXPORT_START:
             case BookService.STATE_EXPORT_FINISH:
                 progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Export))
+                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Export))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
                 setProgressBundle(progress);
@@ -442,7 +417,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             case BookService.STATE_IMPORT_START:
             case BookService.STATE_IMPORT_FINISH:
                 progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Import))
+                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Import))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
                 setProgressBundle(progress);
@@ -450,7 +425,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             case BookService.STATE_BACKUP_START:
             case BookService.STATE_BACKUP_FINISH:
                 progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Backup))
+                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Backup))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
                 setProgressBundle(progress);
@@ -458,7 +433,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             case BookService.STATE_RESTORE_START:
             case BookService.STATE_RESTORE_FINISH:
                 progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Restore))
+                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Restore))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
                 setProgressBundle(progress);
@@ -586,138 +561,6 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public void callback(ButtonAction action, boolean result) {
-        mCurrentAction = ButtonAction.None;
-        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
-        if (result) {
-            switch (action) {
-                case Export_CSV:
-                    Toast.makeText(getContext(), R.string.Toast_Success_Export, Toast.LENGTH_SHORT).show();
-                    break;
-                case Import_CSV:
-                    Toast.makeText(getContext(), R.string.Toast_Success_Import, Toast.LENGTH_SHORT).show();
-                    break;
-                case Backup_Dropbox:
-                    Toast.makeText(getContext(), R.string.Toast_Success_Backup, Toast.LENGTH_SHORT).show();
-                    break;
-                case Restore_Dropbox:
-                    Toast.makeText(getContext(), R.string.Toast_Success_Restore, Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            Toast.makeText(getContext(), R.string.Toast_Failed, Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-
-
-    public void AsyncTaskCSV(ButtonAction action) {
-        new AsyncCSV(this, action).execute();
-    }
-
-
-
-    private static class AsyncCSV extends AsyncTask<Void, Void, Boolean> {
-        private final WeakReference<SettingsFragment> mFragmentReference;
-        private ButtonAction action;
-        private int error;
-
-        private AsyncCSV(SettingsFragment fragment, ButtonAction buttonAction) {
-            this.mFragmentReference = new WeakReference<>(fragment);
-            this.action = buttonAction;
-            this.error = ErrorStatus.No_Error;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            SettingsFragment fragment = mFragmentReference.get();
-
-            Bundle bundle = new Bundle();
-
-            switch (action) {
-                case Export_CSV:
-                    bundle.putString(BaseProgressDialogFragment.title, fragment.getString(R.string.Progress_Export));
-                    break;
-                case Import_CSV:
-                    bundle.putString(BaseProgressDialogFragment.title, fragment.getString(R.string.Progress_Import));
-                    break;
-                case Backup_Dropbox:
-                    bundle.putString(BaseProgressDialogFragment.title, fragment.getString(R.string.Progress_Backup));
-                    break;
-                case Restore_Dropbox:
-                    bundle.putString(BaseProgressDialogFragment.title, fragment.getString(R.string.Progress_Restore));
-                    break;
-            }
-
-            bundle.putString(BaseProgressDialogFragment.message, "");
-/*
-            if (fragment.getActivity() != null) {
-                FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-                fragment.mProgressFragment = BaseProgressDialogFragment.newInstance(bundle);
-                fragment.mProgressFragment.show(manager, SettingsFragment.TAG);
-            }
-*/
-
-
-            PausedHandler mHandler = fragment.getPausedHandler();
-            Message msg = mHandler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_SHOW);
-            msg.setData(bundle);
-            mHandler.sendMessage(msg);
-
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            SettingsFragment fragment = mFragmentReference.get();
-
-            switch (action) {
-                case Export_CSV:
-                    error = fragment.mFileManager.export_csv();
-                    break;
-                case Import_CSV:
-                    error = fragment.mFileManager.import_csv();
-                    break;
-                case Backup_Dropbox:
-                    error = fragment.mFileManager.export_csv();
-                    if (error == ErrorStatus.No_Error) {
-                        error = fragment.mDropboxManager.backup();
-                    }
-                    break;
-                case Restore_Dropbox:
-                    error = fragment.mDropboxManager.restore();
-                    if (error == ErrorStatus.No_Error) {
-                        error = fragment.mFileManager.import_csv();
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return error == ErrorStatus.No_Error;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            mFragmentReference.get().callback(action, result);
-        }
-    }
 
 
 

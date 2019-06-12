@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/Search_Load_Next"
+        android:text="@string/Label_Load_Next"
         android:gravity="center"
         />
 

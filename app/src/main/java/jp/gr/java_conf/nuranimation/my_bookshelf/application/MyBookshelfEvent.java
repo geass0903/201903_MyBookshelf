@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
@@ -24,22 +23,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.SettingsFragment;
 
 
 public enum MyBookshelfEvent {
-    GO_TO_SHELF_BOOKS {
-        @Override
-        public void apply(MainActivity activity, Bundle bundle) {
-            Fragment fragment;
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(BookDetailFragment.TAG);
-            if (fragment instanceof BookDetailFragment) {
-                fragmentManager.popBackStack();
-            }
-            fragment = fragmentManager.findFragmentByTag(ShelfBooksFragment.TAG);
-            if (fragment instanceof ShelfBooksFragment) {
-                ((ShelfBooksFragment) fragment).scrollToTop();
-            }
-        }
-    },
-    MOVE_OTHER_TO_SHELF_BOOKS {
+    SELECT_SHELF_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
@@ -59,7 +43,7 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
-    GO_TO_SEARCH_BOOKS {
+    RESELECT_SHELF_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             Fragment fragment;
@@ -68,13 +52,13 @@ public enum MyBookshelfEvent {
             if (fragment instanceof BookDetailFragment) {
                 fragmentManager.popBackStack();
             }
-            fragment = fragmentManager.findFragmentByTag(SearchBooksFragment.TAG);
-            if (fragment instanceof SearchBooksFragment) {
-                ((SearchBooksFragment) fragment).prepareSearch();
+            fragment = fragmentManager.findFragmentByTag(ShelfBooksFragment.TAG);
+            if (fragment instanceof ShelfBooksFragment) {
+                ((ShelfBooksFragment) fragment).scrollToTop();
             }
         }
     },
-    MOVE_OTHER_TO_SEARCH_BOOKS {
+    SELECT_SEARCH_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             Fragment fragment;
@@ -90,7 +74,7 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
-    GO_TO_NEW_BOOKS {
+    RESELECT_SEARCH_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             Fragment fragment;
@@ -99,15 +83,13 @@ public enum MyBookshelfEvent {
             if (fragment instanceof BookDetailFragment) {
                 fragmentManager.popBackStack();
             }
-
-            fragment = fragmentManager.findFragmentByTag(NewBooksFragment.TAG);
-            if (fragment instanceof NewBooksFragment) {
-                ((NewBooksFragment) fragment).scrollToTop();
+            fragment = fragmentManager.findFragmentByTag(SearchBooksFragment.TAG);
+            if (fragment instanceof SearchBooksFragment) {
+                ((SearchBooksFragment) fragment).prepareSearch();
             }
-
         }
     },
-    MOVE_OTHER_TO_NEW_BOOKS {
+    SELECT_NEW_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
@@ -127,12 +109,24 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
-    GO_TO_SETTINGS {
+    RESELECT_NEW_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
+            Fragment fragment;
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            fragment = fragmentManager.findFragmentByTag(BookDetailFragment.TAG);
+            if (fragment instanceof BookDetailFragment) {
+                fragmentManager.popBackStack();
+            }
+
+            fragment = fragmentManager.findFragmentByTag(NewBooksFragment.TAG);
+            if (fragment instanceof NewBooksFragment) {
+                ((NewBooksFragment) fragment).scrollToTop();
+            }
+
         }
     },
-    MOVE_OTHER_TO_SETTINGS {
+    SELECT_SETTINGS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
@@ -152,7 +146,11 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
-
+    RESELECT_SETTINGS {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+        }
+    },
     GO_TO_BOOK_DETAIL {
         @Override
         public void apply(MainActivity activity, Bundle bundle){
@@ -180,7 +178,7 @@ public enum MyBookshelfEvent {
         }
     },
 
-    ACTION_CHECK_SEARCH_STATE {
+    CHECK_SEARCH_STATE {
         @Override
         public void apply(MainActivity activity, Bundle bundle){
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -190,7 +188,7 @@ public enum MyBookshelfEvent {
             }
         }
     },
-    ACTION_CHECK_RELOAD_STATE {
+    CHECK_RELOAD_STATE {
         @Override
         public void apply(MainActivity activity, Bundle bundle){
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -200,7 +198,7 @@ public enum MyBookshelfEvent {
             }
         }
     },
-    ACTION_CHECK_SETTINGS_STATE {
+    CHECK_SETTINGS_STATE {
         @Override
         public void apply(MainActivity activity, Bundle bundle){
             FragmentManager fragmentManager = activity.getSupportFragmentManager();

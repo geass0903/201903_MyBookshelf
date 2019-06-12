@@ -122,7 +122,7 @@
                     android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/Item_ReadStatus_5" />
+                    android:text="@string/ReadStatus_Label_STATUS_5" />
             </RelativeLayout>
 
         </LinearLayout>

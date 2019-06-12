@@ -95,7 +95,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-        mNewBooksViewAdapter = new BooksListViewAdapter(getContext(), mNewBooks,true);
+        mNewBooksViewAdapter = new BooksListViewAdapter(getContext(), mNewBooks, BooksListViewAdapter.LIST_TYPE_NEW_BOOKS, true);
         mNewBooksViewAdapter.setClickListener(this);
         mRecyclerView = view.findViewById(R.id.fragment_new_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -106,7 +106,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
             case BookService.STATE_NEW_BOOKS_RELOAD_START:
             case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
                 Bundle progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload))
+                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Reload))
                         .put(BaseProgressDialogFragment.message, "")
                         .build();
                 setProgressBundle(progress);
@@ -161,26 +161,21 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_new_action_reload:
-                if(D) Log.d(TAG,"new action search");
-
-                if (getActivity() instanceof MainActivity) {
-                    BookService service = ((MainActivity) getActivity()).getService();
-                    if (service != null) {
-                        Bundle progress = new BundleBuilder()
-                                .put(BaseProgressDialogFragment.title, getString(R.string.Progress_Reload))
-                                .put(BaseProgressDialogFragment.message, "")
-                                .build();
-                        setProgressBundle(progress);
-                        showProgressDialog();
-                        mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_START;
-                        service.reloadNewBooks(mApplicationData.loadAuthorsList());
-                    }
+        if (item.getItemId() == R.id.menu_new_action_reload) {
+            if (D) Log.d(TAG, "new action search");
+            if (getActivity() instanceof MainActivity) {
+                BookService service = ((MainActivity) getActivity()).getService();
+                if (service != null) {
+                    Bundle progress = new BundleBuilder()
+                            .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Reload))
+                            .put(BaseProgressDialogFragment.message, "")
+                            .build();
+                    setProgressBundle(progress);
+                    showProgressDialog();
+                    mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_START;
+                    service.reloadNewBooks(mApplicationData.loadAuthorsList());
                 }
-                break;
-            default:
-                break;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -224,10 +219,10 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 if (mApplicationData.loadBookDataFromShelfBooks(data) == null){
                     // unregistered. register Dialog
                     bundle = new BundleBuilder()
-                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Register_Book_Title))
-                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Register_Book_Message))
-                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Register_Book))
+                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Register_Book))
+                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
                             .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK)
                             .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                             .put(BaseDialogFragment.KEY_CANCELABLE, true)
@@ -235,10 +230,10 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 } else {
                     // registered. delete Dialog
                     bundle = new BundleBuilder()
-                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Dialog_Delete_Book_Title))
-                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.Dialog_Delete_Book_Message))
-                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.Dialog_Button_Positive))
-                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.Dialog_Button_Negative))
+                            .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Unregister_Book))
+                            .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Unregister_Book))
+                            .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                            .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
                             .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                             .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                             .put(BaseDialogFragment.KEY_CANCELABLE, true)
@@ -280,7 +275,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     if (book_unregister != null) {
                         mApplicationData.unregisterFromShelfBooks(book_unregister);
                         mNewBooksViewAdapter.updateBook(position_unregister);
-                        Toast.makeText(getContext(), getString(R.string.Toast_Delete_Book), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.Toast_Unregister_Book), Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
