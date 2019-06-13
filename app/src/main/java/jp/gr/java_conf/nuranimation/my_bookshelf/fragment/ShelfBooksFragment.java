@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
@@ -46,8 +45,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
-    private String mKeyword;
     private List<BookData> mShelfBooks;
+    private String mKeyword;
 
 
     @Override

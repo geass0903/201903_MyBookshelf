@@ -43,16 +43,17 @@
 
 
     <!-- Progress -->
-    <string name="ProgressTitle_Search">検索中…</string>
-    <string name="ProgressTitle_Reload">更新中…</string>
-    <string name="ProgressTitle_Backup">バックアップ中…</string>
-    <string name="ProgressTitle_Restore">リストア中…</string>
-    <string name="ProgressTitle_Export">エクスポート中…</string>
-    <string name="ProgressTitle_Import">インポート中…</string>
-    <string name="ProgressMessage_Upload">ファイルをアップロードしています…</string>
-    <string name="ProgressMessage_Download">ファイルをダウンロードしています…</string>
-    <string name="ProgressMessage_Export">ファイルに書き出しています…</string>
-    <string name="ProgressMessage_Import">ファイルを読み込んでいます…</string>
+    <string name="ProgressTitle_Search">検索中</string>
+    <string name="ProgressTitle_Reload">更新中</string>
+    <string name="ProgressTitle_Backup">バックアップ中</string>
+    <string name="ProgressTitle_Restore">リストア中</string>
+    <string name="ProgressTitle_Export">エクスポート中</string>
+    <string name="ProgressTitle_Import">インポート中</string>
+    <string name="ProgressMessage_Upload">ファイルをアップロードしています</string>
+    <string name="ProgressMessage_Download">ファイルをダウンロードしています</string>
+    <string name="ProgressMessage_Export">ファイルに書き出しています</string>
+    <string name="ProgressMessage_Import">ファイルを読み込んでいます</string>
+    <string name="ProgressMessage_Register">データを登録しています</string>
     <string name="Progress_Unit_Book">冊</string>
     <string name="Progress_Unit_Byte">Byte</string>
 

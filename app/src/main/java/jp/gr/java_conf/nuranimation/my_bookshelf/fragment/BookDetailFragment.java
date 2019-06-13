@@ -267,7 +267,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
                 readDateView.setText(book.getFinishReadDate());
             }
             mSpinnerReadStatus.setSelection(mArrayAdapter.getPosition(String.valueOf(book.getReadStatus())), false);
-            mRatingBar.setRating(Float.parseFloat(book.getRating()));
+            mRatingBar.setRating(book.getFloatRating());
         }
     }
 

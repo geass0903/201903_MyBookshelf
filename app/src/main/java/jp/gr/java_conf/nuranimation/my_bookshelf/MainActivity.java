@@ -139,8 +139,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         switch(serviceState) {
             case BookService.STATE_NONE:
                 break;
-            case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
-            case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
+            case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
+            case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
                 if (navigation_state != R.id.navigation_search_books) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_search_books).setChecked(true);
                     bundle = new BundleBuilder()
@@ -153,8 +153,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                     onFragmentEvent(MyBookshelfEvent.CHECK_SEARCH_STATE, null);
                 }
                 break;
-            case BookService.STATE_NEW_BOOKS_RELOAD_START:
-            case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
+            case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
+            case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
                 if (navigation_state != R.id.navigation_new_books) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_new_books).setChecked(true);
                     bundle = new BundleBuilder()
@@ -165,14 +165,14 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                     onFragmentEvent(MyBookshelfEvent.CHECK_RELOAD_STATE, null);
                 }
                 break;
-            case BookService.STATE_EXPORT_START:
-            case BookService.STATE_EXPORT_FINISH:
-            case BookService.STATE_IMPORT_START:
-            case BookService.STATE_IMPORT_FINISH:
-            case BookService.STATE_BACKUP_START:
-            case BookService.STATE_BACKUP_FINISH:
-            case BookService.STATE_RESTORE_START:
-            case BookService.STATE_RESTORE_FINISH:
+            case BookService.STATE_EXPORT_INCOMPLETE:
+            case BookService.STATE_EXPORT_COMPLETE:
+            case BookService.STATE_IMPORT_INCOMPLETE:
+            case BookService.STATE_IMPORT_COMPLETE:
+            case BookService.STATE_BACKUP_INCOMPLETE:
+            case BookService.STATE_BACKUP_COMPLETE:
+            case BookService.STATE_RESTORE_INCOMPLETE:
+            case BookService.STATE_RESTORE_COMPLETE:
             case BookService.STATE_DROPBOX_LOGIN:
                 if (navigation_state != R.id.navigation_settings) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);

@@ -296,7 +296,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         holder.getPublisherView().setText(book.getPublisher());
         holder.getSalesDateView().setText(book.getSalesDate());
         holder.getItemPriceView().setText(book.getItemPrice());
-        holder.getRatingView().setRating(Float.parseFloat(book.getRating()));
+        holder.getRatingView().setRating(book.getFloatRating());
         holder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
         holder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
     }

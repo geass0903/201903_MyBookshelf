@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 
 /**
  * Created by Kamada on 2019/03/11.
@@ -54,7 +56,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public static final String FILTER_ACTION_UPDATE_SERVICE_STATE = "FILTER_ACTION_UPDATE_SERVICE_STATE";
     public static final String KEY_UPDATE_SERVICE_STATE = "KEY_UPDATE_SERVICE_STATE";
     public static final String FILTER_ACTION_UPDATE_PROGRESS = "FILTER_ACTION_UPDATE_PROGRESS";
-    public static final String KEY_UPDATE_PROGRESS = "KEY_UPDATE_PROGRESS";
+    public static final String KEY_TYPE = "KEY_TYPE";
+    public static final String KEY_PROGRESS = "KEY_PROGRESS";
 
     private static final String KEY_SAVED_REQUEST_PERMISSIONS   = "KEY_SAVED_REQUEST_PERMISSIONS";
     private static final String KEY_IS_SHOW_PROGRESS_DIALOG     = "KEY_IS_SHOW_PROGRESS_DIALOG";
@@ -180,20 +183,55 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         outState.putBoolean(KEY_IS_SHOW_REQUEST_PERMISSION, isShowingRequestPermission);
     }
 
-    public void setProgressBundle(Bundle bundle){
-        isShowingProgressDialog = true;
-        mBundleProgressDialog = new Bundle(bundle);
-    }
 
-    public void setPermissionBundle(Bundle bundle){
-        isShowingPermissionDialog = true;
-        mBundlePermissionDialog = new Bundle(bundle);
+
+
+    public void setProgress(int state) {
+        String title = null;
+        switch (state) {
+            case BookService.STATE_NONE:
+            case BookService.STATE_DROPBOX_LOGIN:
+                break;
+            case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
+            case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
+                title = getString(R.string.ProgressTitle_Search);
+                break;
+            case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
+            case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
+                title = getString(R.string.ProgressTitle_Reload);
+                break;
+            case BookService.STATE_EXPORT_INCOMPLETE:
+            case BookService.STATE_EXPORT_COMPLETE:
+                title = getString(R.string.ProgressTitle_Export);
+                break;
+            case BookService.STATE_IMPORT_INCOMPLETE:
+            case BookService.STATE_IMPORT_COMPLETE:
+                title = getString(R.string.ProgressTitle_Import);
+                break;
+            case BookService.STATE_BACKUP_INCOMPLETE:
+            case BookService.STATE_BACKUP_COMPLETE:
+                title = getString(R.string.ProgressTitle_Backup);
+                break;
+            case BookService.STATE_RESTORE_INCOMPLETE:
+            case BookService.STATE_RESTORE_COMPLETE:
+                title = getString(R.string.ProgressTitle_Restore);
+                break;
+        }
+        if (!TextUtils.isEmpty(title)) {
+            isShowingProgressDialog = true;
+            mBundleProgressDialog = new BundleBuilder()
+                    .put(BaseProgressDialogFragment.title, title)
+                    .put(BaseProgressDialogFragment.message, "")
+                    .build();
+        }
     }
 
     public void showProgressDialog(){
-        Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_SHOW);
-        msg.setData(mBundleProgressDialog);
-        handler.sendMessage(msg);
+        if(mBundleProgressDialog != null) {
+            Message msg = handler.obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_SHOW);
+            msg.setData(mBundleProgressDialog);
+            handler.sendMessage(msg);
+        }
     }
 
     public void showPermissionDialog(){
@@ -277,18 +315,19 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     }
 
     private void showRationaleFragment() {
-        Bundle bundle = new Bundle();
-        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.Permission_Title));
         String message = getString(R.string.Permission_Message) + "\n"
                 + getString(R.string.Permission_Message1) + "\n"
                 + getString(R.string.Permission_Message2) + "\n"
                 + getString(R.string.Permission_Message3);
-        bundle.putString(BaseDialogFragment.KEY_MESSAGE,message);
-        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive));
-        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative));
-        bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE,true);
-        bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS);
-        setPermissionBundle(bundle);
+        isShowingPermissionDialog = true;
+        mBundlePermissionDialog = new BundleBuilder()
+                .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Permission_Title))
+                .put(BaseDialogFragment.KEY_MESSAGE, message)
+                .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
+                .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
+                .put(BaseDialogFragment.KEY_CANCELABLE, true)
+                .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS)
+                .build();
         showPermissionDialog();
     }
 
@@ -447,9 +486,11 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         break;
                     case MESSAGE_PROGRESS_DIALOG_UPDATE:
                         if (fragment.mProgressDialogFragment != null) {
-                            if (msg.obj instanceof String) {
-                                String progress = (String) msg.obj;
-                                fragment.mProgressDialogFragment.setProgressMessage(progress);
+                            if (msg.obj instanceof Bundle){
+                                Bundle bundle = (Bundle) msg.obj;
+                                String message = bundle.getString(BaseProgressDialogFragment.message);
+                                String progress = bundle.getString(BaseProgressDialogFragment.progress);
+                                fragment.mProgressDialogFragment.setDialogProgress(message, progress);
                             }
                         }
                         break;
@@ -478,6 +519,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         if (fragment.mPermissionDialogFragment != null) {
                             fragment.mPermissionDialogFragment.dismiss();
                             fragment.mPermissionDialogFragment = null;
+                            fragment.mBundleProgressDialog = null;
                         }
                         break;
                 }

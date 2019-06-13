@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -34,9 +33,9 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 
 
@@ -103,13 +102,9 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         switch (mReloadState) {
             case BookService.STATE_NONE:
                 break;
-            case BookService.STATE_NEW_BOOKS_RELOAD_START:
-            case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
-                Bundle progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Reload))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
+            case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
+            case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
+                setProgress(BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
                 break;
         }
     }
@@ -166,13 +161,9 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
-                    Bundle progress = new BundleBuilder()
-                            .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Reload))
-                            .put(BaseProgressDialogFragment.message, "")
-                            .build();
-                    setProgressBundle(progress);
+                    mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE;
+                    setProgress(BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
                     showProgressDialog();
-                    mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_START;
                     service.reloadNewBooks(mApplicationData.loadAuthorsList());
                 }
             }
@@ -301,18 +292,23 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                             mReloadState = BookService.STATE_NONE;
                             getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
                             break;
-                        case BookService.STATE_NEW_BOOKS_RELOAD_START:
-                            if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_START");
+                        case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
+                            if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_INCOMPLETE");
                             break;
-                        case BookService.STATE_NEW_BOOKS_RELOAD_FINISH:
-                            if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_FINISH");
+                        case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
+                            if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_COMPLETE");
                             loadNewBooksResult();
                             break;
                     }
                     break;
                 case FILTER_ACTION_UPDATE_PROGRESS:
-                    String progress = intent.getStringExtra(KEY_UPDATE_PROGRESS);
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, progress).sendToTarget();
+                    String progress = intent.getStringExtra(KEY_PROGRESS);
+                    if(progress != null) {
+                        Bundle bundle = new BundleBuilder()
+                                .put(BaseProgressDialogFragment.progress, progress)
+                                .build();
+                        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
+                    }
                     break;
             }
         }
@@ -322,8 +318,8 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     public void checkReloadState(){
         if(getActivity() instanceof MainActivity){
             BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_FINISH){
-                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_FINISH;
+            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE){
+                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE;
                 loadNewBooksResult();
             }
         }

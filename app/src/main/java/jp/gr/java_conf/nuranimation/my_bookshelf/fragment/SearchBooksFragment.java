@@ -32,7 +32,6 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.SearchBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
@@ -58,12 +57,11 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     private BooksListViewAdapter mSearchBooksViewAdapter;
     private SearchView mSearchView;
     private LinearLayoutManager mLayoutManager;
-
     private List<BookData> mSearchBooks;
     private String mTempKeyword;
     private String mKeyword;
     private int mSearchPage = 1;
-    private int mSearchState = 0;
+    private int mSearchState = BookService.STATE_NONE;
     private boolean hasResultData = false;
     private boolean hasButtonLoadNext = false;
 
@@ -164,8 +162,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     BookData book = mApplicationData.loadBookDataFromShelfBooks(data);
                     if(book == null){
                         book = new BookData(data);
-                        book.setRating("0.0");
-                        book.setReadStatus("5");
+                        book.setRating(0.0f);
+                        book.setReadStatus(BookData.STATUS_NONE);
                     }
                     bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
@@ -237,8 +235,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
                         String registerDate = sdf.format(calendar.getTime());
                         book.setRegisterDate(registerDate);
-                        book.setRating("0.0");
-                        book.setReadStatus("5");
+                        book.setRating(0.0f);
+                        book.setReadStatus(BookData.STATUS_NONE);
                         mApplicationData.registerToShelfBooks(book);
                         mSearchBooksViewAdapter.updateBook(position_register);
                         Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
@@ -263,28 +261,44 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     }
 
     @Override
-    public void onReceiveBroadcast(Context context, Intent intent){
+    public void onReceiveBroadcast(Context context, Intent intent) {
         if (D) Log.d(TAG, "onReceive");
         String action = intent.getAction();
-        if(action != null){
-            switch (action){
-                case FILTER_ACTION_UPDATE_SERVICE_STATE:
-                    int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
-                    switch (state) {
-                        case BookService.STATE_NONE:
-                            if (D) Log.d(TAG, "STATE_NONE");
-                            mSearchState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
-                            break;
-                        case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
-                            if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_START");
-                            break;
-                        case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
-                            if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_FINISH");
-                            loadSearchBooksResult();
-                            break;
-                    }
+
+        if (action != null && action.equals(FILTER_ACTION_UPDATE_SERVICE_STATE)) {
+            int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, BookService.STATE_NONE);
+            switch (state) {
+                case BookService.STATE_NONE:
+                    if (D) Log.d(TAG, "STATE_NONE");
+                    mSearchState = BookService.STATE_NONE;
+                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
                     break;
+                case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
+                    if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE");
+                    break;
+                case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
+                    if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_COMPLETE");
+                    checkSearchState();
+                    break;
+                default:
+                    if (D) Log.d(TAG, "IllegalState: " + state);
+                    break;
+            }
+        }
+    }
+
+    public void prepareSearch(){
+        mTempKeyword = null;
+        mSearchView.setQuery(null,false);
+        mSearchView.setIconified(false);
+    }
+
+    public void checkSearchState(){
+        if(getActivity() instanceof MainActivity){
+            BookService service = ((MainActivity) getActivity()).getService();
+            if(service != null && service.getServiceState() == BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE){
+                mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE;
+                loadSearchBooksResult();
             }
         }
     }
@@ -318,7 +332,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         List<BookData> books = new ArrayList<>();
         if (savedInstanceState == null) {
             if (getArguments() != null) {
-                mSearchState = getArguments().getInt(BookService.KEY_SERVICE_STATE, 0);
+                mSearchState = getArguments().getInt(BookService.KEY_SERVICE_STATE, BookService.STATE_NONE);
                 mSearchPage = getArguments().getInt(BookService.KEY_PARAM_SEARCH_PAGE, 1);
                 mTempKeyword = getArguments().getString(BookService.KEY_PARAM_SEARCH_KEYWORD, null);
                 mKeyword = mTempKeyword;
@@ -326,24 +340,20 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             switch (mSearchState) {
                 case BookService.STATE_NONE:
                     break;
-                case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
-                case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
+                case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
+                case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
                     if (mSearchPage > 1) {
                         books = mApplicationData.loadSearchBooks();
                         BookData footer = new BookData();
                         footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
                         books.add(footer);
                     } else if (mSearchPage == 1) {
-                        Bundle progress = new BundleBuilder()
-                                .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Search))
-                                .put(BaseProgressDialogFragment.message, "")
-                                .build();
-                        setProgressBundle(progress);
+                        setProgress(BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
                     }
                     break;
             }
         } else {
-            mSearchState = savedInstanceState.getInt(KEY_SEARCH_STATE, 0);
+            mSearchState = savedInstanceState.getInt(KEY_SEARCH_STATE, BookService.STATE_NONE);
             mTempKeyword = savedInstanceState.getString(KEY_TEMP_KEYWORD, null);
             mKeyword = savedInstanceState.getString(KEY_KEYWORD, null);
             mSearchPage = savedInstanceState.getInt(KEY_PAGE, 1);
@@ -361,18 +371,14 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         books.add(footer);
                     }
                     break;
-                case BookService.STATE_SEARCH_BOOKS_SEARCH_START:
-                case BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH:
+                case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
+                case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
                     if (hasResultData && mSearchPage > 1) {
                         BookData footer = new BookData();
                         footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
                         books.add(footer);
                     } else if (mSearchPage == 1) {
-                        Bundle progress = new BundleBuilder()
-                                .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Search))
-                                .put(BaseProgressDialogFragment.message, "")
-                                .build();
-                        setProgressBundle(progress);
+                        setProgress(BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
                     }
                     break;
             }
@@ -380,23 +386,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         return books;
     }
 
-    public void checkSearchState(){
-        if(getActivity() instanceof MainActivity){
-            BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null && service.getServiceState() == BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH){
-                mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_FINISH;
-                loadSearchBooksResult();
-            }
-        }
-    }
 
-    public void prepareSearch(){
-        mTempKeyword = null;
-        mSearchView.setQuery(null,false);
-        mSearchView.setIconified(false);
-    }
 
-    public void searchBooks(String keyword, int page) {
+    private void searchBooks(String keyword, int page) {
         try{
             if(!MyBookshelfUtils.isValid(keyword)){
                 Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Keyword), Toast.LENGTH_SHORT).show();
@@ -418,23 +410,19 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchBooksViewAdapter.clearBooksData();
                 hasResultData = false;
                 hasButtonLoadNext = false;
-                Bundle progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Search))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
+                setProgress(BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
                 showProgressDialog();
             } else {
                 BookData footer = new BookData();
                 footer.setView_type(BooksListViewAdapter.VIEW_TYPE_LOADING);
                 mSearchBooksViewAdapter.setFooter(footer);
             }
-            mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_START;
+            mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE;
             service.searchBooks(keyword, page);
         }
     }
 
-    public void loadSearchBooksResult() {
+    private void loadSearchBooksResult() {
         if (D) Log.d(TAG, "loadSearchBooksResult");
         mSearchBooksViewAdapter.setFooter(null);
         if (getActivity() instanceof MainActivity) {

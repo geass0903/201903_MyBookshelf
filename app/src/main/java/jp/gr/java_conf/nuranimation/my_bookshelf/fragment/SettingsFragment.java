@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.background.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
@@ -307,7 +310,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
-                    mSettingsState = BookService.STATE_EXPORT_START;
+                    mSettingsState = BookService.STATE_EXPORT_INCOMPLETE;
+                    setProgress(BookService.STATE_EXPORT_INCOMPLETE);
+                    showProgressDialog();
                     service.exportCSV();
                 }
             }
@@ -321,7 +326,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
-                    mSettingsState = BookService.STATE_IMPORT_START;
+                    mSettingsState = BookService.STATE_IMPORT_INCOMPLETE;
+                    setProgress(BookService.STATE_IMPORT_INCOMPLETE);
+                    showProgressDialog();
                     service.importCSV();
                 }
             }
@@ -335,7 +342,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
-                    mSettingsState = BookService.STATE_BACKUP_START;
+                    mSettingsState = BookService.STATE_BACKUP_INCOMPLETE;
+                    setProgress(BookService.STATE_BACKUP_INCOMPLETE);
+                    showProgressDialog();
                     service.backupCSV();
                 }
             }
@@ -349,8 +358,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
-                    mSettingsState = BookService.STATE_RESTORE_START;
-                    setProgress(BookService.STATE_RESTORE_START);
+                    mSettingsState = BookService.STATE_RESTORE_INCOMPLETE;
+                    setProgress(BookService.STATE_RESTORE_INCOMPLETE);
                     showProgressDialog();
                     service.restoreCSV();
                 }
@@ -368,8 +377,6 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 mSettingsState = BookService.STATE_DROPBOX_LOGIN;
                 service.setServiceState(BookService.STATE_DROPBOX_LOGIN);
                 service.startAuthenticate();
-
-
             }
         }
     }
@@ -402,75 +409,18 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
 
-
-    private void setProgress(int state){
-        Bundle progress;
-        switch (state) {
-            case BookService.STATE_EXPORT_START:
-            case BookService.STATE_EXPORT_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Export))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-            case BookService.STATE_IMPORT_START:
-            case BookService.STATE_IMPORT_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Import))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-            case BookService.STATE_BACKUP_START:
-            case BookService.STATE_BACKUP_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Backup))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-            case BookService.STATE_RESTORE_START:
-            case BookService.STATE_RESTORE_FINISH:
-                progress = new BundleBuilder()
-                        .put(BaseProgressDialogFragment.title, getString(R.string.ProgressTitle_Restore))
-                        .put(BaseProgressDialogFragment.message, "")
-                        .build();
-                setProgressBundle(progress);
-                break;
-        }
-    }
-
-
     public void checkSettingsState(){
         if(D) Log.d(TAG,"checkSettingsState");
         if(getActivity() instanceof MainActivity){
             BookService service = ((MainActivity) getActivity()).getService();
             if(service != null) {
                 switch (service.getServiceState()) {
-                    case BookService.STATE_EXPORT_START:
-                        mSettingsState = BookService.STATE_EXPORT_START;
-                        break;
-                    case BookService.STATE_EXPORT_FINISH:
-                        mSettingsState = BookService.STATE_EXPORT_FINISH;
-                        break;
-                    case BookService.STATE_IMPORT_START:
-                        mSettingsState = BookService.STATE_IMPORT_START;
-                        break;
-                    case BookService.STATE_IMPORT_FINISH:
-                        mSettingsState = BookService.STATE_IMPORT_FINISH;
-                        break;
-                    case BookService.STATE_BACKUP_START:
-                        mSettingsState = BookService.STATE_BACKUP_START;
-                        break;
-                    case BookService.STATE_BACKUP_FINISH:
-                        mSettingsState = BookService.STATE_BACKUP_FINISH;
-                        break;
-                    case BookService.STATE_RESTORE_START:
-                        mSettingsState = BookService.STATE_RESTORE_START;
-                        break;
-                    case BookService.STATE_RESTORE_FINISH:
-                        mSettingsState = BookService.STATE_RESTORE_FINISH;
+                    case BookService.STATE_EXPORT_COMPLETE:
+                    case BookService.STATE_IMPORT_COMPLETE:
+                    case BookService.STATE_BACKUP_COMPLETE:
+                    case BookService.STATE_RESTORE_COMPLETE:
+                        mSettingsState = service.getServiceState();
+                        loadFileBackupResult();
                         break;
                     case BookService.STATE_DROPBOX_LOGIN:
                         String token = service.getAccessToken();
@@ -506,34 +456,89 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                             mSettingsState = BookService.STATE_NONE;
                             getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
                             break;
-                        case BookService.STATE_EXPORT_FINISH:
-                            mSettingsState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
-                            break;
-                        case BookService.STATE_IMPORT_FINISH:
-                            mSettingsState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
-                            break;
-                        case BookService.STATE_BACKUP_FINISH:
-                            mSettingsState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
-                            break;
-                        case BookService.STATE_RESTORE_FINISH:
-                            mSettingsState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                        case BookService.STATE_EXPORT_COMPLETE:
+                        case BookService.STATE_IMPORT_COMPLETE:
+                        case BookService.STATE_BACKUP_COMPLETE:
+                        case BookService.STATE_RESTORE_COMPLETE:
+                            checkSettingsState();
                             break;
                     }
                     break;
                 case FILTER_ACTION_UPDATE_PROGRESS:
-                    String progress = intent.getStringExtra(KEY_UPDATE_PROGRESS);
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, progress).sendToTarget();
+                    int type = intent.getIntExtra(KEY_TYPE,FileBackupThread.TYPE_UNKNOWN);
+                    String progress = intent.getStringExtra(KEY_PROGRESS);
+                    if(progress == null){
+                        progress = "";
+                    }
+                    String message = null;
+                    switch (type){
+                        case FileBackupThread.TYPE_EXPORT:
+                            message = getString(R.string.ProgressMessage_Export);
+                            progress = progress + getString(R.string.Progress_Unit_Book);
+                            break;
+                        case FileBackupThread.TYPE_IMPORT:
+                            message = getString(R.string.ProgressMessage_Import);
+                            progress = progress + getString(R.string.Progress_Unit_Book);
+                            break;
+                        case FileBackupThread.TYPE_BACKUP:
+                            message = getString(R.string.ProgressMessage_Upload);
+                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            break;
+                        case FileBackupThread.TYPE_RESTORE:
+                            message = getString(R.string.ProgressMessage_Download);
+                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            break;
+                        case FileBackupThread.TYPE_REGISTER:
+                            message = getString(R.string.ProgressMessage_Register);
+                            break;
+                    }
+                    Bundle bundle = new BundleBuilder()
+                            .put(BaseProgressDialogFragment.message, message)
+                            .put(BaseProgressDialogFragment.progress, progress)
+                            .build();
+                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
                     break;
             }
         }
     }
 
 
-
+    private void loadFileBackupResult() {
+        if (D) Log.d(TAG, "loadFileBackupResult");
+        String message = null;
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                FileBackupThread.Result result = service.loadFileBackupResult();
+                if(result.isSuccess()) {
+                    switch (service.getServiceState()){
+                        case BookService.STATE_EXPORT_COMPLETE:
+                            message = getString(R.string.Toast_Success_Export);
+                            break;
+                        case BookService.STATE_IMPORT_COMPLETE:
+                            message = getString(R.string.Toast_Success_Import);
+                            break;
+                        case BookService.STATE_BACKUP_COMPLETE:
+                            message = getString(R.string.Toast_Success_Backup);
+                            break;
+                        case BookService.STATE_RESTORE_COMPLETE:
+                            message = getString(R.string.Toast_Success_Restore);
+                            break;
+                    }
+                }else{
+                    message = result.getErrorMessage();
+                }
+                if(!TextUtils.isEmpty(message)){
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                }
+                service.setServiceState(BookService.STATE_NONE);
+                service.stopForeground(false);
+                service.stopSelf();
+            }
+        }
+        mSettingsState = BookService.STATE_NONE;
+        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+    }
 
 
 

@@ -18,10 +18,13 @@ public class BaseProgressDialogFragment extends DialogFragment{
 
     public static final String title = "KEY_TITLE";
     public static final String message = "KEY_MESSAGE";
+    public static final String progress = "KEY_PROGRESS";
 
     private TextView mTextView_Title;
+    private TextView mTextView_Message;
     private TextView mTextView_Progress;
     private String mTitle;
+    private String mMessage;
     private String mProgress;
 
 
@@ -55,7 +58,8 @@ public class BaseProgressDialogFragment extends DialogFragment{
         Bundle bundle = this.getArguments();
         setCancelable(false);
         mTitle = bundle.getString(BaseProgressDialogFragment.title);
-        mProgress = bundle.getString(BaseProgressDialogFragment.message);
+        mMessage = bundle.getString(BaseProgressDialogFragment.message);
+        mProgress = bundle.getString(BaseProgressDialogFragment.progress);
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(R.layout.fragment_progressdialog);
         return builder.create();
@@ -66,12 +70,13 @@ public class BaseProgressDialogFragment extends DialogFragment{
     public void onStart(){
         super.onStart();
         mTextView_Title = getDialog().findViewById(R.id.fragment_progress_dialog_text_title);
+        mTextView_Message = getDialog().findViewById(R.id.fragment_progress_dialog_text_message);
         mTextView_Progress = getDialog().findViewById(R.id.fragment_progress_dialog_text_progress);
-        setProgressTitle(mTitle);
-        setProgressMessage(mProgress);
+        setDialogTitle(mTitle);
+        setDialogProgress(mMessage,mProgress);
     }
 
-    public void setProgressTitle(String title){
+    public void setDialogTitle(String title){
         if(mTextView_Title == null){
             mTextView_Title = getDialog().findViewById(R.id.fragment_progress_dialog_text_title);
         }
@@ -80,12 +85,18 @@ public class BaseProgressDialogFragment extends DialogFragment{
         }
     }
 
-    public void setProgressMessage(String message){
+    public void setDialogProgress(String message, String progress){
+        if(mTextView_Message == null){
+            mTextView_Message = getDialog().findViewById(R.id.fragment_progress_dialog_text_message);
+        }
         if(mTextView_Progress == null){
             mTextView_Progress = getDialog().findViewById(R.id.fragment_progress_dialog_text_progress);
         }
         if(!TextUtils.isEmpty(message)) {
-            mTextView_Progress.setText(message);
+            mTextView_Message.setText(message);
+        }
+        if(!TextUtils.isEmpty(progress)) {
+            mTextView_Progress.setText(progress);
         }
     }
 

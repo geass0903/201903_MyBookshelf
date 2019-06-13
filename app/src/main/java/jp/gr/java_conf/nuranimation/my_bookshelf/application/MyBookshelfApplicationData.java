@@ -10,9 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.cache.disk.DiskCacheConfig;
-import com.facebook.drawee.backends.pipeline.DraweeConfig;
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerFactory;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.io.File;
@@ -21,7 +19,7 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 
-@SuppressWarnings({"WeakerAccess","unused"})
+@SuppressWarnings({"unused"})
 public class MyBookshelfApplicationData extends Application {
     private static final String TAG = MyBookshelfApplicationData.class.getSimpleName();
     private static final boolean D = true;

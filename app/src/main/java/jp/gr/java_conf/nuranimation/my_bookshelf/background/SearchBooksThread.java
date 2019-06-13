@@ -152,7 +152,7 @@ public class SearchBooksThread extends Thread {
                 }
 
                 String urlSort = "&sort=" + URLEncoder.encode(sort, "UTF-8");
-                String urlPage = "&page=" + String.valueOf(page);
+                String urlPage = "&page=" + page;
                 String urlKeyword = "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits + urlStockFlag + urlField
                         + urlSort + urlPage + urlKeyword;

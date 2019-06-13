@@ -15,14 +15,21 @@
         android:gravity="center_horizontal"
         android:textSize="@dimen/textSize_large" />
     <TextView
+        android:id="@+id/fragment_progress_dialog_text_message"
+        android:padding="@dimen/padding_small"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textSize="@dimen/textSize_normal" />
+    <TextView
         android:id="@+id/fragment_progress_dialog_text_progress"
-        android:layout_margin="@dimen/margin_large"
+        android:padding="@dimen/padding_small"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:textSize="@dimen/textSize_large" />
+        android:textSize="@dimen/textSize_normal" />
     <ProgressBar
-        android:layout_margin="@dimen/margin_large"
+        android:padding="@dimen/padding_large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="false"

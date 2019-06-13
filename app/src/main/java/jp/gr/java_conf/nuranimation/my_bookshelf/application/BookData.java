@@ -190,6 +190,15 @@ public class BookData implements Parcelable {
         return rating;
     }
 
+    public float getFloatRating() {
+        float value;
+        try{
+            value = Float.parseFloat(this.rating);
+        }  catch (NumberFormatException e){
+            value = 0.0f;
+        }
+        return value;
+    }
 
 
     protected BookData(Parcel in) {
