@@ -465,30 +465,44 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                     }
                     break;
                 case FILTER_ACTION_UPDATE_PROGRESS:
-                    int type = intent.getIntExtra(KEY_TYPE,FileBackupThread.TYPE_UNKNOWN);
+                    int type = intent.getIntExtra(KEY_PROGRESS_TYPE,FileBackupThread.TYPE_UNKNOWN);
                     String progress = intent.getStringExtra(KEY_PROGRESS);
                     if(progress == null){
                         progress = "";
                     }
                     String message = null;
                     switch (type){
-                        case FileBackupThread.TYPE_EXPORT:
-                            message = getString(R.string.ProgressMessage_Export);
+                        case FileBackupThread.PROGRESS_TYPE_EXPORT_BOOKS:
+                            message = getString(R.string.ProgressMessage_Export_Books);
                             progress = progress + getString(R.string.Progress_Unit_Book);
                             break;
-                        case FileBackupThread.TYPE_IMPORT:
-                            message = getString(R.string.ProgressMessage_Import);
+                        case FileBackupThread.PROGRESS_TYPE_EXPORT_AUTHORS:
+                            message = getString(R.string.ProgressMessage_Export_Authors);
+                            break;
+                        case FileBackupThread.PROGRESS_TYPE_IMPORT_BOOKS:
+                            message = getString(R.string.ProgressMessage_Import_Books);
                             progress = progress + getString(R.string.Progress_Unit_Book);
                             break;
-                        case FileBackupThread.TYPE_BACKUP:
-                            message = getString(R.string.ProgressMessage_Upload);
+                        case FileBackupThread.PROGRESS_TYPE_IMPORT_AUTHORS:
+                            message = getString(R.string.ProgressMessage_Import_Authors);
+                            break;
+                        case FileBackupThread.PROGRESS_TYPE_UPLOAD_BOOKS:
+                            message = getString(R.string.ProgressMessage_Upload_Books);
                             progress = progress + getString(R.string.Progress_Unit_Byte);
                             break;
-                        case FileBackupThread.TYPE_RESTORE:
-                            message = getString(R.string.ProgressMessage_Download);
+                        case FileBackupThread.PROGRESS_TYPE_UPLOAD_AUTHORS:
+                            message = getString(R.string.ProgressMessage_Upload_Books);
                             progress = progress + getString(R.string.Progress_Unit_Byte);
                             break;
-                        case FileBackupThread.TYPE_REGISTER:
+                        case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_BOOKS:
+                            message = getString(R.string.ProgressMessage_Download_Books);
+                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            break;
+                        case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_AUTHORS:
+                            message = getString(R.string.ProgressMessage_Download_Authors);
+                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            break;
+                        case FileBackupThread.PROGRESS_TYPE_REGISTER:
                             message = getString(R.string.ProgressMessage_Register);
                             break;
                     }

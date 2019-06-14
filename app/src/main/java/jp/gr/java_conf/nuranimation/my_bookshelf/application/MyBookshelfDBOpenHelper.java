@@ -176,13 +176,10 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
 
-        switch(table){
-            case TABLE_NEW_BOOKS:
-                dropTable(TABLE_NEW_BOOKS);
-                break;
+
+        if (TABLE_NEW_BOOKS.equals(table)) {
+            dropTable(TABLE_NEW_BOOKS);
         }
-
-
 
         for (BookData book : books) {
             if (book != null && !TextUtils.isEmpty(book.getISBN())) {

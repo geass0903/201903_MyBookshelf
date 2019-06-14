@@ -160,22 +160,18 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_detail_action_register:
-                if(D) Log.d(TAG,"detail action register");
-                BookData book = getBookData();
-                Calendar calendar = Calendar.getInstance();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
-                String registerDate = sdf.format(calendar.getTime());
-                book.setRegisterDate(registerDate);
-                mApplicationData.registerToShelfBooks(book);
-                Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
-                if(getFragmentListener() != null){
-                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK_BOOK_DETAIL, null);
-                }
-                break;
-            default:
-                break;
+        if(item.getItemId() == R.id.menu_detail_action_register){
+            if(D) Log.d(TAG,"detail action register");
+            BookData book = getBookData();
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
+            String registerDate = sdf.format(calendar.getTime());
+            book.setRegisterDate(registerDate);
+            mApplicationData.registerToShelfBooks(book);
+            Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
+            if(getFragmentListener() != null){
+                getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK_BOOK_DETAIL, null);
+            }
         }
         return super.onOptionsItemSelected(item);
     }

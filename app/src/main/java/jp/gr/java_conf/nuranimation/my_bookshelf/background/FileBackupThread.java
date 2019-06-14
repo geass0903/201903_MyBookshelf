@@ -44,7 +44,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicat
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
-//@SuppressWarnings({"WeakerAccess","unused"})
+@SuppressWarnings({"WeakerAccess","unused"})
 public class FileBackupThread extends Thread {
     private static final String TAG = FileBackupThread.class.getSimpleName();
     private static final boolean D = true;
@@ -54,7 +54,16 @@ public class FileBackupThread extends Thread {
     public static final int TYPE_IMPORT = 2;
     public static final int TYPE_BACKUP = 3;
     public static final int TYPE_RESTORE = 4;
-    public static final int TYPE_REGISTER = 5;
+
+    public static final int PROGRESS_TYPE_EXPORT_BOOKS      = 1;
+    public static final int PROGRESS_TYPE_EXPORT_AUTHORS    = 2;
+    public static final int PROGRESS_TYPE_IMPORT_BOOKS      = 3;
+    public static final int PROGRESS_TYPE_IMPORT_AUTHORS    = 4;
+    public static final int PROGRESS_TYPE_UPLOAD_BOOKS      = 5;
+    public static final int PROGRESS_TYPE_UPLOAD_AUTHORS    = 6;
+    public static final int PROGRESS_TYPE_DOWNLOAD_BOOKS    = 7;
+    public static final int PROGRESS_TYPE_DOWNLOAD_AUTHORS  = 8;
+    public static final int PROGRESS_TYPE_REGISTER          = 9;
 
 
     private static final String CLIENT_IDENTIFIER = "MyBookshelf/1.0";
@@ -196,7 +205,7 @@ public class FileBackupThread extends Thread {
                 count++;
                 String progress = count + "/" + recodeCount;
                 Intent intent = new Intent();
-                intent.putExtra(BaseFragment.KEY_TYPE, TYPE_EXPORT);
+                intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_EXPORT_BOOKS);
                 intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                 intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                 mLocalBroadcastManager.sendBroadcast(intent);
@@ -219,7 +228,7 @@ public class FileBackupThread extends Thread {
                 count++;
                 String progress = count + "/" + recodeCount;
                 Intent intent = new Intent();
-                intent.putExtra(BaseFragment.KEY_TYPE, TYPE_EXPORT);
+                intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_EXPORT_AUTHORS);
                 intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                 intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                 mLocalBroadcastManager.sendBroadcast(intent);
@@ -293,7 +302,7 @@ public class FileBackupThread extends Thread {
                     count++;
                     String progress = count + "/" + size;
                     Intent intent = new Intent();
-                    intent.putExtra(BaseFragment.KEY_TYPE, TYPE_IMPORT);
+                    intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_IMPORT_BOOKS);
                     intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                     intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                     mLocalBroadcastManager.sendBroadcast(intent);
@@ -308,7 +317,7 @@ public class FileBackupThread extends Thread {
                     count++;
                     String progress = count + "/" + size;
                     Intent intent = new Intent();
-                    intent.putExtra(BaseFragment.KEY_TYPE, TYPE_IMPORT);
+                    intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_IMPORT_BOOKS);
                     intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                     intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                     mLocalBroadcastManager.sendBroadcast(intent);
@@ -341,7 +350,7 @@ public class FileBackupThread extends Thread {
                 count++;
                 String progress = count + "/" + size;
                 Intent intent = new Intent();
-                intent.putExtra(BaseFragment.KEY_TYPE, TYPE_IMPORT);
+                intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_IMPORT_AUTHORS);
                 intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                 intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                 mLocalBroadcastManager.sendBroadcast(intent);
@@ -351,7 +360,7 @@ public class FileBackupThread extends Thread {
 
             if (D) Log.d(TAG, "register start");
             Intent intent = new Intent();
-            intent.putExtra(BaseFragment.KEY_TYPE, TYPE_REGISTER);
+            intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_REGISTER);
             intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
             mLocalBroadcastManager.sendBroadcast(intent);
             mApplicationData.registerToShelfBooks(books);
@@ -397,13 +406,12 @@ public class FileBackupThread extends Thread {
             }
 
             InputStream input_bookshelf = new FileInputStream(file_books);
-            final long size_file_books = file_books.length();
             mClient.files().uploadBuilder("/MyBookshelf/" + FILE_NAME_SHELF_BOOKS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_bookshelf, new IOUtil.ProgressListener() {
                 @Override
                 public void onProgress(long bytesWritten) {
-                    String progress = bytesWritten + "/" + size_file_books;
+                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
                     Intent intent = new Intent();
-                    intent.putExtra(BaseFragment.KEY_TYPE, TYPE_BACKUP);
+                    intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_UPLOAD_BOOKS);
                     intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                     intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                     mLocalBroadcastManager.sendBroadcast(intent);
@@ -412,13 +420,12 @@ public class FileBackupThread extends Thread {
 
 
             InputStream input_authors = new FileInputStream(file_authors);
-            final long size_file_authors = file_books.length();
             mClient.files().uploadBuilder("/MyBookshelf/" + FILE_NAME_AUTHORS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_authors, new IOUtil.ProgressListener() {
                 @Override
                 public void onProgress(long bytesWritten) {
-                    String progress = bytesWritten + "/" + size_file_authors;
+                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
                     Intent intent = new Intent();
-                    intent.putExtra(BaseFragment.KEY_TYPE, TYPE_BACKUP);
+                    intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_UPLOAD_AUTHORS);
                     intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
                     intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
                     mLocalBroadcastManager.sendBroadcast(intent);
@@ -486,13 +493,33 @@ public class FileBackupThread extends Thread {
                 return Result.error(TYPE_RESTORE, ERROR_FILE_NOT_FOUND, "metadataAuthors not found");
             }
 
-            File file_bookshelf = new File(dirPath + FILE_NAME_SHELF_BOOKS);
-            OutputStream output_bookshelf = new FileOutputStream(file_bookshelf);
-            mClient.files().download(metadataBookshelf.getPathLower()).download(output_bookshelf);
+            File file_books = new File(dirPath + FILE_NAME_SHELF_BOOKS);
+            OutputStream output_bookshelf = new FileOutputStream(file_books);
+            mClient.files().download(metadataBookshelf.getPathLower()).download(output_bookshelf, new IOUtil.ProgressListener() {
+                @Override
+                public void onProgress(long bytesWritten) {
+                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
+                    Intent intent = new Intent();
+                    intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_DOWNLOAD_BOOKS);
+                    intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
+                    intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
+                    mLocalBroadcastManager.sendBroadcast(intent);
+                }
+            });
 
             File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
             OutputStream output_authors = new FileOutputStream(file_authors);
-            mClient.files().download(metadataAuthors.getPathLower()).download(output_authors);
+            mClient.files().download(metadataAuthors.getPathLower()).download(output_authors, new IOUtil.ProgressListener() {
+                @Override
+                public void onProgress(long bytesWritten) {
+                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
+                    Intent intent = new Intent();
+                    intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, PROGRESS_TYPE_DOWNLOAD_AUTHORS);
+                    intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
+                    intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
+                    mLocalBroadcastManager.sendBroadcast(intent);
+                }
+            });
 
             return Result.success(TYPE_RESTORE);
         } catch (FileNotFoundException e) {
