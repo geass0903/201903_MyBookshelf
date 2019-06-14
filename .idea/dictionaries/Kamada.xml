@@ -5,10 +5,15 @@
       <w>dataset</w>
       <w>drawee</w>
       <w>dropbox</w>
+      <w>fullwidth</w>
+      <w>halfwidth</w>
+      <w>hiragana</w>
+      <w>katakana</w>
       <w>nuranimation</w>
       <w>rakuten</w>
       <w>readee</w>
       <w>recyclerview</w>
+      <w>xxxx</w>
     </words>
   </dictionary>
 </component>
