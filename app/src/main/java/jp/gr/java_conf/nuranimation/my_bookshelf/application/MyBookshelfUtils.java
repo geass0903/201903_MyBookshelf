@@ -5,13 +5,20 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +28,21 @@ import java.util.regex.PatternSyntaxException;
 public class MyBookshelfUtils {
     public static final String TAG = MyBookshelfUtils.class.getSimpleName();
     private static final boolean D = true;
+
+    private static final String INDEX_IMAGE             = "images";
+    private static final String INDEX_ISBN              = "isbn";
+    private static final String INDEX_TITLE             = "title";
+    private static final String INDEX_AUTHOR            = "author";
+    private static final String INDEX_PUBLISHER         = "publisherName";
+    private static final String INDEX_RELEASE_DATE      = "releaseDate";
+    private static final String INDEX_PRICE             = "price";
+    private static final String INDEX_RAKUTEN_URL       = "rakutenUrl";
+    private static final String INDEX_RATING            = "rating";
+    private static final String INDEX_READ_STATUS       = "readStatus";
+    private static final String INDEX_TAGS              = "tags";
+    private static final String INDEX_READ_DATE         = "finishReadDate";
+    private static final String INDEX_REGISTER_DATE     = "registerDate";
+
 
     public static final int IMAGE_TYPE_LARGE = 1;
     public static final int IMAGE_TYPE_SMALL = 2;
@@ -117,25 +139,209 @@ public class MyBookshelfUtils {
         return null;
     }
 
-    public static InputStream getStreamSkipBOM(InputStream is, Charset charSet) throws IOException {
-        if( !(charSet == Charset.forName("UTF-8")) ){
-            return is;
+    public static BufferedReader getBufferedReaderSkipBOM(InputStream is, Charset charSet) throws IOException {
+        InputStreamReader isr;
+        BufferedReader br;
+
+        if (!(charSet == Charset.forName("UTF-8"))) {
+            isr = new InputStreamReader(is);
+            br = new BufferedReader(isr);
+            return br;
         }
-        if( !is.markSupported() ){
+
+        if (!is.markSupported()) {
             is = new BufferedInputStream(is);
         }
         is.mark(3);
-        if( is.available() >= 3 ){
+        if (is.available() >= 3) {
             byte[] b = {0, 0, 0};
-            int bytes = is.read(b,0,3);
-            if(bytes == 3 &&  b[0]!=(byte)0xEF  || b[1]!=(byte)0xBB || b[2]!= (byte)0xBF ){
+            int bytes = is.read(b, 0, 3);
+            if (bytes == 3 && b[0] != (byte) 0xEF || b[1] != (byte) 0xBB || b[2] != (byte) 0xBF) {
                 is.reset();
             }
         }
-        return is;
+        isr = new InputStreamReader(is, charSet);
+        br = new BufferedReader(isr);
+        return br;
     }
 
-    public static String[] splitLineWithComma(String line) throws PatternSyntaxException{
+
+    public static BufferedWriter getBufferedWriter(OutputStream os, Charset charSet){
+        OutputStreamWriter osr = new OutputStreamWriter(os, charSet);
+        return new BufferedWriter(osr);
+    }
+
+
+    public static String[] getShelfBooksIndex() {
+        List<String> list = new ArrayList<>();
+        list.add(INDEX_ISBN);
+        list.add(INDEX_TITLE);
+        list.add(INDEX_AUTHOR);
+        list.add(INDEX_PUBLISHER);
+        list.add(INDEX_IMAGE);
+        list.add(INDEX_RELEASE_DATE);
+        list.add(INDEX_PRICE);
+        list.add(INDEX_RAKUTEN_URL);
+        list.add(INDEX_RATING);
+        list.add(INDEX_READ_STATUS);
+        list.add(INDEX_READ_DATE);
+        list.add(INDEX_TAGS);
+        list.add(INDEX_REGISTER_DATE);
+        return list.toArray(new String[0]);
+    }
+
+    public static String convertBookDataToLine(String[] index, BookData book){
+        List<String> list = new ArrayList<>();
+        for(String idx: index){
+            switch(idx){
+                case INDEX_ISBN:
+                    list.add(book.getISBN());
+                    break;
+                case INDEX_TITLE:
+                    list.add(book.getTitle());
+                    break;
+                case INDEX_AUTHOR:
+                    list.add(book.getAuthor());
+                    break;
+                case INDEX_PUBLISHER:
+                    list.add(book.getPublisher());
+                    break;
+                case INDEX_IMAGE:
+                    list.add(book.getImage());
+                    break;
+                case INDEX_RELEASE_DATE:
+                    list.add(book.getSalesDate());
+                    break;
+                case INDEX_PRICE:
+                    list.add(book.getItemPrice());
+                    break;
+                case INDEX_RAKUTEN_URL:
+                    list.add(book.getRakutenUrl());
+                    break;
+                case INDEX_RATING:
+                    list.add(book.getRating());
+                    break;
+                case INDEX_READ_STATUS:
+                    list.add(book.getReadStatus());
+                    break;
+                case INDEX_READ_DATE:
+                    list.add(book.getFinishReadDate());
+                    break;
+                case INDEX_TAGS:
+                    list.add(book.getTags());
+                    break;
+                case INDEX_REGISTER_DATE:
+                    list.add(book.getRegisterDate());
+                    break;
+                default:
+                    list.add("");
+                    break;
+            }
+        }
+        return TextUtils.join(",", list.toArray(new String[0]));
+    }
+
+
+    public static BookData convertToBookData (final String[] index, final String line) throws IOException{
+        BookData book = new BookData();
+        String[] split = splitLineWithComma(line);
+        if(split.length != index.length){
+            throw new IOException("can not convertToBookData");
+        }
+
+        for(int i=0; i<index.length; i++){
+            switch (index[i]){
+                case INDEX_ISBN:
+                    book.setISBN(split[i]);
+                    break;
+                case INDEX_TITLE:
+                    book.setTitle(split[i]);
+                    break;
+                case INDEX_AUTHOR:
+                    book.setAuthor(split[i]);
+                    break;
+                case INDEX_PUBLISHER:
+                    book.setPublisher(split[i]);
+                    break;
+                case INDEX_RELEASE_DATE:
+                    book.setSalesDate(convertSalesDate(split[i]));
+                    break;
+                case INDEX_PRICE:
+                    book.setItemPrice(split[i]);
+                    break;
+                case INDEX_RAKUTEN_URL:
+                    book.setRakutenUrl(split[i]);
+                    break;
+                case INDEX_RATING:
+                    book.setRating(split[i]);
+                    break;
+                case INDEX_READ_STATUS:
+                    book.setReadStatus(split[i]);
+                    break;
+                case INDEX_TAGS:
+                    book.setTags(split[i]);
+                    break;
+                case INDEX_READ_DATE:
+                    book.setFinishReadDate(convertSalesDate(split[i]));
+                    break;
+                case INDEX_REGISTER_DATE:
+                    book.setRegisterDate(split[i]);
+                    break;
+                case INDEX_IMAGE:
+                    String url = split[i];
+//        String REGEX_CSV_COMMA = ",";
+                    String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
+                    String REGEX_SURROUND_BRACKET = "^\\(|\\)$";
+
+                    Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
+                    Matcher matcher = sdqPattern.matcher(url);
+                    url = matcher.replaceAll("");
+                    Pattern sbPattern = Pattern.compile(REGEX_SURROUND_BRACKET);
+                    matcher = sbPattern.matcher(url);
+                    url = matcher.replaceAll("");
+
+                    int pos = url.lastIndexOf(".jpg");
+                    if(pos != -1) {
+                        url = url.substring(0, pos+4);
+                    }else{
+                        pos = url.lastIndexOf(".gif");
+                        if(pos != -1){
+                            url = url.substring(0, pos+4);
+                        }
+                    }
+
+                    if(D) Log.d(TAG,"url: " + url);
+                    book.setImage(url);
+                    break;
+            }
+
+        }
+        if(TextUtils.isEmpty(book.getISBN())){
+            throw new IOException("illegal BookData");
+        }
+        return book;
+    }
+
+
+
+
+    private static String convertSalesDate(String date) {
+        if(!TextUtils.isEmpty(date)) {
+            String[] split = date.split("/");
+            if(split.length == 3) {
+                return String.format(Locale.JAPAN, "%s年%s月%s日", split[0], split[1], split[2]);
+            }
+        }
+        return date;
+    }
+
+
+
+
+
+
+
+    private static String[] splitLineWithComma(String line) throws PatternSyntaxException{
         String REGEX_CSV_COMMA = ",(?=(([^\"]*\"){2})*[^\"]*$)";
         String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
         String REGEX_DOUBLE_DOUBLE_QUOTATION = "\"\"";

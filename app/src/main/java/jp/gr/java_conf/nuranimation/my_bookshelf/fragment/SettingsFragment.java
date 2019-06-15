@@ -491,7 +491,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                             progress = progress + getString(R.string.Progress_Unit_Byte);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_UPLOAD_AUTHORS:
-                            message = getString(R.string.ProgressMessage_Upload_Books);
+                            message = getString(R.string.ProgressMessage_Upload_Authors);
                             progress = progress + getString(R.string.Progress_Unit_Byte);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_BOOKS:

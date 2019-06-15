@@ -40,7 +40,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 
 public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener{
     private static final String TAG = BaseFragment.class.getSimpleName();
-    private static final boolean D = true;
+    private static final boolean D = false;
 
     public static final int MESSAGE_PROGRESS_DIALOG_SHOW        = 1;
     public static final int MESSAGE_PROGRESS_DIALOG_UPDATE      = 2;

@@ -85,19 +85,15 @@ public class BaseProgressDialogFragment extends DialogFragment{
         }
     }
 
-    public void setDialogProgress(String message, String progress){
-        if(mTextView_Message == null){
+    public void setDialogProgress(String message, String progress) {
+        if (mTextView_Message == null) {
             mTextView_Message = getDialog().findViewById(R.id.fragment_progress_dialog_text_message);
         }
-        if(mTextView_Progress == null){
+        if (mTextView_Progress == null) {
             mTextView_Progress = getDialog().findViewById(R.id.fragment_progress_dialog_text_progress);
         }
-        if(!TextUtils.isEmpty(message)) {
-            mTextView_Message.setText(message);
-        }
-        if(!TextUtils.isEmpty(progress)) {
-            mTextView_Progress.setText(progress);
-        }
+        mTextView_Message.setText(message);
+        mTextView_Progress.setText(progress);
     }
 
 }
