@@ -159,16 +159,16 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         int id = v.getId();
         switch (id){
             case R.id.settings_button_export:
-                onClickExport();
+                onClickBackup(FileBackupThread.TYPE_EXPORT);
                 break;
             case R.id.settings_button_import:
-                onClickImport();
+                onClickBackup(FileBackupThread.TYPE_IMPORT);
                 break;
             case R.id.settings_button_backup:
-                onClickBackup();
+                onClickBackup(FileBackupThread.TYPE_BACKUP);
                 break;
             case R.id.settings_button_restore:
-                onClickRestore();
+                onClickBackup(FileBackupThread.TYPE_RESTORE);
                 break;
             case R.id.settings_button_login_dropbox:
                 onClickLogin();
@@ -178,270 +178,6 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 break;
         }
     }
-
-
-
-    private void initSpinner(View view) {
-        Spinner mShelfBooksSortSpinner = view.findViewById(R.id.ShelfBooksSortSpinner);
-        SpinnerArrayAdapter mShelfBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getShelfBooksSortSpinnerList());
-        mShelfBooksSortSpinner.setAdapter(mShelfBooksSortAdapter);
-        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooksSort_Code_REGISTERED_ASCENDING));
-        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(code), false);
-        mShelfBooksSortSpinner.setOnItemSelectedListener(mShelfBooksSortSpinnerListener);
-
-        Spinner mSearchBooksSortSpinner = view.findViewById(R.id.SearchBooksSortSpinner);
-        SpinnerArrayAdapter mSearchBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getSearchBooksSortSpinnerList());
-        mSearchBooksSortSpinner.setAdapter(mSearchBooksSortAdapter);
-        code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
-        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(code), false);
-        mSearchBooksSortSpinner.setOnItemSelectedListener(mSearchBooksSortSpinnerListener);
-    }
-
-    private void initButton(View view, boolean isAllowedPermissions, boolean isLogged_in){
-        mButtonExport = view.findViewById(R.id.settings_button_export);
-        mButtonExport.setOnClickListener(this);
-        mButtonImport = view.findViewById(R.id.settings_button_import);
-        mButtonImport.setOnClickListener(this);
-        mButtonBackup = view.findViewById(R.id.settings_button_backup);
-        mButtonBackup.setOnClickListener(this);
-        mButtonRestore = view.findViewById(R.id.settings_button_restore);
-        mButtonRestore.setOnClickListener(this);
-        mButtonLogin = view.findViewById(R.id.settings_button_login_dropbox);
-        mButtonLogin.setOnClickListener(this);
-        mButtonLogout = view.findViewById(R.id.settings_button_logout_dropbox);
-        mButtonLogout.setOnClickListener(this);
-        enableButton(isAllowedPermissions);
-        enableDropboxFunction(isLogged_in);
-    }
-
-
-
-    private List<BaseSpinnerItem> getShelfBooksSortSpinnerList() {
-        List<BaseSpinnerItem> list = new ArrayList<>();
-        Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.ShelfBooksSortSpinner);
-        for (int i = 0; i < array.length(); ++i) {
-            int id = array.getResourceId(i, -1);
-            if (id > -1) {
-                String[] item = res.getStringArray(id);
-                list.add(new BaseSpinnerItem(item[0], item[1]));
-            }
-        }
-        array.recycle();
-        return list;
-    }
-
-    private List<BaseSpinnerItem> getSearchBooksSortSpinnerList() {
-        List<BaseSpinnerItem> list = new ArrayList<>();
-        Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.SearchBooksSortSpinner);
-        for (int i = 0; i < array.length(); ++i) {
-            int id = array.getResourceId(i, -1);
-            if (id > -1) {
-                String[] item = res.getStringArray(id);
-                list.add(new BaseSpinnerItem(item[0], item[1]));
-            }
-        }
-        array.recycle();
-        return list;
-    }
-
-
-    AdapterView.OnItemSelectedListener mShelfBooksSortSpinnerListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> adapter,
-                                   View v, int position, long id) {
-            BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
-            if (D) Log.d(TAG, "selected: " + item.getLabel());
-            mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, item.getCode()).apply();
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapter) {
-        }
-    };
-
-    AdapterView.OnItemSelectedListener mSearchBooksSortSpinnerListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> adapter,
-                                   View v, int position, long id) {
-            BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
-            if (D) Log.d(TAG, "selected: " + item.getLabel());
-            mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, item.getCode()).apply();
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapter) {
-        }
-    };
-
-
-    private void enableDropboxFunction(boolean enable){
-        if(enable){
-            mButtonLogin.setVisibility(View.GONE);
-            mButtonLogout.setVisibility(View.VISIBLE);
-            mButtonBackup.setVisibility(View.VISIBLE);
-            mButtonRestore.setVisibility(View.VISIBLE);
-        }else{
-            mButtonLogin.setVisibility(View.VISIBLE);
-            mButtonLogout.setVisibility(View.GONE);
-            mButtonBackup.setVisibility(View.GONE);
-            mButtonRestore.setVisibility(View.GONE);
-        }
-    }
-
-    private void enableButton(boolean enable){
-        if(enable){
-            mButtonExport.setBackgroundResource(R.drawable.selector_button);
-            mButtonImport.setBackgroundResource(R.drawable.selector_button);
-            mButtonBackup.setBackgroundResource(R.drawable.selector_button);
-            mButtonRestore.setBackgroundResource(R.drawable.selector_button);
-        }else{
-            mButtonExport.setBackgroundResource(R.drawable.selector_button_disable);
-            mButtonImport.setBackgroundResource(R.drawable.selector_button_disable);
-            mButtonBackup.setBackgroundResource(R.drawable.selector_button_disable);
-            mButtonRestore.setBackgroundResource(R.drawable.selector_button_disable);
-        }
-    }
-
-
-    private void onClickExport() {
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-            if (getActivity() instanceof MainActivity) {
-                BookService service = ((MainActivity) getActivity()).getService();
-                if (service != null) {
-                    mSettingsState = BookService.STATE_EXPORT_INCOMPLETE;
-                    setProgress(BookService.STATE_EXPORT_INCOMPLETE);
-                    showProgressDialog();
-                    service.exportCSV();
-                }
-            }
-        } else {
-            requestPermissions(mApplicationData.getUse_Permissions());
-        }
-    }
-
-    private void onClickImport(){
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-            if (getActivity() instanceof MainActivity) {
-                BookService service = ((MainActivity) getActivity()).getService();
-                if (service != null) {
-                    mSettingsState = BookService.STATE_IMPORT_INCOMPLETE;
-                    setProgress(BookService.STATE_IMPORT_INCOMPLETE);
-                    showProgressDialog();
-                    service.importCSV();
-                }
-            }
-        } else {
-            requestPermissions(mApplicationData.getUse_Permissions());
-        }
-    }
-
-    private void onClickBackup(){
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-            if (getActivity() instanceof MainActivity) {
-                BookService service = ((MainActivity) getActivity()).getService();
-                if (service != null) {
-                    mSettingsState = BookService.STATE_BACKUP_INCOMPLETE;
-                    setProgress(BookService.STATE_BACKUP_INCOMPLETE);
-                    showProgressDialog();
-                    service.backupCSV();
-                }
-            }
-        } else {
-            requestPermissions(mApplicationData.getUse_Permissions());
-        }
-    }
-
-    private void onClickRestore(){
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
-            if (getActivity() instanceof MainActivity) {
-                BookService service = ((MainActivity) getActivity()).getService();
-                if (service != null) {
-                    mSettingsState = BookService.STATE_RESTORE_INCOMPLETE;
-                    setProgress(BookService.STATE_RESTORE_INCOMPLETE);
-                    showProgressDialog();
-                    service.restoreCSV();
-                }
-            }
-        } else {
-            requestPermissions(mApplicationData.getUse_Permissions());
-        }
-    }
-
-
-    private void onClickLogin(){
-        if (getActivity() instanceof MainActivity) {
-            BookService service = ((MainActivity) getActivity()).getService();
-            if (service != null) {
-                mSettingsState = BookService.STATE_DROPBOX_LOGIN;
-                service.setServiceState(BookService.STATE_DROPBOX_LOGIN);
-                service.startAuthenticate();
-            }
-        }
-    }
-
-
-
-    private void onClickLogout(){
-        Bundle bundle = new Bundle();
-        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Logout_Dropbox));
-        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Logout_Dropbox));
-        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive));
-        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative));
-        bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
-        if (getActivity() != null) {
-            FragmentManager manager = getActivity().getSupportFragmentManager();
-            BaseDialogFragment dialog = BaseDialogFragment.newInstance(this, bundle);
-            dialog.show(manager, SettingsFragment.TAG);
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public void checkSettingsState(){
-        if(D) Log.d(TAG,"checkSettingsState");
-        if(getActivity() instanceof MainActivity){
-            BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null) {
-                switch (service.getServiceState()) {
-                    case BookService.STATE_EXPORT_COMPLETE:
-                    case BookService.STATE_IMPORT_COMPLETE:
-                    case BookService.STATE_BACKUP_COMPLETE:
-                    case BookService.STATE_RESTORE_COMPLETE:
-                        mSettingsState = service.getServiceState();
-                        loadFileBackupResult();
-                        break;
-                    case BookService.STATE_DROPBOX_LOGIN:
-                        String token = service.getAccessToken();
-                        if (token != null) {
-                            // Log-in Success
-                            if(D) Log.d(TAG,"Log-in Success");
-                            mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, token).apply();
-                            isLogged_in = true;
-                            enableDropboxFunction(true);
-                        }
-                        service.setServiceState(BookService.STATE_NONE);
-                        service.stopForeground(false);
-                        service.stopSelf();
-                        mSettingsState = BookService.STATE_NONE;
-                        break;
-                }
-            }
-        }
-    }
-
-
 
     @Override
     public void onReceiveBroadcast(Context context, Intent intent){
@@ -517,13 +253,211 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     }
 
 
+
+
+
+
+    private void initSpinner(View view) {
+        Spinner mShelfBooksSortSpinner = view.findViewById(R.id.ShelfBooksSortSpinner);
+        SpinnerArrayAdapter mShelfBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getSpinnerItemList(R.array.ShelfBooksSortSpinner));
+        mShelfBooksSortSpinner.setAdapter(mShelfBooksSortAdapter);
+        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooksSort_Code_REGISTERED_ASCENDING));
+        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(code), false);
+        mShelfBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapter,
+                                       View v, int position, long id) {
+                BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
+                if (D) Log.d(TAG, "selected: " + item.getLabel());
+                mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, item.getCode()).apply();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {
+            }
+        });
+
+        Spinner mSearchBooksSortSpinner = view.findViewById(R.id.SearchBooksSortSpinner);
+        SpinnerArrayAdapter mSearchBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getSpinnerItemList(R.array.SearchBooksSortSpinner));
+        mSearchBooksSortSpinner.setAdapter(mSearchBooksSortAdapter);
+        code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
+        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(code), false);
+        mSearchBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapter,
+                                       View v, int position, long id) {
+                BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
+                if (D) Log.d(TAG, "selected: " + item.getLabel());
+                mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, item.getCode()).apply();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {
+            }
+        });
+    }
+
+
+    private void initButton(View view, boolean isAllowedPermissions, boolean isLogged_in){
+        mButtonExport = view.findViewById(R.id.settings_button_export);
+        mButtonExport.setOnClickListener(this);
+        mButtonImport = view.findViewById(R.id.settings_button_import);
+        mButtonImport.setOnClickListener(this);
+        mButtonBackup = view.findViewById(R.id.settings_button_backup);
+        mButtonBackup.setOnClickListener(this);
+        mButtonRestore = view.findViewById(R.id.settings_button_restore);
+        mButtonRestore.setOnClickListener(this);
+        mButtonLogin = view.findViewById(R.id.settings_button_login_dropbox);
+        mButtonLogin.setOnClickListener(this);
+        mButtonLogout = view.findViewById(R.id.settings_button_logout_dropbox);
+        mButtonLogout.setOnClickListener(this);
+        enableButton(isAllowedPermissions);
+        enableDropboxFunction(isLogged_in);
+    }
+
+
+    private List<BaseSpinnerItem> getSpinnerItemList(int array_id){
+        List<BaseSpinnerItem> list = new ArrayList<>();
+        Resources res = getResources();
+        TypedArray array = res.obtainTypedArray(array_id);
+        for (int i = 0; i < array.length(); ++i) {
+            int id = array.getResourceId(i, -1);
+            if (id > -1) {
+                String[] item = res.getStringArray(id);
+                list.add(new BaseSpinnerItem(item[0], item[1]));
+            }
+        }
+        array.recycle();
+        return list;
+    }
+
+
+    private void enableDropboxFunction(boolean enable){
+        if(enable){
+            mButtonLogin.setVisibility(View.GONE);
+            mButtonLogout.setVisibility(View.VISIBLE);
+            mButtonBackup.setVisibility(View.VISIBLE);
+            mButtonRestore.setVisibility(View.VISIBLE);
+        }else{
+            mButtonLogin.setVisibility(View.VISIBLE);
+            mButtonLogout.setVisibility(View.GONE);
+            mButtonBackup.setVisibility(View.GONE);
+            mButtonRestore.setVisibility(View.GONE);
+        }
+    }
+
+    private void enableButton(boolean enable){
+        if(enable){
+            mButtonExport.setBackgroundResource(R.drawable.selector_button);
+            mButtonImport.setBackgroundResource(R.drawable.selector_button);
+            mButtonBackup.setBackgroundResource(R.drawable.selector_button);
+            mButtonRestore.setBackgroundResource(R.drawable.selector_button);
+        }else{
+            mButtonExport.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonImport.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonBackup.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonRestore.setBackgroundResource(R.drawable.selector_button_disable);
+        }
+    }
+
+
+    private void onClickBackup(int type){
+        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+            if (getActivity() instanceof MainActivity) {
+                BookService service = ((MainActivity) getActivity()).getService();
+                if (service != null) {
+                    switch(type){
+                        case FileBackupThread.TYPE_EXPORT:
+                            mSettingsState = BookService.STATE_EXPORT_INCOMPLETE;
+                            break;
+                        case FileBackupThread.TYPE_IMPORT:
+                            mSettingsState = BookService.STATE_IMPORT_INCOMPLETE;
+                            break;
+                        case FileBackupThread.TYPE_BACKUP:
+                            mSettingsState = BookService.STATE_BACKUP_INCOMPLETE;
+                            break;
+                        case FileBackupThread.TYPE_RESTORE:
+                            mSettingsState = BookService.STATE_RESTORE_INCOMPLETE;
+                            break;
+                        default:
+                            break;
+                    }
+                    setProgress(mSettingsState);
+                    showProgressDialog();
+                    service.fileBackup(type);
+                }
+            }
+        } else {
+            requestPermissions(mApplicationData.getUse_Permissions());
+        }
+    }
+
+    private void onClickLogin(){
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                mSettingsState = BookService.STATE_DROPBOX_LOGIN;
+                service.setServiceState(BookService.STATE_DROPBOX_LOGIN);
+                service.startAuthenticate();
+            }
+        }
+    }
+
+    private void onClickLogout(){
+        Bundle bundle = new Bundle();
+        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Logout_Dropbox));
+        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Logout_Dropbox));
+        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive));
+        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative));
+        bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
+        if (getActivity() != null) {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            BaseDialogFragment dialog = BaseDialogFragment.newInstance(this, bundle);
+            dialog.show(manager, SettingsFragment.TAG);
+        }
+    }
+
+
+    public void checkSettingsState(){
+        if(D) Log.d(TAG,"checkSettingsState");
+        if(getActivity() instanceof MainActivity){
+            BookService service = ((MainActivity) getActivity()).getService();
+            if(service != null) {
+                switch (service.getServiceState()) {
+                    case BookService.STATE_EXPORT_COMPLETE:
+                    case BookService.STATE_IMPORT_COMPLETE:
+                    case BookService.STATE_BACKUP_COMPLETE:
+                    case BookService.STATE_RESTORE_COMPLETE:
+                        mSettingsState = service.getServiceState();
+                        loadFileBackupResult();
+                        break;
+                    case BookService.STATE_DROPBOX_LOGIN:
+                        String token = service.getAccessToken();
+                        if (token != null) {
+                            // Log-in Success
+                            if(D) Log.d(TAG,"Log-in Success");
+                            mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, token).apply();
+                            isLogged_in = true;
+                            enableDropboxFunction(true);
+                        }
+                        service.setServiceState(BookService.STATE_NONE);
+                        service.stopForeground(false);
+                        service.stopSelf();
+                        mSettingsState = BookService.STATE_NONE;
+                        break;
+                }
+            }
+        }
+    }
+
+
     private void loadFileBackupResult() {
         if (D) Log.d(TAG, "loadFileBackupResult");
         String message = null;
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service != null) {
-                FileBackupThread.Result result = service.loadFileBackupResult();
+                FileBackupThread.Result result = service.getFileBackupResult();
                 if(result.isSuccess()) {
                     switch (service.getServiceState()){
                         case BookService.STATE_EXPORT_COMPLETE:
@@ -553,37 +487,6 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         mSettingsState = BookService.STATE_NONE;
         getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

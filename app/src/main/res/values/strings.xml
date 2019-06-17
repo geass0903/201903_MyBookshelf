@@ -67,12 +67,6 @@
     <string name="Notification_Channel_Title">本の検索</string>
     <string name="Notification_Channel_Description">検索状況の通知</string>
 
-    <string name="Notification_Title_Search">本の検索</string>
-    <string name="Notification_Title_Reload">新刊検索</string>
-    <string name="Notification_Title_Backup">バックアップ</string>
-    <string name="Notification_Title_Restore">リストア</string>
-    <string name="Notification_Title_Export">エクスポート</string>
-    <string name="Notification_Title_Import">インポート</string>
     <string name="Notification_Message_Search_Incomplete">本を検索しています</string>
     <string name="Notification_Message_Search_Complete">検索を終了しました</string>
     <string name="Notification_Message_Reload_Incomplete">新刊を検索しています</string>
@@ -85,6 +79,7 @@
     <string name="Notification_Message_Export_Complete">エクスポートしました</string>
     <string name="Notification_Message_Import_Incomplete">インポート中</string>
     <string name="Notification_Message_Import_Complete">インポートしました</string>
+    <string name="Notification_Message_Dropbox_Login">Dropboxログイン</string>
 
 
     <!-- Navigation -->

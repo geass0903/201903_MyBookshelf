@@ -9,6 +9,22 @@ import java.util.Locale;
 
 @SuppressWarnings("WeakerAccess")
 public class BookData implements Parcelable {
+
+    public static final String JSON_KEY_ITEMS = "Items";
+    public static final String JSON_KEY_COUNT = "count";
+    public static final String JSON_KEY_LAST = "last";
+    public static final String JSON_KEY_ERROR = "error";
+    public static final String JSON_KEY_ERROR_DESCRIPTION = "error_description";
+    public static final String JSON_KEY_TITLE = "title";
+    public static final String JSON_KEY_AUTHOR = "author";
+    public static final String JSON_KEY_PUBLISHER_NAME = "publisherName";
+    public static final String JSON_KEY_ISBN = "isbn";
+    public static final String JSON_KEY_SALES_DATE = "salesDate";
+    public static final String JSON_KEY_ITEM_PRICE = "itemPrice";
+    public static final String JSON_KEY_ITEM_URL = "itemUrl";
+    public static final String JSON_KEY_IMAGE_URL = "largeImageUrl";
+    public static final String JSON_KEY_REVIEW_AVERAGE = "reviewAverage";
+
     public static final String STATUS_UNREGISTERED = "0";
     public static final String STATUS_INTERESTED = "1";
     public static final String STATUS_UNREAD = "2";

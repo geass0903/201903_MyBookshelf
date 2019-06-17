@@ -31,6 +31,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicat
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.background.NewBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
@@ -250,7 +251,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     if (book_register != null) {
                         BookData book = new BookData(book_register);
                         Calendar calendar = Calendar.getInstance();
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
                         String registerDate = sdf.format(calendar.getTime());
                         book.setRegisterDate(registerDate);
                         book.setRating("0.0");
@@ -314,6 +315,9 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         }
     }
 
+    public void scrollToTop(){
+        mRecyclerView.scrollToPosition(0);
+    }
 
     public void checkReloadState(){
         if(getActivity() instanceof MainActivity){
@@ -327,34 +331,26 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
 
     private void loadNewBooksResult() {
         if(D) Log.d(TAG, "loadNewBooksResult()");
-        scrollToTop();
-        mNewBooksViewAdapter.replaceBooksData(mApplicationData.loadNewBooks());
-        getPausedHandler().removeCallbacks(delayLoadNewBooksResult);
-        getPausedHandler().postDelayed(delayLoadNewBooksResult,1000);
-    }
-
-    public void scrollToTop(){
-        mRecyclerView.scrollToPosition(0);
-    }
-
-
-
-    Runnable delayLoadNewBooksResult = new Runnable() {
-        @Override
-        public void run() {
-            if(D) Log.d(TAG, "delayLoadNewBooksResult()");
-            if (getActivity() instanceof MainActivity) {
-                BookService service = ((MainActivity) getActivity()).getService();
-                if (service != null) {
-                    service.setServiceState(BookService.STATE_NONE);
-                    service.stopForeground(false);
-                    service.stopSelf();
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                NewBooksThread.Result result = service.getNewBooksResult();
+                if (result.isSuccess()) {
+                    scrollToTop();
+                    mNewBooksViewAdapter.replaceBooksData(mApplicationData.loadNewBooks());
+                } else {
+                    Toast.makeText(getContext(), result.getErrorMessage(), Toast.LENGTH_SHORT).show();
                 }
+                service.setServiceState(BookService.STATE_NONE);
+                service.stopForeground(false);
+                service.stopSelf();
             }
-            mReloadState = BookService.STATE_NONE;
-            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
         }
-    };
+        mReloadState = BookService.STATE_NONE;
+        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+    }
+
+
 
 
 

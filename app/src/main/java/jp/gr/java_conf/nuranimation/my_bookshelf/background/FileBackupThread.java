@@ -8,7 +8,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.util.IOUtil;
@@ -32,7 +31,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
@@ -84,7 +82,7 @@ public class FileBackupThread extends Thread {
     private ThreadFinishListener mListener;
     private LocalBroadcastManager mLocalBroadcastManager;
     private MyBookshelfApplicationData mApplicationData;
-
+    private boolean isCanceled;
 
     public static final class Result {
         private final boolean isSuccess;
@@ -135,6 +133,7 @@ public class FileBackupThread extends Thread {
         this.type = type;
         this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
         this.mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        isCanceled = false;
         if (context instanceof ThreadFinishListener) {
             mListener = (ThreadFinishListener) context;
         } else {
@@ -159,16 +158,21 @@ public class FileBackupThread extends Thread {
                 mResult = restoreFile();
                 break;
         }
-        if (mListener != null && mResult != null) {
+        if (mListener != null && mResult != null && !isCanceled) {
             mListener.deliverBackupResult(mResult);
         }
     }
 
+    public void cancel() {
+        if (D) Log.d(TAG, "thread cancel");
+        isCanceled = true;
+    }
 
     private Result exportFile() {
         int recodeCount;
         int count;
         String line;
+        String progress;
 
         File extDir = Environment.getExternalStorageDirectory();
         String dirPath = extDir.getPath() + APPLICATION_DIRECTORY_PATH;
@@ -188,6 +192,8 @@ public class FileBackupThread extends Thread {
             List<BookData> books = mApplicationData.loadShelfBooks(null);
             count = 0;
             recodeCount = books.size();
+            progress = count + "/" + recodeCount;
+            sendProgressMessage(PROGRESS_TYPE_EXPORT_BOOKS, progress);
             BufferedWriter bw_books = MyBookshelfUtils.getBufferedWriter(new FileOutputStream(file_books), Charset.forName("UTF-8"));
             String[] index = MyBookshelfUtils.getShelfBooksIndex();
             line = TextUtils.join(",", index);
@@ -196,7 +202,7 @@ public class FileBackupThread extends Thread {
                 line = MyBookshelfUtils.convertBookDataToLine(index, book) + "\r\n";
                 bw_books.write(line);
                 count++;
-                String progress = count + "/" + recodeCount;
+                progress = count + "/" + recodeCount;
                 sendProgressMessage(PROGRESS_TYPE_EXPORT_BOOKS, progress);
                 Thread.sleep(2);
             }
@@ -208,11 +214,13 @@ public class FileBackupThread extends Thread {
             List<String> authors = mApplicationData.loadAuthorsList();
             count = 0;
             recodeCount = authors.size();
+            progress = count + "/" + recodeCount;
+            sendProgressMessage(PROGRESS_TYPE_EXPORT_AUTHORS, progress);
             BufferedWriter bw_authors = MyBookshelfUtils.getBufferedWriter(new FileOutputStream(file_authors), Charset.forName("UTF-8"));
             for (String author : authors) {
                 bw_authors.write(author + "\r\n");
                 count++;
-                String progress = count + "/" + recodeCount;
+                progress = count + "/" + recodeCount;
                 sendProgressMessage(PROGRESS_TYPE_EXPORT_AUTHORS, progress);
                 Thread.sleep(2);
             }
@@ -235,6 +243,7 @@ public class FileBackupThread extends Thread {
     private Result importFile() {
         int count;
         int size;
+        String progress;
         String line;
         List<BookData> books = new ArrayList<>();
         List<String> authors = new ArrayList<>();
@@ -257,13 +266,15 @@ public class FileBackupThread extends Thread {
             // import books
             count = 0;
             size = getLineCount(new FileInputStream(file_books), Charset.forName("UTF-8")) - 1; // remove count index line
+            progress = count + "/" + size;
+            sendProgressMessage(PROGRESS_TYPE_IMPORT_BOOKS, progress);
             BufferedReader br_books = MyBookshelfUtils.getBufferedReaderSkipBOM(new FileInputStream(file_books), Charset.forName("UTF-8"));
             String[] index =  br_books.readLine().split(",");
             while( (line = br_books.readLine()) != null ) {
                 BookData book = MyBookshelfUtils.convertToBookData(index, line);
                 books.add(book);
                 count++;
-                String progress = count + "/" + size;
+                progress = count + "/" + size;
                 sendProgressMessage(PROGRESS_TYPE_IMPORT_BOOKS, progress);
                 Thread.sleep(2);
             }
@@ -272,11 +283,13 @@ public class FileBackupThread extends Thread {
             // import authors
             count = 0;
             size = getLineCount(new FileInputStream(file_authors), Charset.forName("UTF-8"));
+            progress = count + "/" + size;
+            sendProgressMessage(PROGRESS_TYPE_IMPORT_AUTHORS, progress);
             BufferedReader br_authors = MyBookshelfUtils.getBufferedReaderSkipBOM(new FileInputStream(file_authors), Charset.forName("UTF-8"));
             while ((line = br_authors.readLine()) != null) {
                 authors.add(line);
                 count++;
-                String progress = count + "/" + size;
+                progress = count + "/" + size;
                 sendProgressMessage(PROGRESS_TYPE_IMPORT_AUTHORS, progress);
                 Thread.sleep(2);
             }
@@ -329,8 +342,7 @@ public class FileBackupThread extends Thread {
             mClient.files().uploadBuilder(DROPBOX_APP_DIRECTORY_PATH + FILE_NAME_BOOKS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_books, new IOUtil.ProgressListener() {
                 @Override
                 public void onProgress(long bytesWritten) {
-                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
-                    sendProgressMessage(PROGRESS_TYPE_UPLOAD_BOOKS, progress);
+                    sendProgressMessage(PROGRESS_TYPE_UPLOAD_BOOKS, String.valueOf(bytesWritten));
                 }
             });
 
@@ -339,8 +351,7 @@ public class FileBackupThread extends Thread {
             mClient.files().uploadBuilder(DROPBOX_APP_DIRECTORY_PATH + FILE_NAME_AUTHORS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_authors, new IOUtil.ProgressListener() {
                 @Override
                 public void onProgress(long bytesWritten) {
-                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
-                    sendProgressMessage(PROGRESS_TYPE_UPLOAD_AUTHORS, progress);
+                    sendProgressMessage(PROGRESS_TYPE_UPLOAD_AUTHORS, String.valueOf(bytesWritten));
                 }
             });
 
@@ -389,8 +400,7 @@ public class FileBackupThread extends Thread {
             mClient.files().download(metadata_books.getPathLower()).download(output_books, new IOUtil.ProgressListener() {
                 @Override
                 public void onProgress(long bytesWritten) {
-                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
-                    sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_BOOKS, progress);
+                    sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_BOOKS, String.valueOf(bytesWritten));
                 }
             });
 
@@ -400,8 +410,7 @@ public class FileBackupThread extends Thread {
             mClient.files().download(metadata_authors.getPathLower()).download(output_authors, new IOUtil.ProgressListener() {
                 @Override
                 public void onProgress(long bytesWritten) {
-                    String progress = String.format(Locale.JAPAN,"%d",bytesWritten);
-                    sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_AUTHORS, progress);
+                    sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_AUTHORS, String.valueOf(bytesWritten));
                 }
             });
 

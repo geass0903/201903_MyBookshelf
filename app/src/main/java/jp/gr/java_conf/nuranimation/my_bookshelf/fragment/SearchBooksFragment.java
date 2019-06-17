@@ -232,7 +232,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     if (book_register != null) {
                         BookData book = new BookData(book_register);
                         Calendar calendar = Calendar.getInstance();
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
                         String registerDate = sdf.format(calendar.getTime());
                         book.setRegisterDate(registerDate);
                         book.setRating(0.0f);
@@ -390,7 +390,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
     private void searchBooks(String keyword, int page) {
         try{
-            if(!MyBookshelfUtils.isValid(keyword)){
+            if(!MyBookshelfUtils.isSearchable(keyword)){
                 Toast.makeText(getContext(), getString(R.string.Toast_Search_Error_Keyword), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -428,7 +428,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service != null) {
-                SearchBooksThread.Result result = service.loadSearchBooksResult();
+                SearchBooksThread.Result result = service.getSearchBooksResult();
                 if (result.isSuccess()) {
                     hasButtonLoadNext = result.hasNext();
                     List<BookData> books = result.getBooks();

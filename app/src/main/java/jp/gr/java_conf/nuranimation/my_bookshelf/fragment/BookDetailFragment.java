@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -164,7 +165,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             if(D) Log.d(TAG,"detail action register");
             BookData book = getBookData();
             Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
             String registerDate = sdf.format(calendar.getTime());
             book.setRegisterDate(registerDate);
             mApplicationData.registerToShelfBooks(book);
@@ -250,7 +251,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private void setBookData(BookData book){
         if(book != null) {
-            mBookImageView.setImageURI(MyBookshelfUtils.getImageUri(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_LARGE));
+            mBookImageView.setImageURI(Uri.parse(MyBookshelfUtils.parseUrlString(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_LARGE)));
             titleView.setText(book.getTitle());
             authorView.setText(book.getAuthor());
             publisherView.setText(book.getPublisher());

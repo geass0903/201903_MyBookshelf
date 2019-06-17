@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         public void onServiceConnected(ComponentName name, IBinder binder) {
             if (D) Log.d(TAG, "onServiceConnected");
             mBookService = ((BookService.MBinder)binder).getService();
-            mBookService.endForeground();
+            mBookService.cancelForeground();
             applyFragment(mBookService);
         }
 
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             Intent intent = new Intent(this, BookService.class);
             bindService(intent,connection, Service.BIND_AUTO_CREATE);
         }else{
-            mBookService.endForeground();
+            mBookService.cancelForeground();
             applyFragment(mBookService);
         }
     }

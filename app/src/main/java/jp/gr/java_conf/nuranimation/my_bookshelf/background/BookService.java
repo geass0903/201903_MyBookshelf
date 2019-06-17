@@ -9,25 +9,19 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.dropbox.core.android.Auth;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
 
-public class BookService extends Service implements SearchBooksThread.ThreadFinishListener, FileBackupThread.ThreadFinishListener {
+public class BookService extends Service implements SearchBooksThread.ThreadFinishListener, NewBooksThread.ThreadFinishListener, FileBackupThread.ThreadFinishListener {
     public static final String TAG = BookService.class.getSimpleName();
     private static final boolean D = true;
 
@@ -50,27 +44,21 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public static final int STATE_RESTORE_COMPLETE                  = 12;
     public static final int STATE_DROPBOX_LOGIN                     = 13;
 
-
     private static final int notifyId = 1;
     private NotificationManager mNotificationManager;
     private LocalBroadcastManager mLocalBroadcastManager;
     private MyBookshelfApplicationData mApplicationData;
     private SearchBooksThread searchBooksThread;
     private SearchBooksThread.Result mSearchBooksResult;
+    private NewBooksThread newBooksThread;
+    private NewBooksThread.Result mNewBooksResult;
     private FileBackupThread fileBackupThread;
     private FileBackupThread.Result mFileBackupResult;
 
     private String mParamSEARCH_KEYWORD;
     private int mParamSEARCH_PAGE;
-    private List<String> mAuthorsList;
     private int mState;
     private boolean isForeground;
-
-    private List<BookData> resultNewBooks;
-
-    private int progress_last = 0;
-    private int progress_now  = 0;
-
 
 
     public class MBinder extends Binder {
@@ -120,6 +108,12 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
             case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
                 cancelReload();
                 break;
+            case STATE_EXPORT_INCOMPLETE:
+            case STATE_IMPORT_INCOMPLETE:
+            case STATE_BACKUP_INCOMPLETE:
+            case STATE_RESTORE_INCOMPLETE:
+                cancelBackup();
+                break;
         }
      }
 
@@ -136,30 +130,29 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
     @Override
     public void deliverSearchBooksResult(SearchBooksThread.Result result) {
-        switch(mState) {
-            case STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
-                saveSearchBooksResult(result);
-                if (result.isSuccess()) {
-                    mApplicationData.registerToSearchBooks(result.getBooks());
-                }
-                setServiceState(STATE_SEARCH_BOOKS_SEARCH_COMPLETE);
-                break;
-            case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
-                saveSearchBooksResult(result);
-                String author = getSearchKeyword();
-                int page = getSearchPage();
-                if (!TextUtils.isEmpty(author) && page > 0) {
-                    searchBooksThread = new SearchBooksThread(this, author, page, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
-                    searchBooksThread.start();
-                } else {
-                    mApplicationData.registerToNewBooks(resultNewBooks);
-                    setServiceState(STATE_NEW_BOOKS_RELOAD_COMPLETE);
-                }
-                break;
-            default:
-                if (D) Log.d(TAG, "Error");
-                setServiceState(STATE_NONE);
-                break;
+        if(mState == STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE){
+            mSearchBooksResult = result;
+            if (result.isSuccess()) {
+                mApplicationData.registerToSearchBooks(result.getBooks());
+            }
+            setServiceState(STATE_SEARCH_BOOKS_SEARCH_COMPLETE);
+        }else{
+            if (D) Log.d(TAG, "Illegal State");
+            setServiceState(STATE_NONE);
+        }
+    }
+
+    @Override
+    public void deliverNewBooksResult(NewBooksThread.Result result) {
+        if(mState == STATE_NEW_BOOKS_RELOAD_INCOMPLETE) {
+            mNewBooksResult = result;
+            if (result.isSuccess()) {
+                mApplicationData.registerToNewBooks(result.getBooks());
+            }
+            setServiceState(STATE_NEW_BOOKS_RELOAD_COMPLETE);
+        }else{
+            if (D) Log.d(TAG, "Illegal State");
+            setServiceState(STATE_NONE);
         }
     }
 
@@ -170,26 +163,26 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 mFileBackupResult = result;
                 setServiceState(STATE_EXPORT_COMPLETE);
                 break;
+            case STATE_IMPORT_INCOMPLETE:
+                mFileBackupResult = result;
+                setServiceState(STATE_IMPORT_COMPLETE);
+                break;
             case STATE_BACKUP_INCOMPLETE:
                 if (result.isSuccess()) {
                     switch (result.getType()) {
-                        case FileBackupThread.TYPE_BACKUP:
-                            mFileBackupResult = result;
-                            setServiceState(STATE_BACKUP_COMPLETE);
-                            break;
                         case FileBackupThread.TYPE_EXPORT:
                             fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_BACKUP);
                             fileBackupThread.start();
+                            break;
+                        case FileBackupThread.TYPE_BACKUP:
+                            mFileBackupResult = result;
+                            setServiceState(STATE_BACKUP_COMPLETE);
                             break;
                     }
                 } else {
                     mFileBackupResult = result;
                     setServiceState(STATE_BACKUP_COMPLETE);
                 }
-                break;
-            case STATE_IMPORT_INCOMPLETE:
-                mFileBackupResult = result;
-                setServiceState(STATE_IMPORT_COMPLETE);
                 break;
             case STATE_RESTORE_INCOMPLETE:
                 if (result.isSuccess()) {
@@ -209,8 +202,18 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 }
                 break;
             default:
+                if (D) Log.d(TAG, "Illegal State");
+                setServiceState(STATE_NONE);
                 break;
         }
+    }
+
+    public void startAuthenticate(){
+        Auth.startOAuth2Authentication(this,getString(R.string.dropbox_key));
+    }
+
+    public String getAccessToken(){
+        return Auth.getOAuth2Token();
     }
 
 
@@ -227,35 +230,22 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         return mState;
     }
 
-    public void setSearchKeyword(String keyword){
+    private void setSearchParam(String keyword, int page){
         this.mParamSEARCH_KEYWORD = keyword;
+        this.mParamSEARCH_PAGE = page;
     }
 
     public String getSearchKeyword(){
         return this.mParamSEARCH_KEYWORD;
     }
 
-    public void setSearchPage(int page){
-        this.mParamSEARCH_PAGE = page;
-    }
-
     public int getSearchPage(){
         return this.mParamSEARCH_PAGE;
     }
 
-
-    public void endForeground(){
+    public void cancelForeground(){
         isForeground = false;
         stopForeground(true);
-    }
-
-
-    public void searchBooks(final String keyword, final int page){
-        setServiceState(STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
-        setSearchKeyword(keyword);
-        setSearchPage(page);
-        searchBooksThread = new SearchBooksThread(this, keyword, page, mApplicationData.getSearchBooksSortSetting());
-        searchBooksThread.start();
     }
 
     public void cancelSearch(){
@@ -266,151 +256,78 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         }
     }
 
-    public void reloadNewBooks(final List<String> authors){
-        resultNewBooks = new ArrayList<>();
-        mAuthorsList = new ArrayList<>(authors);
-        if(mAuthorsList.size() > 0) {
-            progress_last = mAuthorsList.size();
-            progress_now  = 0;
-            updateProgress(progress_now, progress_last);
-            String author = mAuthorsList.get(0);
-            mAuthorsList.remove(0);
-            setSearchKeyword(author);
-            setSearchPage(1);
-            setServiceState(STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
-            searchBooksThread = new SearchBooksThread(this, author, 1, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
-            searchBooksThread.start();
-        }else{
-            if(D) Log.d(TAG, "No authorsList");
-            setServiceState(STATE_NONE);
-        }
-    }
-
     public void cancelReload(){
-        if(searchBooksThread != null){
-            searchBooksThread.cancel();
+        if(newBooksThread != null){
+            newBooksThread.cancel();
             setServiceState(STATE_NONE);
-            searchBooksThread = null;
+            newBooksThread = null;
         }
     }
 
+    public void cancelBackup(){
+        if(fileBackupThread != null){
+            fileBackupThread.cancel();
+            setServiceState(STATE_NONE);
+            fileBackupThread = null;
+        }
+    }
 
+    public void searchBooks(final String keyword, final int page){
+        setServiceState(STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
+        setSearchParam(keyword, page);
+        searchBooksThread = new SearchBooksThread(this, keyword, page, mApplicationData.getSearchBooksSortSetting());
+        searchBooksThread.start();
+    }
 
-    public SearchBooksThread.Result loadSearchBooksResult(){
+    public SearchBooksThread.Result getSearchBooksResult(){
         if(mSearchBooksResult == null){
-            return SearchBooksThread.Result.error(SearchBooksThread.ERROR_UNKNOWN,"get result failed");
+            return SearchBooksThread.Result.error(SearchBooksThread.ERROR_UNKNOWN, "get result failed");
         }
         return mSearchBooksResult;
     }
 
+    public void reloadNewBooks(final List<String> authors){
+        setServiceState(STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
+        newBooksThread = new NewBooksThread(this, authors);
+        newBooksThread.start();
+    }
 
-    public FileBackupThread.Result loadFileBackupResult(){
+    public NewBooksThread.Result getNewBooksResult(){
+        if(mNewBooksResult == null){
+            return NewBooksThread.Result.error(NewBooksThread.ERROR_UNKNOWN, "get result failed");
+        }
+        return mNewBooksResult;
+    }
+
+    public void fileBackup(int type){
+        switch(type){
+            case FileBackupThread.TYPE_EXPORT:
+                setServiceState(STATE_EXPORT_INCOMPLETE);
+                break;
+            case FileBackupThread.TYPE_IMPORT:
+                setServiceState(STATE_IMPORT_INCOMPLETE);
+                break;
+            case FileBackupThread.TYPE_BACKUP:
+                setServiceState(STATE_BACKUP_INCOMPLETE);
+                break;
+            case FileBackupThread.TYPE_RESTORE:
+                setServiceState(STATE_RESTORE_INCOMPLETE);
+                break;
+            default:
+                if (D) Log.d(TAG, "Illegal Type");
+                setServiceState(STATE_NONE);
+                break;
+        }
+        fileBackupThread = new FileBackupThread(this, type);
+        fileBackupThread.start();
+    }
+
+    public FileBackupThread.Result getFileBackupResult(){
         if(mFileBackupResult == null){
             return FileBackupThread.Result.error(FileBackupThread.TYPE_UNKNOWN,FileBackupThread.ERROR_UNKNOWN,"get result failed");
         }
         return mFileBackupResult;
     }
-
-
-    private void saveSearchBooksResult(SearchBooksThread.Result result){
-        switch(mState){
-            case STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
-                mSearchBooksResult = result;
-                break;
-            case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
-                if(result.isSuccess()){
-                    boolean needLoadNext = true;
-                    List<BookData> check = result.getBooks();
-                    for(BookData book : check){
-                        if(isNewBook(book)){
-                            String book_author = book.getAuthor();
-                            book_author = book_author.replaceAll("[\\x20\\u3000]","");
-                            if(book_author.contains(getSearchKeyword())){
-                                if(D) Log.d(TAG,"author: " + getSearchKeyword() + " add: " + book.getTitle());
-                                resultNewBooks.add(book);
-                            }
-                        }else{
-                            needLoadNext = false;
-                            break;
-                        }
-                    }
-                    if(result.hasNext() && needLoadNext){
-                        setSearchPage(getSearchPage() + 1);
-                    }else{
-                        progress_now++;
-                        if(mAuthorsList.size() > 0){
-                            String author = mAuthorsList.get(0);
-                            mAuthorsList.remove(0);
-                            setSearchKeyword(author);
-                            setSearchPage(1);
-                        }else{
-                            setSearchKeyword(null);
-                            setSearchPage(0);
-                        }
-                    }
-                }else{
-                    if (D) Log.d(TAG, "Error: " + result.getErrorMessage());
-                    progress_now++;
-                    if(mAuthorsList.size() > 0){
-                        String author = mAuthorsList.get(0);
-                        mAuthorsList.remove(0);
-                        setSearchKeyword(author);
-                        setSearchPage(1);
-                    }else{
-                        setSearchKeyword(null);
-                        setSearchPage(0);
-                    }
-                }
-                updateProgress(progress_now,progress_last);
-                break;
-        }
-    }
-
-
-
-
-
-    public void exportCSV(){
-        setServiceState(STATE_EXPORT_INCOMPLETE);
-        fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_EXPORT);
-        fileBackupThread.start();
-    }
-
-
-    public void importCSV(){
-        setServiceState(STATE_IMPORT_INCOMPLETE);
-        fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_IMPORT);
-        fileBackupThread.start();
-    }
-
-
-    public void backupCSV(){
-        setServiceState(STATE_BACKUP_INCOMPLETE);
-        fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_EXPORT);
-        fileBackupThread.start();
-    }
-
-    public void restoreCSV(){
-        setServiceState(STATE_RESTORE_INCOMPLETE);
-        fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_RESTORE);
-        fileBackupThread.start();
-    }
-
-    public void startAuthenticate(){
-        Auth.startOAuth2Authentication(this,getString(R.string.dropbox_key));
-    }
-
-    public String getAccessToken(){
-        return Auth.getOAuth2Token();
-    }
-
-    private void updateProgress(int progress, int size){
-        Intent intent = new Intent();
-        intent.putExtra(BaseFragment.KEY_PROGRESS,  String.format(Locale.JAPAN, "%d / %d", progress, size));
-        intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
-        mLocalBroadcastManager.sendBroadcast(intent);
-    }
-
 
     private void updateNotification(int state) {
         if(mNotificationManager != null && isForeground) {
@@ -421,32 +338,65 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
     private Notification createNotification(int state){
         Notification notification;
-        String title = getString(R.string.Notification_Channel_Title);
+        String title = getString(R.string.app_name);
         String message = getString(R.string.Notification_Channel_Title);
         int iconId  = R.drawable.ic_vector_shelf_24dp;
         switch (state) {
             case STATE_NONE:
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
-                title = getString(R.string.Notification_Title_Search);
                 message = getString(R.string.Notification_Message_Search_Incomplete);
                 iconId  = R.drawable.ic_vector_search_24dp;
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
-                title = getString(R.string.Notification_Title_Search);
                 message = getString(R.string.Notification_Message_Search_Complete);
                 iconId  = R.drawable.ic_vector_search_24dp;
                 break;
             case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
-                title = getString(R.string.Notification_Title_Reload);
                 message = getString(R.string.Notification_Message_Reload_Incomplete);
                 iconId  = R.drawable.ic_vector_reload_24dp;
                 break;
             case STATE_NEW_BOOKS_RELOAD_COMPLETE:
-                title = getString(R.string.Notification_Title_Reload);
                 message = getString(R.string.Notification_Message_Reload_Complete);
                 iconId  = R.drawable.ic_vector_reload_24dp;
                 break;
+            case STATE_EXPORT_INCOMPLETE:
+                message = getString(R.string.Notification_Message_Export_Incomplete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_EXPORT_COMPLETE:
+                message = getString(R.string.Notification_Message_Export_Complete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_IMPORT_INCOMPLETE:
+                message = getString(R.string.Notification_Message_Import_Incomplete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_IMPORT_COMPLETE:
+                message = getString(R.string.Notification_Message_Import_Complete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_BACKUP_INCOMPLETE:
+                message = getString(R.string.Notification_Message_Backup_Incomplete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_BACKUP_COMPLETE:
+                message = getString(R.string.Notification_Message_Backup_Complete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_RESTORE_INCOMPLETE:
+                message = getString(R.string.Notification_Message_Reload_Incomplete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_RESTORE_COMPLETE:
+                message = getString(R.string.Notification_Message_Reload_Complete);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+            case STATE_DROPBOX_LOGIN:
+                message = getString(R.string.Notification_Message_Dropbox_Login);
+                iconId  = R.drawable.ic_vector_file_download_24dp;
+                break;
+
         }
 
         Intent ni = new Intent();
@@ -473,21 +423,6 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         }
         return notification;
     }
-
-
-
-    private boolean isNewBook(BookData book){
-        Calendar baseDate = Calendar.getInstance();
-        baseDate.add(Calendar.DAY_OF_MONTH, -14);
-        Calendar salesDate = MyBookshelfUtils.parseDate(book.getSalesDate());
-        if(salesDate != null){
-            return salesDate.compareTo(baseDate) >= 0;
-        }else{
-            return false;
-        }
-    }
-
-
 
 
 }
