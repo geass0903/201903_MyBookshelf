@@ -338,6 +338,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 if (result.isSuccess()) {
                     scrollToTop();
                     mNewBooksViewAdapter.replaceBooksData(mApplicationData.loadNewBooks());
+                    Toast.makeText(getContext(), getString(R.string.Toast_Success_Reload), Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getContext(), result.getErrorMessage(), Toast.LENGTH_SHORT).show();
                 }

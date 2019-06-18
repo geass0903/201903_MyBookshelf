@@ -232,7 +232,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         readDateView.setOnClickListener(dateButtonOnClickListener);
         readDateView.setOnLongClickListener(dateButtonOnLongClickListener);
         mSpinnerReadStatus = view.findViewById(R.id.book_detail_spinner_read_status);
-        mArrayAdapter = new ReadStatusSpinnerArrayAdapter(this.getContext(), R.layout.litem_spinner_read_status, getSpinnerItem_ReadStatus());
+        mArrayAdapter = new ReadStatusSpinnerArrayAdapter(this.getContext(), R.layout.item_read_status_spinner, getSpinnerItem_ReadStatus());
         mSpinnerReadStatus.setAdapter(mArrayAdapter);
         mSpinnerReadStatus.setOnItemSelectedListener(listener_ReadStatus);
         mRatingText = view.findViewById(R.id.book_detail_rating_text);
@@ -240,7 +240,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         mRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                String ratingText = String.format(Locale.JAPAN, "%.1f / 5.0", rating);
+                String ratingText = String.format(Locale.JAPAN, "%.1f", rating);
                 detailBook.setRating(rating);
                 mRatingText.setText(ratingText);
             }
@@ -263,7 +263,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             if(!TextUtils.isEmpty(book.getFinishReadDate())) {
                 readDateView.setText(book.getFinishReadDate());
             }
-            mSpinnerReadStatus.setSelection(mArrayAdapter.getPosition(String.valueOf(book.getReadStatus())), false);
+            mSpinnerReadStatus.setSelection(mArrayAdapter.getPosition(book.getReadStatus()));
             mRatingBar.setRating(book.getFloatRating());
         }
     }

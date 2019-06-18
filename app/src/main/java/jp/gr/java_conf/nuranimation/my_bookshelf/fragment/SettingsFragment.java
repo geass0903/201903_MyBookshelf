@@ -24,7 +24,7 @@ import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SortSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
@@ -259,10 +259,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     private void initSpinner(View view) {
         Spinner mShelfBooksSortSpinner = view.findViewById(R.id.ShelfBooksSortSpinner);
-        SpinnerArrayAdapter mShelfBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getSpinnerItemList(R.array.ShelfBooksSortSpinner));
+        SortSpinnerArrayAdapter mShelfBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.ShelfBooksSortSpinner));
         mShelfBooksSortSpinner.setAdapter(mShelfBooksSortAdapter);
         String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooksSort_Code_REGISTERED_ASCENDING));
-        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(code), false);
+        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(code));
         mShelfBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
@@ -278,10 +278,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         });
 
         Spinner mSearchBooksSortSpinner = view.findViewById(R.id.SearchBooksSortSpinner);
-        SpinnerArrayAdapter mSearchBooksSortAdapter = new SpinnerArrayAdapter(getContext(), R.layout.item_spinner, getSpinnerItemList(R.array.SearchBooksSortSpinner));
+        SortSpinnerArrayAdapter mSearchBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.SearchBooksSortSpinner));
         mSearchBooksSortSpinner.setAdapter(mSearchBooksSortAdapter);
         code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
-        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(code), false);
+        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(code));
         mSearchBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,

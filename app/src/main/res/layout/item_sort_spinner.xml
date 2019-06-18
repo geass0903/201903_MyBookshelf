@@ -7,5 +7,7 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:padding="@dimen/padding_large"
+    android:drawableRight="@drawable/ic_vector_drop_down_24dp"
+    android:drawableEnd="@drawable/ic_vector_drop_down_24dp"
     android:textColor="#FFFFFFFF"
     android:textSize="@dimen/textSize_normal" />

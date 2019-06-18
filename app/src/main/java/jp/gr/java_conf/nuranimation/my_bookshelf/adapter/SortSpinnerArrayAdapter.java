@@ -13,23 +13,22 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
 
-public class SpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
+public class SortSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
 
     @SuppressWarnings("unused")
-    public SpinnerArrayAdapter(Context context, int textViewResourceId) {
+    public SortSpinnerArrayAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
-        setDropDownViewResource(R.layout.item_spinner_drop_down);
+        setDropDownViewResource(R.layout.item_sort_spinner_drop_down);
     }
 
-    public SpinnerArrayAdapter(Context context, int textViewResourceId, List<BaseSpinnerItem> list) {
+    public SortSpinnerArrayAdapter(Context context, int textViewResourceId, List<BaseSpinnerItem> list) {
         super(context, textViewResourceId, list);
-        setDropDownViewResource(R.layout.item_spinner_drop_down);
+        setDropDownViewResource(R.layout.item_sort_spinner_drop_down);
     }
 
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-
         TextView view = (TextView) super.getView(position, convertView, parent);
         BaseSpinnerItem item = getItem(position);
         if (item != null) {
