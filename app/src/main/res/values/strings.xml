@@ -103,7 +103,7 @@
     <string name="label_review">レビュー</string>
     <string name="label_sales_date">発売日</string>
     <string name="Label_ReadDate">読了日</string>
-    <string name="Label_ReadStatus">ステータス</string>
+    <string name="label_read_status">ステータス</string>
     <string name="label_item_price">価格(税込)</string>
     <string name="label_isbn">ISBN</string>
     <string name="label_no_data">未設定</string>
@@ -127,9 +127,9 @@
     <string name="unit_price_yen_mark">￥</string>
     <string name="Unit_ItemPrice_Tax">(税込)</string>
     <string name="InputHint_Search">タイトルまたは著者、ISBNなど</string>
-    <string name="InputHint_Title">タイトル</string>
-    <string name="InputHint_Author">著者・作者</string>
-    <string name="InputHint_Publisher">出版社</string>
+    <string name="input_hint_title">タイトル</string>
+    <string name="input_hint_author">著者・作者</string>
+    <string name="input_hint_publisher">出版社</string>
     <string name="InputHint_ItemPrice">価格(税込)</string>
     <string name="InputHint_ISBN">ISBN</string>
 

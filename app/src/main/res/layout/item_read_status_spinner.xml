@@ -15,5 +15,5 @@
     android:drawablePadding="@dimen/padding_small"
     android:drawableLeft="@drawable/ic_vector_read_status_0_24dp"
     android:drawableStart="@drawable/ic_vector_read_status_0_24dp"
-    android:textSize="@dimen/text_size_large"
+    android:textSize="@dimen/text_size_normal"
     android:textColor="#FF000000" />

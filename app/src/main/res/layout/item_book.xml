@@ -23,7 +23,7 @@
             android:layout_height="100dp"
             android:layout_width="100dp"
             fresco:actualImageScaleType="fitCenter"
-            fresco:placeholderImage="@drawable/ic_vector_image_24dp" />
+            fresco:placeholderImage="@drawable/ic_black_image_24dp" />
 
         <LinearLayout
             android:orientation="vertical"
