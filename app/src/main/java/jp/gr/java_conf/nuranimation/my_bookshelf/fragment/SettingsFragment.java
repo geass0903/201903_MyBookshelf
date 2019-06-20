@@ -348,15 +348,15 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     private void enableButton(boolean enable){
         if(enable){
-            mButtonExport.setBackgroundResource(R.drawable.selector_button);
-            mButtonImport.setBackgroundResource(R.drawable.selector_button);
-            mButtonBackup.setBackgroundResource(R.drawable.selector_button);
-            mButtonRestore.setBackgroundResource(R.drawable.selector_button);
+            mButtonExport.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_primary);
+            mButtonImport.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_primary);
+            mButtonBackup.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_primary);
+            mButtonRestore.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_primary);
         }else{
-            mButtonExport.setBackgroundResource(R.drawable.selector_button_disable);
-            mButtonImport.setBackgroundResource(R.drawable.selector_button_disable);
-            mButtonBackup.setBackgroundResource(R.drawable.selector_button_disable);
-            mButtonRestore.setBackgroundResource(R.drawable.selector_button_disable);
+            mButtonExport.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_gray);
+            mButtonImport.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_gray);
+            mButtonBackup.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_gray);
+            mButtonRestore.setBackgroundResource(R.drawable.selector_rounded_rectangle_color_gray);
         }
     }
 

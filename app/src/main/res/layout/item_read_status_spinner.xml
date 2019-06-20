@@ -11,9 +11,9 @@
     android:layout_height="match_parent"
     android:layout_gravity="center_vertical"
     android:gravity="center_vertical"
-    android:background="@drawable/selector_textview_transparent"
+    android:background="@drawable/selector_rectangle_transparent"
     android:drawablePadding="@dimen/padding_small"
     android:drawableLeft="@drawable/ic_vector_read_status_0_24dp"
     android:drawableStart="@drawable/ic_vector_read_status_0_24dp"
-    android:textSize="@dimen/textSize_large"
+    android:textSize="@dimen/text_size_large"
     android:textColor="#FF000000" />

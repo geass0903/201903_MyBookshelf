@@ -66,11 +66,11 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private EditText titleView;
     private EditText authorView;
     private EditText publisherView;
-    private EditText itemPriceView;
-    private EditText isbnView;
+    private TextView itemPriceView;
+    private TextView isbnView;
     private TextView salesDateView;
     private TextView readDateView;
-    private TextView mRatingText;
+
 
 
     private BookData detailBook = new BookData();
@@ -202,10 +202,10 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         if(resultCode == DialogInterface.BUTTON_POSITIVE){
             switch (requestCode){
                 case REQUEST_CODE_SALES_DATE:
-                    salesDateView.setText(getString(R.string.Label_No_Data));
+                    salesDateView.setText(getString(R.string.label_no_data));
                     break;
                 case REQUEST_CODE_READ_DATE:
-                    readDateView.setText(getString(R.string.Label_No_Data));
+                    readDateView.setText(getString(R.string.label_no_data));
                     break;
             }
         }
@@ -224,8 +224,6 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         authorView = view.findViewById(R.id.book_detail_author);
         publisherView = view.findViewById(R.id.book_detail_publisher);
         salesDateView = view.findViewById(R.id.book_detail_sales_date);
-        salesDateView.setOnClickListener(dateButtonOnClickListener);
-        salesDateView.setOnLongClickListener(dateButtonOnLongClickListener);
         itemPriceView = view.findViewById(R.id.book_detail_price);
         isbnView = view.findViewById(R.id.book_detail_isbn);
         readDateView = view.findViewById(R.id.book_detail_read_date);
@@ -235,14 +233,11 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         mArrayAdapter = new ReadStatusSpinnerArrayAdapter(this.getContext(), R.layout.item_read_status_spinner, getSpinnerItem_ReadStatus());
         mSpinnerReadStatus.setAdapter(mArrayAdapter);
         mSpinnerReadStatus.setOnItemSelectedListener(listener_ReadStatus);
-        mRatingText = view.findViewById(R.id.book_detail_rating_text);
-        mRatingBar = view.findViewById(R.id.book_detail_rating);
+        mRatingBar = view.findViewById(R.id.book_detail_rating_bar);
         mRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                String ratingText = String.format(Locale.JAPAN, "%.1f", rating);
                 detailBook.setRating(rating);
-                mRatingText.setText(ratingText);
             }
         });
         setBookData(book);
@@ -250,8 +245,26 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
 
     private void setBookData(BookData book){
+
         if(book != null) {
             mBookImageView.setImageURI(Uri.parse(MyBookshelfUtils.parseUrlString(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_LARGE)));
+
+            mBookImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(D) Log.d(TAG,"onClick");
+                }
+            });
+
+            mBookImageView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if(D) Log.d(TAG,"onLongClick");
+                    return true;
+                }
+            });
+
+
             titleView.setText(book.getTitle());
             authorView.setText(book.getAuthor());
             publisherView.setText(book.getPublisher());

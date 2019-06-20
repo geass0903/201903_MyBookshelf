@@ -26,15 +26,15 @@ public class BooksViewHolder extends RecyclerView.ViewHolder {
 
     BooksViewHolder(@NonNull View itemView) {
         super(itemView);
-        draweeView_Image = itemView.findViewById(R.id.Item_Book_Image);
-        textView_Title = itemView.findViewById(R.id.Item_Book_Title);
-        textView_Author = itemView.findViewById(R.id.Item_Book_Author);
-        textView_Publisher = itemView.findViewById(R.id.Item_Book_Publisher);
-        textView_SalesDate = itemView.findViewById(R.id.Item_Book_SalesDate);
-        textView_ItemPrice = itemView.findViewById(R.id.Item_Book_ItemPrice);
-        ratingBar = itemView.findViewById(R.id.Item_Book_Rating);
-        image_ReadStatus = itemView.findViewById(R.id.Item_Book_Icon_ReadStatus);
-        textView_ReadStatus = itemView.findViewById(R.id.Item_Book_ReadStatus);
+        draweeView_Image = itemView.findViewById(R.id.item_book_image);
+        textView_Title = itemView.findViewById(R.id.item_book_title);
+        textView_Author = itemView.findViewById(R.id.item_book_author);
+        textView_Publisher = itemView.findViewById(R.id.item_book_publisher);
+        textView_SalesDate = itemView.findViewById(R.id.item_book_sales_date);
+        textView_ItemPrice = itemView.findViewById(R.id.item_book_price);
+        ratingBar = itemView.findViewById(R.id.item_book_rating);
+        image_ReadStatus = itemView.findViewById(R.id.item_book_read_status);
+        textView_ReadStatus = itemView.findViewById(R.id.item_book_read_status_text);
     }
 
     public SimpleDraweeView getImageView(){

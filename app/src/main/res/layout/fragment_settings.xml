@@ -48,7 +48,7 @@
                 android:id="@+id/ShelfBooksSortSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:layout_margin="@dimen/margin_small"
                 android:spinnerMode="dialog" />
         </LinearLayout>
@@ -88,7 +88,7 @@
                 android:id="@+id/SearchBooksSortSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:layout_margin="@dimen/margin_small"
                 android:spinnerMode="dialog" />
         </LinearLayout>
@@ -129,7 +129,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Export_CSV"/>
             <Button
@@ -137,7 +137,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Import_CSV"/>
         </LinearLayout>
@@ -177,7 +177,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Login_Dropbox" />
             <Button
@@ -185,7 +185,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
-                android:background="@drawable/selector_button_logout"
+                android:background="@drawable/selector_rounded_rectangle_color_red"
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Logout_Dropbox" />
             <Button
@@ -193,7 +193,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Backup" />
             <Button
@@ -201,7 +201,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small"
-                android:background="@drawable/selector_button"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:textColor="#FFFFFFFF"
                 android:text="@string/Label_Restore" />
         </LinearLayout>

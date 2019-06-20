@@ -15,5 +15,5 @@
     android:drawableLeft="@drawable/ic_vector_read_status_0_24dp"
     android:drawableStart="@drawable/ic_vector_read_status_0_24dp"
     android:checkMark="?android:attr/textCheckMark"
-    android:textSize="@dimen/textSize_large"
+    android:textSize="@dimen/text_size_large"
     android:textColor="#FF000000" />
