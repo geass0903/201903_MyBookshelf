@@ -5,6 +5,5 @@
         android:id="@+id/menu_new_action_reload"
         android:icon="@drawable/ic_reload_24dp"
         android:title="@string/menu_button_reload_new_books"
-        app:showAsAction="always"
-        />
+        app:showAsAction="always" />
 </menu>

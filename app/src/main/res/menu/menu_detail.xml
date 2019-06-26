@@ -5,6 +5,5 @@
         android:id="@+id/menu_detail_action_register"
         android:icon="@drawable/ic_register_24dp"
         android:title="@string/menu_button_register_book"
-        app:showAsAction="always"
-        />
+        app:showAsAction="always" />
 </menu>
