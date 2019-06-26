@@ -125,7 +125,7 @@
                 android:gravity="center_vertical|start"
                 android:textSize="@dimen/text_size_small"
                 android:textColor="#FF000000"
-                android:text="@string/unit_price_yen_mark" />
+                android:text="@string/label_price_yen_mark" />
             <TextView
                 android:id="@+id/item_book_price"
                 android:layout_width="wrap_content"

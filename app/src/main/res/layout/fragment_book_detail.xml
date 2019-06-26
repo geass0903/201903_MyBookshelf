@@ -24,7 +24,7 @@
             fresco:actualImageScaleType="fitCenter"
             fresco:placeholderImage="@drawable/ic_image_24dp" />
 
-        <!-- Get Book Info -->
+        <!-- Download BookData -->
         <Button
             android:id="@+id/book_detail_button_download_book_data"
             android:minWidth="0dp"
@@ -145,7 +145,7 @@
                 android:gravity="center_vertical|end"
                 android:textSize="@dimen/text_size_small"
                 android:textColor="#FF000000"
-                android:text="@string/unit_price_yen_mark" />
+                android:text="@string/label_price_yen_mark" />
             <TextView
                 android:id="@+id/book_detail_price"
                 android:layout_width="wrap_content"
@@ -340,7 +340,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical|start"
                 android:gravity="center_vertical|start"
-                android:background="@color/transparent"
+                android:background="@color/colorTransparent"
                 android:spinnerMode="dialog" />
         </LinearLayout>
 
