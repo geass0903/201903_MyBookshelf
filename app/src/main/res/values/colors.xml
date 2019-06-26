@@ -4,13 +4,6 @@
     <color name="colorPrimaryDark">#FF303F9F</color>
     <color name="colorAccent">#FF44CCDD</color>
     <color name="colorBackground">#FFFFFFFF</color>
-    <color name="transparent">#00000000</color>
-
-    <color name="colorLineMargin">#FFAAAAAA</color>
-
-
-
-    <color name="button_normal">#FF44CCDD</color>
-    <color name="button_pressed">#FF1199AA</color>
-
+    <color name="colorDividerLine">#FF808080</color>
+    <color name="colorTransparent">#00000000</color>
 </resources>

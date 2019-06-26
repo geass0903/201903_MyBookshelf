@@ -4,265 +4,259 @@
     <string name="dropbox_key">fh2si4dchz272b1</string>
 
     <!-- Dialog -->
-    <string name="DialogButton_Label_Positive">はい</string>
-    <string name="DialogButton_Label_Negative">キャンセル</string>
-    <string name="DialogTitle_Logout_Dropbox">ログアウト</string>
-    <string name="DialogTitle_Unregister_Book">削除の確認</string>
-    <string name="DialogTitle_Register_Book">登録の確認</string>
-    <string name="DialogTitle_Clear_Date">日付のクリア</string>
-    <string name="DialogMessage_Logout_Dropbox">Dropboxからログアウトしますか？</string>
-    <string name="DialogMessage_Unregister_Book">この本を削除しますか？</string>
-    <string name="DialogMessage_Register_Book">この本を登録しますか？</string>
-    <string name="DialogMessage_Clear_Date">日付をクリアしますか？</string>
+    <string name="dialog_button_label_positive">はい</string>
+    <string name="dialog_button_label_negative">キャンセル</string>
+    <string name="dialog_title_logout_dropbox">ログアウト</string>
+    <string name="dialog_title_unregister_book">削除の確認</string>
+    <string name="dialog_title_register_book">登録の確認</string>
+    <string name="dialog_title_clear_date">日付のクリア</string>
+    <string name="dialog_message_logout_dropbox">Dropboxからログアウトしますか？</string>
+    <string name="dialog_message_unregister_book">この本を削除しますか？</string>
+    <string name="dialog_message_register_book">この本を登録しますか？</string>
+    <string name="dialog_message_clear_date">日付をクリアしますか？</string>
 
 
     <!-- Permission -->
-    <string name="Permission_Title">ストレージの書き込み権限取得許可</string>
-    <string name="Permission_Message">以下の機能の使用には書き込み権限が必要です</string>
-    <string name="Permission_Message1">・表紙画像の保存(パケット通信量の節約)</string>
-    <string name="Permission_Message2">・本棚のインポート・エクスポート機能</string>
-    <string name="Permission_Message3">・Dropbox連携</string>
+    <string name="permission_dialog_title">ストレージの書き込み権限取得許可</string>
+    <string name="permission_dialog_message">以下の機能の使用には書き込み権限が必要です</string>
+    <string name="permission_dialog_message1">・表紙画像の保存(パケット通信量の節約)</string>
+    <string name="permission_dialog_message2">・本棚のインポート・エクスポート機能</string>
+    <string name="permission_dialog_message3">・Dropbox連携</string>
 
     <!-- Toast -->
-    <string name="Toast_Failed">エラーが発生しました</string>
-    <string name="Toast_Success_Get_Permissions">権限が付与されました</string>
-    <string name="Toast_Failed_Get_Permissions">権限が付与されませんでした</string>
-    <string name="Toast_Success_Export">エクスポートしました</string>
-    <string name="Toast_Success_Import">インポートしました</string>
-    <string name="Toast_Success_Backup">バックアップしました</string>
-    <string name="Toast_Success_Restore">リストアしました</string>
-    <string name="Toast_Success_Reload">更新しました</string>
-    <string name="Toast_Register_Book">本を登録しました</string>
-    <string name="Toast_Unregister_Book">本を削除しました</string>
-    <string name="Toast_Search_Error_Keyword">検索文字列エラー(半角2文字または全角1文字以上。ひらがな・カタカナ・記号の場合は2文字以上)</string>
-    <string name="Toast_Search_Error_Book_not_found">本が見つかりませんでした</string>
-    <string name="Toast_Search_Error_HTTP_400">400 wrong parameter</string>
-    <string name="Toast_Search_Error_HTTP_404">404 not found</string>
-    <string name="Toast_Search_Error_HTTP_429">429 too many requests</string>
-    <string name="Toast_Search_Error_HTTP_500">500 system error</string>
-    <string name="Toast_Search_Error_HTTP_503">503 service unavailable</string>
+    <string name="toast_failed">エラーが発生しました</string>
+    <string name="toast_success_get_permissions">権限が付与されました</string>
+    <string name="toast_failed_get_permissions">権限が付与されませんでした</string>
+    <string name="toast_success_export">エクスポートしました</string>
+    <string name="toast_success_import">インポートしました</string>
+    <string name="toast_success_backup">バックアップしました</string>
+    <string name="toast_success_restore">リストアしました</string>
+    <string name="toast_success_reload">更新しました</string>
+    <string name="toast_success_register_book">本を登録しました</string>
+    <string name="toast_success_unregister_book">本を削除しました</string>
+    <string name="toast_failed_search_keyword_error">検索文字列エラー(半角2文字または全角1文字以上。ひらがな・カタカナ・記号の場合は2文字以上)</string>
+    <string name="toast_failed_search_book_not_found">本が見つかりませんでした</string>
+    <string name="toast_failed_search_http_400_error">400 wrong parameter</string>
+    <string name="toast_failed_search_http_404_error">404 not found</string>
+    <string name="toast_failed_search_http_429_error">429 too many requests</string>
+    <string name="toast_failed_search_http_500_error">500 system error</string>
+    <string name="toast_failed_search_http_503_error">503 service unavailable</string>
 
 
     <!-- Progress -->
-    <string name="ProgressTitle_Search">検索中</string>
-    <string name="ProgressTitle_Reload">更新中</string>
-    <string name="ProgressTitle_Backup">バックアップ中</string>
-    <string name="ProgressTitle_Restore">リストア中</string>
-    <string name="ProgressTitle_Export">エクスポート中</string>
-    <string name="ProgressTitle_Import">インポート中</string>
-    <string name="ProgressMessage_Upload_Books">書籍データをアップロードしています</string>
-    <string name="ProgressMessage_Download_Books">書籍データをダウンロードしています</string>
-    <string name="ProgressMessage_Export_Books">書籍データを書き出しています</string>
-    <string name="ProgressMessage_Import_Books">書籍データを読み込んでいます</string>
-    <string name="ProgressMessage_Upload_Authors">著者データをアップロードしています</string>
-    <string name="ProgressMessage_Download_Authors">著者データをダウンロードしています</string>
-    <string name="ProgressMessage_Export_Authors">著者データを書き出しています</string>
-    <string name="ProgressMessage_Import_Authors">著者データを読み込んでいます</string>
-    <string name="ProgressMessage_Register">データを登録しています</string>
-    <string name="Progress_Unit_Book">冊</string>
-    <string name="Progress_Unit_Byte">Byte</string>
+    <string name="progress_title_search_books">検索中</string>
+    <string name="progress_title_reload_new_books">更新中</string>
+    <string name="progress_title_backup">バックアップ中</string>
+    <string name="progress_title_restore">リストア中</string>
+    <string name="progress_title_export">エクスポート中</string>
+    <string name="progress_title_import">インポート中</string>
+    <string name="progress_message_upload_books">書籍データをアップロードしています</string>
+    <string name="progress_message_download_books">書籍データをダウンロードしています</string>
+    <string name="progress_message_export_books">書籍データを書き出しています</string>
+    <string name="progress_message_import_books">書籍データを読み込んでいます</string>
+    <string name="progress_message_upload_authors">著者データをアップロードしています</string>
+    <string name="progress_message_download_authors">著者データをダウンロードしています</string>
+    <string name="progress_message_export_authors">著者データを書き出しています</string>
+    <string name="progress_message_import_authors">著者データを読み込んでいます</string>
+    <string name="progress_message_register">データを登録しています</string>
+    <string name="progress_unit_book">冊</string>
+    <string name="progress_unit_byte">Byte</string>
 
 
     <!-- Notification-->
-    <string name="Notification_Channel_ID">BookSearchService</string>
-    <string name="Notification_Channel_Title">本の検索</string>
-    <string name="Notification_Channel_Description">検索状況の通知</string>
+    <string name="notification_channel_id">BookSearchService</string>
+    <string name="notification_channel_title">本の検索</string>
+    <string name="notification_channel_description">検索状況の通知</string>
 
-    <string name="Notification_Message_Search_Incomplete">本を検索しています</string>
-    <string name="Notification_Message_Search_Complete">検索を終了しました</string>
-    <string name="Notification_Message_Reload_Incomplete">新刊を検索しています</string>
-    <string name="Notification_Message_Reload_Complete">検索を終了しました</string>
-    <string name="Notification_Message_Backup_Incomplete">バックアップ中</string>
-    <string name="Notification_Message_Backup_Complete">バックアップ完了しました</string>
-    <string name="Notification_Message_Restore_Incomplete">リストア中</string>
-    <string name="Notification_Message_Restore_Complete">リストア完了しました</string>
-    <string name="Notification_Message_Export_Incomplete">エクスポート中</string>
-    <string name="Notification_Message_Export_Complete">エクスポートしました</string>
-    <string name="Notification_Message_Import_Incomplete">インポート中</string>
-    <string name="Notification_Message_Import_Complete">インポートしました</string>
-    <string name="Notification_Message_Dropbox_Login">Dropboxログイン</string>
+    <string name="notification_message_search_incomplete">本を検索しています</string>
+    <string name="notification_message_search_complete">検索を終了しました</string>
+    <string name="notification_message_reload_incomplete">新刊を検索しています</string>
+    <string name="notification_message_reload_complete">検索を終了しました</string>
+    <string name="notification_message_backup_incomplete">バックアップ中</string>
+    <string name="notification_message_backup_complete">バックアップ完了しました</string>
+    <string name="notification_message_restore_incomplete">リストア中</string>
+    <string name="notification_message_restore_complete">リストア完了しました</string>
+    <string name="notification_message_export_incomplete">エクスポート中</string>
+    <string name="notification_message_export_complete">エクスポートしました</string>
+    <string name="notification_message_import_incomplete">インポート中</string>
+    <string name="notification_message_import_complete">インポートしました</string>
+    <string name="notification_message_login_dropbox">Dropboxログイン</string>
 
 
     <!-- Navigation -->
-    <string name="Navigation_Item_ShelfBooks">本棚</string>
-    <string name="Navigation_Item_SearchBooks">検索</string>
-    <string name="Navigation_Item_NewBooks">新刊</string>
-    <string name="Navigation_Item_Settings">設定</string>
+    <string name="navigation_item_shelf_books">本棚</string>
+    <string name="navigation_item_search_books">検索</string>
+    <string name="navigation_item_new_books">新刊</string>
+    <string name="navigation_item_settings">設定</string>
 
 
     <!-- Menu -->
-    <string name="MenuButton_SearchInShelfBooks">本棚内検索</string>
-    <string name="MenuButton_Search">検索</string>
-    <string name="MenuButton_Reload">更新</string>
-    <string name="MenuButton_Register">登録</string>
+    <string name="menu_button_search_in_shelf_books">本棚内検索</string>
+    <string name="menu_button_search_books">検索</string>
+    <string name="menu_button_reload_new_books">更新</string>
+    <string name="menu_button_register_book">登録</string>
 
 
 
     <!-- Other -->
-    <string name="Label_RakutenUrl">楽天ブックス</string>
+    <string name="label_rakuten_url">楽天ブックス</string>
     <string name="label_review">レビュー</string>
     <string name="label_sales_date">発売日</string>
-    <string name="Label_ReadDate">読了日</string>
+    <string name="label_sale">発売</string>
+    <string name="label_finish_read_date">読了日</string>
     <string name="label_read_status">ステータス</string>
     <string name="label_item_price">価格(税込)</string>
     <string name="label_isbn">ISBN</string>
     <string name="label_no_data">未設定</string>
     <string name="label_unknown">不明</string>
-    <string name="label_separator">/</string>
-    <string name="label_rating_min_value">0.0</string>
-    <string name="label_rating_max_value">5.0</string>
     <string name="label_download_book_data">書籍情報の再取得</string>
-    <string name="Label_Get_BookImage_WEB">表紙画像の再取得</string>
-    <string name="Label_ShelfBooksSortSetting">本棚のソート設定</string>
-    <string name="Label_SearchBooksSortSetting">検索結果のソート設定</string>
-    <string name="Label_ExportImport">エクスポート／インポート</string>
-    <string name="Label_Link_up_Dropbox">Dropbox連携</string>
-    <string name="Label_Export_CSV">CSVファイルにエクスポート</string>
-    <string name="Label_Import_CSV">CSVファイルからインポート</string>
-    <string name="Label_Login_Dropbox">ログイン</string>
-    <string name="Label_Logout_Dropbox">ログアウト</string>
-    <string name="Label_Backup">バックアップ</string>
-    <string name="Label_Restore">リストア</string>
-    <string name="Label_Load_Next">次の20件を表示</string>
-    <string name="unit_price_yen_mark">￥</string>
-    <string name="Unit_ItemPrice_Tax">(税込)</string>
-    <string name="InputHint_Search">タイトルまたは著者、ISBNなど</string>
+    <string name="label_download_book_image">表紙画像の再取得</string>
+    <string name="label_shelf_books_sort_setting">本棚のソート設定</string>
+    <string name="label_search_books_sort_setting">検索結果のソート設定</string>
+    <string name="label_export_and_import">エクスポート／インポート</string>
+    <string name="label_link_up_dropbox">Dropbox連携</string>
+    <string name="label_export_csv">CSVファイルにエクスポート</string>
+    <string name="label_import_csv">CSVファイルからインポート</string>
+    <string name="label_log_in_dropbox">ログイン</string>
+    <string name="label_log_out_dropbox">ログアウト</string>
+    <string name="label_backup">バックアップ</string>
+    <string name="label_restore">リストア</string>
+    <string name="label_load_next_page">次の20件を表示</string>
+    <string name="label_tax_included">(税込)</string>
+    <string name="label_price_yen_mark">￥</string>
+    <string name="input_hint_search_books">タイトルまたは著者、ISBNなど</string>
     <string name="input_hint_title">タイトル</string>
     <string name="input_hint_author">著者・作者</string>
     <string name="input_hint_publisher">出版社</string>
-    <string name="InputHint_ItemPrice">価格(税込)</string>
-    <string name="InputHint_ISBN">ISBN</string>
 
 
     <!-- ReadStatus -->
-    <string name="ReadStatus_Label_STATUS_0">未登録</string>
-    <string name="ReadStatus_Label_STATUS_1">興味あり</string>
-    <string name="ReadStatus_Label_STATUS_2">未読</string>
-    <string name="ReadStatus_Label_STATUS_3">読書中</string>
-    <string name="ReadStatus_Label_STATUS_4">既読</string>
-    <string name="ReadStatus_Label_STATUS_5">未指定</string>
-    <string name="ReadStatus_Code_STATUS_0">0</string>
-    <string name="ReadStatus_Code_STATUS_1">1</string>
-    <string name="ReadStatus_Code_STATUS_2">2</string>
-    <string name="ReadStatus_Code_STATUS_3">3</string>
-    <string name="ReadStatus_Code_STATUS_4">4</string>
-    <string name="ReadStatus_Code_STATUS_5">5</string>
-
+    <string name="read_status_label_0">未登録</string>
+    <string name="read_status_label_1">興味あり</string>
+    <string name="read_status_label_2">未読</string>
+    <string name="read_status_label_3">読書中</string>
+    <string name="read_status_label_4">既読</string>
+    <string name="read_status_label_5">未指定</string>
+    <string name="read_status_code_0">0</string>
+    <string name="read_status_code_1">1</string>
+    <string name="read_status_code_2">2</string>
+    <string name="read_status_code_3">3</string>
+    <string name="read_status_code_4">4</string>
+    <string name="read_status_code_5">5</string>
     <!-- ReadStatus Spinner -->
-    <string-array name="ReadStatusSpinner_Item_READ_STATUS_0">
-        <item name="code">@string/ReadStatus_Code_STATUS_0</item>
-        <item name="label">@string/ReadStatus_Label_STATUS_0</item>
+    <string-array name="read_status_spinner_item_0">
+        <item name="code">@string/read_status_code_0</item>
+        <item name="label">@string/read_status_label_0</item>
     </string-array>
-    <string-array name="ReadStatusSpinner_Item_READ_STATUS_1">
-        <item name="code">@string/ReadStatus_Code_STATUS_1</item>
-        <item name="label">@string/ReadStatus_Label_STATUS_1</item>
+    <string-array name="read_status_spinner_item_1">
+        <item name="code">@string/read_status_code_1</item>
+        <item name="label">@string/read_status_label_1</item>
     </string-array>
-    <string-array name="ReadStatusSpinner_Item_READ_STATUS_2">
-        <item name="code">@string/ReadStatus_Code_STATUS_2</item>
-        <item name="label">@string/ReadStatus_Label_STATUS_2</item>
+    <string-array name="read_status_spinner_item_2">
+        <item name="code">@string/read_status_code_2</item>
+        <item name="label">@string/read_status_label_2</item>
     </string-array>
-    <string-array name="ReadStatusSpinner_Item_READ_STATUS_3">
-        <item name="code">@string/ReadStatus_Code_STATUS_3</item>
-        <item name="label">@string/ReadStatus_Label_STATUS_3</item>
+    <string-array name="read_status_spinner_item_3">
+        <item name="code">@string/read_status_code_3</item>
+        <item name="label">@string/read_status_label_3</item>
     </string-array>
-    <string-array name="ReadStatusSpinner_Item_READ_STATUS_4">
-        <item name="code">@string/ReadStatus_Code_STATUS_4</item>
-        <item name="label">@string/ReadStatus_Label_STATUS_4</item>
+    <string-array name="read_status_spinner_item_4">
+        <item name="code">@string/read_status_code_4</item>
+        <item name="label">@string/read_status_label_4</item>
     </string-array>
-    <string-array name="ReadStatusSpinner_Item_READ_STATUS_5">
-        <item name="code">@string/ReadStatus_Code_STATUS_5</item>
-        <item name="label">@string/ReadStatus_Label_STATUS_5</item>
+    <string-array name="read_status_spinner_item_5">
+        <item name="code">@string/read_status_code_5</item>
+        <item name="label">@string/read_status_label_5</item>
     </string-array>
     <!-- ReadStatus Spinner -->
-    <string-array name="ReadStatusSpinner">
-        <item>@array/ReadStatusSpinner_Item_READ_STATUS_1</item>
-        <item>@array/ReadStatusSpinner_Item_READ_STATUS_2</item>
-        <item>@array/ReadStatusSpinner_Item_READ_STATUS_3</item>
-        <item>@array/ReadStatusSpinner_Item_READ_STATUS_4</item>
-        <item>@array/ReadStatusSpinner_Item_READ_STATUS_5</item>
+    <string-array name="read_status_spinner">
+        <item>@array/read_status_spinner_item_1</item>
+        <item>@array/read_status_spinner_item_2</item>
+        <item>@array/read_status_spinner_item_3</item>
+        <item>@array/read_status_spinner_item_4</item>
+        <item>@array/read_status_spinner_item_5</item>
     </string-array>
 
 
     <!-- ShelfBooksSortSetting -->
-    <string name="ShelfBooksSort_Label_TITLE_ASCENDING">タイトル(昇順)</string>
-    <string name="ShelfBooksSort_Label_TITLE_DESCENDING">タイトル(降順)</string>
-    <string name="ShelfBooksSort_Label_AUTHOR_ASCENDING">著者(昇順)</string>
-    <string name="ShelfBooksSort_Label_AUTHOR_DESCENDING">著者(降順)</string>
-    <string name="ShelfBooksSort_Label_SALES_DATE_ASCENDING">発売日(昇順)</string>
-    <string name="ShelfBooksSort_Label_SALES_DATE_DESCENDING">発売日(降順)</string>
-    <string name="ShelfBooksSort_Label_REGISTERED_ASCENDING">登録日(昇順)</string>
-    <string name="ShelfBooksSort_Label_REGISTERED_DESCENDING">登録日(降順)</string>
-    <string name="ShelfBooksSort_Code_TITLE_ASCENDING">" order by title asc"</string>
-    <string name="ShelfBooksSort_Code_TITLE_DESCENDING">" order by title desc</string>
-    <string name="ShelfBooksSort_Code_AUTHOR_ASCENDING">" order by author asc"</string>
-    <string name="ShelfBooksSort_Code_AUTHOR_DESCENDING">" order by author desc"</string>
-    <string name="ShelfBooksSort_Code_SALES_DATE_ASCENDING">" order by release_date asc"</string>
-    <string name="ShelfBooksSort_Code_SALES_DATE_DESCENDING">" order by release_date desc"</string>
-    <string name="ShelfBooksSort_Code_REGISTERED_ASCENDING">" order by register_date asc"</string>
-    <string name="ShelfBooksSort_Code_REGISTERED_DESCENDING">" order by register_date desc"</string>
+    <string name="label_shelf_books_sort_title_ascending">タイトル(昇順)</string>
+    <string name="label_shelf_books_sort_title_descending">タイトル(降順)</string>
+    <string name="label_shelf_books_sort_author_ascending">著者(昇順)</string>
+    <string name="label_shelf_books_sort_author_descending">著者(降順)</string>
+    <string name="label_shelf_books_sort_sales_date_ascending">発売日(昇順)</string>
+    <string name="label_shelf_books_sort_sales_date_descending">発売日(降順)</string>
+    <string name="label_shelf_books_sort_registered_ascending">登録日(昇順)</string>
+    <string name="label_shelf_books_sort_registered_descending">登録日(降順)</string>
+    <string name="code_shelf_books_sort_title_ascending">" order by title asc"</string>
+    <string name="code_shelf_books_sort_title_descending">" order by title desc</string>
+    <string name="code_shelf_books_sort_author_ascending">" order by author asc"</string>
+    <string name="code_shelf_books_sort_author_descending">" order by author desc"</string>
+    <string name="code_shelf_books_sort_sales_date_ascending">" order by release_date asc"</string>
+    <string name="code_shelf_books_sort_sales_date_descending">" order by release_date desc"</string>
+    <string name="code_shelf_books_sort_registered_ascending">" order by register_date asc"</string>
+    <string name="code_shelf_books_sort_registered_descending">" order by register_date desc"</string>
     <!-- ShelfBooksSortSetting Spinner -->
-    <string-array name="ShelfBooksSortSpinner_Item_TITLE_ASC">
-        <item name="code">@string/ShelfBooksSort_Code_TITLE_ASCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_TITLE_ASCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_title_asc">
+        <item name="code">@string/code_shelf_books_sort_title_ascending</item>
+        <item name="label">@string/label_shelf_books_sort_title_ascending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_TITLE_DESC">
-        <item name="code">@string/ShelfBooksSort_Code_TITLE_DESCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_TITLE_DESCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_title_desc">
+        <item name="code">@string/code_shelf_books_sort_title_descending</item>
+        <item name="label">@string/label_shelf_books_sort_title_descending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_AUTHOR_ASC">
-        <item name="code">@string/ShelfBooksSort_Code_AUTHOR_ASCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_AUTHOR_ASCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_author_asc">
+        <item name="code">@string/code_shelf_books_sort_author_ascending</item>
+        <item name="label">@string/label_shelf_books_sort_author_ascending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_AUTHOR_DESC">
-        <item name="code">@string/ShelfBooksSort_Code_AUTHOR_DESCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_AUTHOR_DESCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_author_desc">
+        <item name="code">@string/code_shelf_books_sort_author_descending</item>
+        <item name="label">@string/label_shelf_books_sort_author_descending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_SALES_DATE_ASC">
-        <item name="code">@string/ShelfBooksSort_Code_SALES_DATE_ASCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_SALES_DATE_ASCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_sales_date_asc">
+        <item name="code">@string/code_shelf_books_sort_sales_date_ascending</item>
+        <item name="label">@string/label_shelf_books_sort_sales_date_ascending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_SALES_DATE_DESC">
-        <item name="code">@string/ShelfBooksSort_Code_SALES_DATE_DESCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_SALES_DATE_DESCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_sales_date_desc">
+        <item name="code">@string/code_shelf_books_sort_sales_date_descending</item>
+        <item name="label">@string/label_shelf_books_sort_sales_date_descending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_REGISTERED_ASC">
-        <item name="code">@string/ShelfBooksSort_Code_REGISTERED_ASCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_REGISTERED_ASCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_registered_asc">
+        <item name="code">@string/code_shelf_books_sort_registered_ascending</item>
+        <item name="label">@string/label_shelf_books_sort_registered_ascending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner_Item_REGISTERED_DESC">
-        <item name="code">@string/ShelfBooksSort_Code_REGISTERED_DESCENDING</item>
-        <item name="label">@string/ShelfBooksSort_Label_REGISTERED_DESCENDING</item>
+    <string-array name="shelf_books_sort_spinner_item_registered_desc">
+        <item name="code">@string/code_shelf_books_sort_registered_descending</item>
+        <item name="label">@string/label_shelf_books_sort_registered_descending</item>
     </string-array>
-    <string-array name="ShelfBooksSortSpinner">
-        <item>@array/ShelfBooksSortSpinner_Item_TITLE_ASC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_TITLE_DESC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_AUTHOR_ASC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_AUTHOR_DESC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_SALES_DATE_ASC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_SALES_DATE_DESC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_REGISTERED_ASC</item>
-        <item>@array/ShelfBooksSortSpinner_Item_REGISTERED_DESC</item>
+    <string-array name="shelf_books_sort_spinner">
+        <item>@array/shelf_books_sort_spinner_item_title_asc</item>
+        <item>@array/shelf_books_sort_spinner_item_title_desc</item>
+        <item>@array/shelf_books_sort_spinner_item_author_asc</item>
+        <item>@array/shelf_books_sort_spinner_item_author_desc</item>
+        <item>@array/shelf_books_sort_spinner_item_sales_date_asc</item>
+        <item>@array/shelf_books_sort_spinner_item_sales_date_desc</item>
+        <item>@array/shelf_books_sort_spinner_item_registered_asc</item>
+        <item>@array/shelf_books_sort_spinner_item_registered_desc</item>
     </string-array>
 
 
     <!-- SearchBooksSortSetting -->
-    <string name="SearchBooksSort_Label_SALES_DATE_ASCENDING">発売日(昇順)</string>
-    <string name="SearchBooksSort_Label_SALES_DATE_DESCENDING">発売日(降順)</string>
-    <string name="SearchBooksSort_Code_SALES_DATE_ASCENDING">"+releaseDate"</string>
-    <string name="SearchBooksSort_Code_SALES_DATE_DESCENDING">"-releaseDate"</string>
+    <string name="label_search_books_sort_sales_date_ascending">発売日(昇順)</string>
+    <string name="label_search_books_sort_sales_date_descending">発売日(降順)</string>
+    <string name="code_search_books_sort_sales_date_ascending">"+releaseDate"</string>
+    <string name="code_search_books_sort_sales_date_descending">"-releaseDate"</string>
     <!-- SearchBooksSortSetting Spinner -->
-    <string-array name="SearchBooksSortSpinner_Item_SALES_DATE_ASC">
-        <item name="code">@string/SearchBooksSort_Code_SALES_DATE_ASCENDING</item>
-        <item name="label">@string/SearchBooksSort_Label_SALES_DATE_ASCENDING</item>
+    <string-array name="search_books_sort_spinner_item_sales_date_asc">
+        <item name="code">@string/code_search_books_sort_sales_date_ascending</item>
+        <item name="label">@string/label_search_books_sort_sales_date_ascending</item>
     </string-array>
-    <string-array name="SearchBooksSortSpinner_Item_SALES_DATE_DESC">
-        <item name="code">@string/SearchBooksSort_Code_SALES_DATE_DESCENDING</item>
-        <item name="label">@string/SearchBooksSort_Label_SALES_DATE_DESCENDING</item>
+    <string-array name="search_books_sort_spinner_item_sales_date_desc">
+        <item name="code">@string/code_search_books_sort_sales_date_descending</item>
+        <item name="label">@string/label_search_books_sort_sales_date_descending</item>
     </string-array>
-    <string-array name="SearchBooksSortSpinner">
-        <item>@array/SearchBooksSortSpinner_Item_SALES_DATE_ASC</item>
-        <item>@array/SearchBooksSortSpinner_Item_SALES_DATE_DESC</item>
+    <string-array name="search_books_sort_spinner">
+        <item>@array/search_books_sort_spinner_item_sales_date_asc</item>
+        <item>@array/search_books_sort_spinner_item_sales_date_desc</item>
     </string-array>
-
 
 </resources>
