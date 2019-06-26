@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_new_action_reload"
-        android:icon="@drawable/ic_vector_reload_24dp"
-        android:title="@string/MenuButton_Reload"
+        android:icon="@drawable/ic_reload_24dp"
+        android:title="@string/menu_button_reload_new_books"
         app:showAsAction="always"
         />
 </menu>

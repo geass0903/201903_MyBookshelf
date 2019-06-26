@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_detail_action_register"
-        android:icon="@drawable/ic_vector_register_24dp"
-        android:title="@string/MenuButton_Register"
+        android:icon="@drawable/ic_register_24dp"
+        android:title="@string/menu_button_register_book"
         app:showAsAction="always"
         />
 </menu>
