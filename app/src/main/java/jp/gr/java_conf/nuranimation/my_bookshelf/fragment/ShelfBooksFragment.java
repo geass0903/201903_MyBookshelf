@@ -60,7 +60,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         if (D) Log.d(TAG, "onCreateView");
-        return inflater.inflate(R.layout.fragment_bookshelf, container, false);
+        return inflater.inflate(R.layout.fragment_shelf_books, container, false);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         super.onViewCreated(view, savedInstanceState);
         if (D) Log.d(TAG, "onViewCreated");
         if (getActivity() != null) {
-            getActivity().setTitle(R.string.Navigation_Item_ShelfBooks);
+            getActivity().setTitle(R.string.navigation_item_shelf_books);
         }
         mLayoutManager = new LinearLayoutManager(view.getContext());
         if (savedInstanceState != null) {
@@ -80,11 +80,11 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             }
         }
         if(mShelfBooks == null) {
-            mShelfBooks = mApplicationData.loadShelfBooks(mKeyword);
+            mShelfBooks = mApplicationData.loadShelfBooks(mKeyword,mApplicationData.getShelfBooksSortSetting());
         }
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS);
         mShelfBooksViewAdapter.setClickListener(this);
-        mRecyclerView = view.findViewById(R.id.fragment_shelf_recyclerview);
+        mRecyclerView = view.findViewById(R.id.fragment_shelf_books_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mShelfBooksViewAdapter);
     }
@@ -155,10 +155,10 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
                 Bundle bundle = new BundleBuilder()
-                        .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Unregister_Book))
-                        .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Unregister_Book))
-                        .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
-                        .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
+                        .put(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book))
+                        .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book))
+                        .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive))
+                        .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative))
                         .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
                         .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
                         .put(BaseDialogFragment.KEY_CANCELABLE, true)
@@ -181,7 +181,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             if (book != null) {
                 mApplicationData.unregisterFromShelfBooks(book);
                 mShelfBooksViewAdapter.deleteBook(position);
-                Toast.makeText(getContext(), getString(R.string.Toast_Unregister_Book), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.toast_success_unregister_book), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -196,7 +196,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         mSearchView.setMaxWidth(Integer.MAX_VALUE);
         mSearchView.setIconifiedByDefault(true);
         mSearchView.setSubmitButtonEnabled(false);
-        mSearchView.setQueryHint(getString(R.string.InputHint_Search));
+        mSearchView.setQueryHint(getString(R.string.input_hint_search_books));
         mSearchView.setQuery(mKeyword,false);
         if(!TextUtils.isEmpty(mKeyword)){
             mSearchView.setIconified(false);
@@ -225,7 +225,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
     private void searchBooksInShelf(String keyword){
         scrollToTop();
-        List<BookData> books = mApplicationData.loadShelfBooks(keyword);
+        List<BookData> books = mApplicationData.loadShelfBooks(keyword,mApplicationData.getShelfBooksSortSetting());
         mShelfBooksViewAdapter.replaceBooksData(books);
     }
 

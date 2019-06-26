@@ -5,6 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -75,7 +78,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         super.onViewCreated(view, savedInstanceState);
         if (D) Log.d(TAG, "onViewCreated");
         if (getActivity() != null) {
-            getActivity().setTitle(R.string.Navigation_Item_Settings);
+            getActivity().setTitle(R.string.navigation_item_settings);
         }
         if (savedInstanceState != null) {
             isAllowedPermissions = savedInstanceState.getBoolean(KEY_IS_ALLOWED_PERMISSIONS, false);
@@ -142,15 +145,18 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     }
 
     @Override
-    protected void onAllowPermission(String permission) {
-        super.onAllowPermission(permission);
+    protected void onAllowAllPermissions() {
+        super.onAllowAllPermissions();
         isAllowedPermissions = true;
         enableButton(true);
     }
 
     @Override
-    protected void onDenyPermission(String permission) {
-        super.onDenyPermission(permission);
+    protected void onDenyPermissions() {
+        super.onDenyPermissions();
+        if(D) Log.d(TAG, "Denied permission");
+        isAllowedPermissions = false;
+        enableButton(false);
     }
 
 
@@ -209,37 +215,37 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                     String message = null;
                     switch (type){
                         case FileBackupThread.PROGRESS_TYPE_EXPORT_BOOKS:
-                            message = getString(R.string.ProgressMessage_Export_Books);
-                            progress = progress + getString(R.string.Progress_Unit_Book);
+                            message = getString(R.string.progress_message_export_books);
+                            progress = progress + getString(R.string.progress_unit_book);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_EXPORT_AUTHORS:
-                            message = getString(R.string.ProgressMessage_Export_Authors);
+                            message = getString(R.string.progress_message_export_authors);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_IMPORT_BOOKS:
-                            message = getString(R.string.ProgressMessage_Import_Books);
-                            progress = progress + getString(R.string.Progress_Unit_Book);
+                            message = getString(R.string.progress_message_import_books);
+                            progress = progress + getString(R.string.progress_unit_book);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_IMPORT_AUTHORS:
-                            message = getString(R.string.ProgressMessage_Import_Authors);
+                            message = getString(R.string.progress_message_import_authors);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_UPLOAD_BOOKS:
-                            message = getString(R.string.ProgressMessage_Upload_Books);
-                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            message = getString(R.string.progress_message_upload_books);
+                            progress = progress + getString(R.string.progress_unit_byte);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_UPLOAD_AUTHORS:
-                            message = getString(R.string.ProgressMessage_Upload_Authors);
-                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            message = getString(R.string.progress_message_upload_authors);
+                            progress = progress + getString(R.string.progress_unit_byte);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_BOOKS:
-                            message = getString(R.string.ProgressMessage_Download_Books);
-                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            message = getString(R.string.progress_message_download_books);
+                            progress = progress + getString(R.string.progress_unit_byte);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_AUTHORS:
-                            message = getString(R.string.ProgressMessage_Download_Authors);
-                            progress = progress + getString(R.string.Progress_Unit_Byte);
+                            message = getString(R.string.progress_message_download_authors);
+                            progress = progress + getString(R.string.progress_unit_byte);
                             break;
                         case FileBackupThread.PROGRESS_TYPE_REGISTER:
-                            message = getString(R.string.ProgressMessage_Register);
+                            message = getString(R.string.progress_message_register);
                             break;
                     }
                     Bundle bundle = new BundleBuilder()
@@ -258,11 +264,11 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
     private void initSpinner(View view) {
-        Spinner mShelfBooksSortSpinner = view.findViewById(R.id.ShelfBooksSortSpinner);
-        SortSpinnerArrayAdapter mShelfBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.ShelfBooksSortSpinner));
+        Spinner mShelfBooksSortSpinner = view.findViewById(R.id.shelf_books_sort_spinner);
+        SortSpinnerArrayAdapter mShelfBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.shelf_books_sort_spinner));
         mShelfBooksSortSpinner.setAdapter(mShelfBooksSortAdapter);
-        String code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, getString(R.string.ShelfBooksSort_Code_REGISTERED_ASCENDING));
-        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(code));
+        String sort = mApplicationData.getShelfBooksSortSetting();
+        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(sort));
         mShelfBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
@@ -277,11 +283,11 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             }
         });
 
-        Spinner mSearchBooksSortSpinner = view.findViewById(R.id.SearchBooksSortSpinner);
-        SortSpinnerArrayAdapter mSearchBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.SearchBooksSortSpinner));
+        Spinner mSearchBooksSortSpinner = view.findViewById(R.id.search_books_sort_spinner);
+        SortSpinnerArrayAdapter mSearchBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.search_books_sort_spinner));
         mSearchBooksSortSpinner.setAdapter(mSearchBooksSortAdapter);
-        code = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING));
-        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(code));
+        sort = mApplicationData.getSearchBooksSortSetting();
+        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(sort));
         mSearchBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
@@ -301,20 +307,35 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     private void initButton(View view, boolean isAllowedPermissions, boolean isLogged_in){
         mButtonExport = view.findViewById(R.id.settings_button_export);
         mButtonExport.setOnClickListener(this);
+        setColorFilterButtonDrawables(mButtonExport, Color.parseColor("#FFFFFF"));
         mButtonImport = view.findViewById(R.id.settings_button_import);
         mButtonImport.setOnClickListener(this);
+        setColorFilterButtonDrawables(mButtonImport, Color.parseColor("#FFFFFF"));
         mButtonBackup = view.findViewById(R.id.settings_button_backup);
         mButtonBackup.setOnClickListener(this);
+        setColorFilterButtonDrawables(mButtonBackup, Color.parseColor("#FFFFFF"));
         mButtonRestore = view.findViewById(R.id.settings_button_restore);
         mButtonRestore.setOnClickListener(this);
+        setColorFilterButtonDrawables(mButtonRestore, Color.parseColor("#FFFFFF"));
         mButtonLogin = view.findViewById(R.id.settings_button_login_dropbox);
         mButtonLogin.setOnClickListener(this);
+        setColorFilterButtonDrawables(mButtonLogin, Color.parseColor("#FFFFFF"));
         mButtonLogout = view.findViewById(R.id.settings_button_logout_dropbox);
         mButtonLogout.setOnClickListener(this);
+        setColorFilterButtonDrawables(mButtonLogout, Color.parseColor("#FFFFFF"));
         enableButton(isAllowedPermissions);
         enableDropboxFunction(isLogged_in);
     }
 
+    private void setColorFilterButtonDrawables(Button button, int color){
+        Drawable[] drawables = button.getCompoundDrawables();
+        for(Drawable drawable : drawables){
+            if(drawable != null){
+                drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            }
+        }
+        button.setCompoundDrawablesWithIntrinsicBounds(drawables[0],drawables[1],drawables[2],drawables[3]);
+    }
 
     private List<BaseSpinnerItem> getSpinnerItemList(int array_id){
         List<BaseSpinnerItem> list = new ArrayList<>();
@@ -330,7 +351,6 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         array.recycle();
         return list;
     }
-
 
     private void enableDropboxFunction(boolean enable){
         if(enable){
@@ -405,10 +425,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     private void onClickLogout(){
         Bundle bundle = new Bundle();
-        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Logout_Dropbox));
-        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Logout_Dropbox));
-        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive));
-        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative));
+        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_logout_dropbox));
+        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_logout_dropbox));
+        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
         bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
         if (getActivity() != null) {
             FragmentManager manager = getActivity().getSupportFragmentManager();
@@ -461,16 +481,16 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 if(result.isSuccess()) {
                     switch (service.getServiceState()){
                         case BookService.STATE_EXPORT_COMPLETE:
-                            message = getString(R.string.Toast_Success_Export);
+                            message = getString(R.string.toast_success_export);
                             break;
                         case BookService.STATE_IMPORT_COMPLETE:
-                            message = getString(R.string.Toast_Success_Import);
+                            message = getString(R.string.toast_success_import);
                             break;
                         case BookService.STATE_BACKUP_COMPLETE:
-                            message = getString(R.string.Toast_Success_Backup);
+                            message = getString(R.string.toast_success_backup);
                             break;
                         case BookService.STATE_RESTORE_COMPLETE:
-                            message = getString(R.string.Toast_Success_Restore);
+                            message = getString(R.string.toast_success_restore);
                             break;
                     }
                 }else{

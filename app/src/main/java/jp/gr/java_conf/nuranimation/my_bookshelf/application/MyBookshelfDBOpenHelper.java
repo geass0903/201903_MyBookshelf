@@ -94,12 +94,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + KEY_REGISTER_DATE + " text"  // 登録日
             + ");";
 
-    private MyBookshelfApplicationData mApplicationData;
-
-
     public MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
-        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
     }
 
     @Override
@@ -231,29 +227,25 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    private List<BookData> loadBooks(final String table, final String keyword) {
+    private List<BookData> loadBooks(final String table, final String keyword, final String order) {
         List<BookData> books = new ArrayList<>(1000);
         String where = "";
-        String order = "";
-
         if (!TextUtils.isEmpty(keyword)) {
             where = " where "
                     + KEY_TITLE + " like " + "'%" + keyword + "%'" + " or "
                     + KEY_AUTHOR + " like " + "'%" + keyword + "%'" + " or "
                     + KEY_ISBN + " = " + "'" + keyword + "'";
         }
-        switch(table){
-            case TABLE_SHELF_BOOKS:
-                order = mApplicationData.getShelfBooksSortSetting();
-                break;
-            case TABLE_SEARCH_BOOKS:
-                order = "";
-                break;
-            case TABLE_NEW_BOOKS:
-                order = " order by " + KEY_RELEASE_DATE + " desc";
-                break;
+
+        String sql = "select * from " + table;
+        if(!TextUtils.isEmpty(where)){
+            sql = sql + where;
         }
-        String sql = "select * from " + table + where + order + ";";
+        if(!TextUtils.isEmpty(order)){
+            sql = sql + order;
+        }
+        sql = sql + ";";
+
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(sql, null);
         boolean mov = c.moveToFirst();
@@ -400,8 +392,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         registerBooks(TABLE_SHELF_BOOKS, books);
     }
 
-    public List<BookData> loadShelfBooks(String keyword) {
-        return loadBooks(TABLE_SHELF_BOOKS, keyword);
+    public List<BookData> loadShelfBooks(String keyword, String order) {
+        return loadBooks(TABLE_SHELF_BOOKS, keyword, order);
     }
 
     public BookData loadBookDataFromShelfBooks(BookData book){
@@ -428,7 +420,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
     public List<BookData> loadSearchBooks(){
-        return loadBooks(TABLE_SEARCH_BOOKS, null);
+        return loadBooks(TABLE_SEARCH_BOOKS, null, null);
     }
 
     public BookData loadBookDataFromSearchBooks(BookData book){
@@ -454,7 +446,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
     public List<BookData> loadNewBooks(){
-        return loadBooks(TABLE_NEW_BOOKS, null);
+        String order = " order by " + KEY_RELEASE_DATE + " desc";
+        return loadBooks(TABLE_NEW_BOOKS, null, order);
     }
 
     public BookData loadBookDataFromNewBooks(BookData book){

@@ -303,22 +303,26 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         switch(type){
             case FileBackupThread.TYPE_EXPORT:
                 setServiceState(STATE_EXPORT_INCOMPLETE);
+                fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_EXPORT);
                 break;
             case FileBackupThread.TYPE_IMPORT:
                 setServiceState(STATE_IMPORT_INCOMPLETE);
+                fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_IMPORT);
                 break;
             case FileBackupThread.TYPE_BACKUP:
                 setServiceState(STATE_BACKUP_INCOMPLETE);
+                fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_EXPORT);
                 break;
             case FileBackupThread.TYPE_RESTORE:
                 setServiceState(STATE_RESTORE_INCOMPLETE);
+                fileBackupThread = new FileBackupThread(this, FileBackupThread.TYPE_RESTORE);
                 break;
             default:
                 if (D) Log.d(TAG, "Illegal Type");
                 setServiceState(STATE_NONE);
                 break;
         }
-        fileBackupThread = new FileBackupThread(this, type);
+
         fileBackupThread.start();
     }
 
@@ -339,62 +343,62 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private Notification createNotification(int state){
         Notification notification;
         String title = getString(R.string.app_name);
-        String message = getString(R.string.Notification_Channel_Title);
-        int iconId  = R.drawable.ic_vector_shelf_24dp;
+        String message = getString(R.string.notification_channel_title);
+        int iconId  = R.drawable.ic_shelf_24dp;
         switch (state) {
             case STATE_NONE:
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
-                message = getString(R.string.Notification_Message_Search_Incomplete);
-                iconId  = R.drawable.ic_vector_search_24dp;
+                message = getString(R.string.notification_message_search_incomplete);
+                iconId  = R.drawable.ic_search_24dp;
                 break;
             case STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
-                message = getString(R.string.Notification_Message_Search_Complete);
-                iconId  = R.drawable.ic_vector_search_24dp;
+                message = getString(R.string.notification_message_search_complete);
+                iconId  = R.drawable.ic_search_24dp;
                 break;
             case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
-                message = getString(R.string.Notification_Message_Reload_Incomplete);
-                iconId  = R.drawable.ic_vector_reload_24dp;
+                message = getString(R.string.notification_message_reload_incomplete);
+                iconId  = R.drawable.ic_reload_24dp;
                 break;
             case STATE_NEW_BOOKS_RELOAD_COMPLETE:
-                message = getString(R.string.Notification_Message_Reload_Complete);
-                iconId  = R.drawable.ic_vector_reload_24dp;
+                message = getString(R.string.notification_message_reload_complete);
+                iconId  = R.drawable.ic_reload_24dp;
                 break;
             case STATE_EXPORT_INCOMPLETE:
-                message = getString(R.string.Notification_Message_Export_Incomplete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_export_incomplete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_EXPORT_COMPLETE:
-                message = getString(R.string.Notification_Message_Export_Complete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_export_complete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_IMPORT_INCOMPLETE:
-                message = getString(R.string.Notification_Message_Import_Incomplete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_import_incomplete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_IMPORT_COMPLETE:
-                message = getString(R.string.Notification_Message_Import_Complete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_import_complete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_BACKUP_INCOMPLETE:
-                message = getString(R.string.Notification_Message_Backup_Incomplete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_backup_incomplete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_BACKUP_COMPLETE:
-                message = getString(R.string.Notification_Message_Backup_Complete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_backup_complete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_RESTORE_INCOMPLETE:
-                message = getString(R.string.Notification_Message_Reload_Incomplete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_reload_incomplete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_RESTORE_COMPLETE:
-                message = getString(R.string.Notification_Message_Reload_Complete);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_reload_complete);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
             case STATE_DROPBOX_LOGIN:
-                message = getString(R.string.Notification_Message_Dropbox_Login);
-                iconId  = R.drawable.ic_vector_file_download_24dp;
+                message = getString(R.string.notification_message_login_dropbox);
+                iconId  = R.drawable.ic_file_download_24dp;
                 break;
 
         }
@@ -407,14 +411,14 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            notification = new Notification.Builder(getApplicationContext(), getString(R.string.Notification_Channel_ID))
+            notification = new Notification.Builder(getApplicationContext(), getString(R.string.notification_channel_id))
                     .setContentTitle(title)
                     .setSmallIcon(iconId)
                     .setContentText(message)
                     .setContentIntent(pi)
                     .build();
         } else {
-            notification = new NotificationCompat.Builder(this, getString(R.string.Notification_Channel_ID))
+            notification = new NotificationCompat.Builder(this, getString(R.string.notification_channel_id))
                     .setContentTitle(title)
                     .setSmallIcon(iconId)
                     .setContentText(message)

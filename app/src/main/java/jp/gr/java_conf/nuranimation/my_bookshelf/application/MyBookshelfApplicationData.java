@@ -68,7 +68,7 @@ public class MyBookshelfApplicationData extends Application {
 
         Fresco.initialize(this, config);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannelManager.create(getApplicationContext(),getString(R.string.Notification_Channel_ID), R.string.Notification_Channel_Title, R.string.Notification_Channel_Description);
+            NotificationChannelManager.create(getApplicationContext(),getString(R.string.notification_channel_id), R.string.notification_channel_title, R.string.notification_channel_description);
         }
 
         mPreferences = getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
@@ -105,6 +105,11 @@ public class MyBookshelfApplicationData extends Application {
 
 
 
+    public List<BookData> loadDatabaseBooks(){
+        return mDatabaseHelper.loadShelfBooks(null, getString(R.string.code_shelf_books_sort_registered_ascending));
+    }
+
+
 
     public void dropTableAuthorsList(){
         mDatabaseHelper.dropTableAuthorsList();
@@ -124,7 +129,6 @@ public class MyBookshelfApplicationData extends Application {
 
 
 
-
     public void dropTableShelfBooks(){
         mDatabaseHelper.dropTableShelfBooks();
     }
@@ -137,8 +141,8 @@ public class MyBookshelfApplicationData extends Application {
         mDatabaseHelper.registerToShelfBooks(books);
     }
 
-    public List<BookData> loadShelfBooks(String keyword){
-        return mDatabaseHelper.loadShelfBooks(keyword);
+    public List<BookData> loadShelfBooks(String keyword, String order){
+        return mDatabaseHelper.loadShelfBooks(keyword, order);
     }
 
     public BookData loadBookDataFromShelfBooks(BookData book){
@@ -148,7 +152,6 @@ public class MyBookshelfApplicationData extends Application {
     public void unregisterFromShelfBooks(BookData book){
         mDatabaseHelper.unregisterFromShelfBooks(book);
     }
-
 
 
 
@@ -206,8 +209,8 @@ public class MyBookshelfApplicationData extends Application {
     public String getShelfBooksSortSetting(){
         String sort = mPreferences.getString(KEY_SHELF_BOOKS_ORDER,null);
         if(TextUtils.isEmpty(sort)){
-            sort = getString(R.string.ShelfBooksSort_Code_SALES_DATE_DESCENDING);
-            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.ShelfBooksSort_Code_SALES_DATE_DESCENDING)).apply();
+            sort = getString(R.string.code_shelf_books_sort_registered_ascending);
+            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.code_shelf_books_sort_registered_ascending)).apply();
         }
         return sort;
     }
@@ -215,8 +218,8 @@ public class MyBookshelfApplicationData extends Application {
     public String getSearchBooksSortSetting(){
         String sort = mPreferences.getString(KEY_SEARCH_BOOKS_ORDER,null);
         if(TextUtils.isEmpty(sort)){
-            sort = getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING);
-            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.SearchBooksSort_Code_SALES_DATE_DESCENDING)).apply();
+            sort = getString(R.string.code_search_books_sort_sales_date_descending);
+            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.code_search_books_sort_sales_date_descending)).apply();
         }
         return sort;
     }

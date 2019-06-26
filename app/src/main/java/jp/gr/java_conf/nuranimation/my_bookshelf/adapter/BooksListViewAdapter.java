@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
@@ -94,22 +94,27 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType){
         View inflate;
-        if(viewType == VIEW_TYPE_BUTTON_LOAD){
-            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_load_next,viewGroup,false);
-            inflate.setOnClickListener(this);
-            inflate.setOnLongClickListener(this);
-            return new LoadViewHolder(inflate);
+        switch (viewType){
+            case VIEW_TYPE_BOOK:
+                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_book, viewGroup, false);
+                inflate.setOnClickListener(this);
+                inflate.setOnLongClickListener(this);
+                return new BooksViewHolder(inflate);
+            case VIEW_TYPE_BUTTON_LOAD:
+                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_load_next,viewGroup,false);
+                inflate.setOnClickListener(this);
+                inflate.setOnLongClickListener(this);
+                return new LoadViewHolder(inflate);
+            case VIEW_TYPE_LOADING:
+                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_loading,viewGroup,false);
+                inflate.setOnClickListener(this);
+                inflate.setOnLongClickListener(this);
+                return new LoadingViewHolder(inflate);
         }
-        if(viewType == VIEW_TYPE_LOADING){
-            inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_loading,viewGroup,false);
-            inflate.setOnClickListener(this);
-            inflate.setOnLongClickListener(this);
-            return new LoadingViewHolder(inflate);
-        }
-        inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_book,viewGroup,false);
-        inflate.setOnClickListener(this);
-        inflate.setOnLongClickListener(this);
+        // Error
+        inflate = LayoutInflater.from(viewGroup.getContext()).inflate(null,viewGroup,false);
         return new BooksViewHolder(inflate);
+
     }
 
     @Override
@@ -176,7 +181,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyItemRangeInserted(start,count);
     }
 
-    public void updateBook(int position){
+    public void refreshBook(int position){
         if(position >= 0 && position < list.size()){
             notifyItemChanged(position);
         }
@@ -213,31 +218,31 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-
+/*
     private String getReadStatusText(String status) {
-        String readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_0);
+        String readStatus = mContext.getString(R.string.read_status_label_0);
         if(status != null) {
             switch (status) {
                 case BookData.STATUS_UNREGISTERED:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_0);
+                    readStatus = mContext.getString(R.string.read_status_label_0);
                     break;
                 case BookData.STATUS_INTERESTED:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_1);
+                    readStatus = mContext.getString(R.string.read_status_label_1);
                     break;
                 case BookData.STATUS_UNREAD:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_2);
+                    readStatus = mContext.getString(R.string.read_status_label_2);
                     break;
                 case BookData.STATUS_READING:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_2);
+                    readStatus = mContext.getString(R.string.read_status_label_2);
                     break;
                 case BookData.STATUS_ALREADY_READ:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_4);
+                    readStatus = mContext.getString(R.string.read_status_label_4);
                     break;
                 case BookData.STATUS_NONE:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_5);
+                    readStatus = mContext.getString(R.string.read_status_label_5);
                     break;
                 default:
-                    readStatus = mContext.getString(R.string.ReadStatus_Label_STATUS_0);
+                    readStatus = mContext.getString(R.string.read_status_label_0);
                     break;
             }
         }
@@ -245,14 +250,14 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private Drawable getReadStatusIcon(String status){
-        Drawable icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_0_24dp, null);
+        Drawable icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_circle, null);
         if(status != null) {
             switch (status) {
                 case BookData.STATUS_UNREGISTERED:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_0_24dp, null);
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_circle, null);
                     break;
                 case BookData.STATUS_INTERESTED:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_1_24dp, null);
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_favorites, null);
                     break;
                 case BookData.STATUS_UNREAD:
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_2_24dp, null);
@@ -267,27 +272,25 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                     icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_5_24dp, null);
                     break;
                 default:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_0_24dp, null);
+                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_circle, null);
                     break;
             }
         }
         return icon;
     }
-
+*/
 
 
 
 
     private void bindViewHolder(BooksViewHolder holder, BookData book){
-        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(book.getImage()))
+        Uri uri = Uri.parse(MyBookshelfUtils.parseUrlString(book.getImage(), MyBookshelfUtils.IMAGE_TYPE_SMALL));
+        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
                 .setCacheChoice(ImageRequest.CacheChoice.SMALL)
                 .build();
-//        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(MyBookshelfUtils.getImageUri(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_SMALL))
-//                .setCacheChoice(ImageRequest.CacheChoice.SMALL)
-//                .build();
-        holder.getImageView().setController(
+        holder.getBookImageView().setController(
                 Fresco.newDraweeControllerBuilder()
-                        .setOldController(holder.getImageView().getController())
+                        .setOldController(holder.getBookImageView().getController())
                         .setImageRequest(request)
                         .build());
         holder.getTitleView().setText(book.getTitle());
@@ -296,8 +299,11 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         holder.getSalesDateView().setText(book.getSalesDate());
         holder.getItemPriceView().setText(book.getItemPrice());
         holder.getRatingView().setRating(book.getFloatRating());
-        holder.getReadStatusView().setText(getReadStatusText(book.getReadStatus()));
-        holder.getReadStatusImageView().setImageDrawable(getReadStatusIcon(book.getReadStatus()));
+
+        Drawable read_status_image = BookData.getReadStatusImage(mContext, book.getReadStatus());
+        holder.getReadStatusImageView().setImageDrawable(read_status_image);
+        String read_status_text = BookData.getReadStatusText(mContext, book.getReadStatus());
+        holder.getReadStatusTextView().setText(read_status_text);
     }
 
 

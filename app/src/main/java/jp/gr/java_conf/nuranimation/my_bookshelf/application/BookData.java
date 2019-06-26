@@ -1,11 +1,19 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.application;
 
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 
 import java.util.Locale;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 @SuppressWarnings("WeakerAccess")
 public class BookData implements Parcelable {
@@ -169,6 +177,95 @@ public class BookData implements Parcelable {
     public String getReadStatus() {
         return readStatus;
     }
+
+    public static Drawable getReadStatusImage(Context context, String status) {
+        Resources res = context.getResources();
+        Drawable read_status_image;
+        switch (status) {
+            case BookData.STATUS_UNREGISTERED:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_INTERESTED:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_favorites, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FFDD0000"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_UNREAD:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FFDDDD00"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_READING:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FF00DD00"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_ALREADY_READ:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FF0000DD"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_NONE:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FF808080"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            default:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
+                }
+        }
+        return read_status_image;
+    }
+
+    public static String getReadStatusText(Context context, String status){
+        String read_status_text;
+        switch (status){
+            case BookData.STATUS_UNREGISTERED:
+                read_status_text = context.getString(R.string.read_status_label_0);
+                break;
+            case BookData.STATUS_INTERESTED:
+                read_status_text = context.getString(R.string.read_status_label_1);
+                break;
+            case BookData.STATUS_UNREAD:
+                read_status_text = context.getString(R.string.read_status_label_2);
+                break;
+            case BookData.STATUS_READING:
+                read_status_text = context.getString(R.string.read_status_label_3);
+                break;
+            case BookData.STATUS_ALREADY_READ:
+                read_status_text = context.getString(R.string.read_status_label_4);
+                break;
+            case BookData.STATUS_NONE:
+                read_status_text = context.getString(R.string.read_status_label_5);
+                break;
+            default:
+                read_status_text = context.getString(R.string.read_status_label_0);
+        }
+        return read_status_text;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void setTags(String tags) {
         this.tags = tags;

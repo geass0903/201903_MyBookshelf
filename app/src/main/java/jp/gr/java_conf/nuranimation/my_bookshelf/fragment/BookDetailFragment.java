@@ -73,6 +73,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
 
 
+
     private BookData detailBook = new BookData();
     private int position;
 
@@ -169,7 +170,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             String registerDate = sdf.format(calendar.getTime());
             book.setRegisterDate(registerDate);
             mApplicationData.registerToShelfBooks(book);
-            Toast.makeText(getContext(), getString(R.string.Toast_Register_Book), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
             if(getFragmentListener() != null){
                 getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK_BOOK_DETAIL, null);
             }
@@ -219,6 +220,8 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
 
     private void initView(View view,BookData book) {
+
+
         mBookImageView = view.findViewById(R.id.book_detail_image);
         titleView = view.findViewById(R.id.book_detail_title);
         authorView = view.findViewById(R.id.book_detail_author);
@@ -226,7 +229,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         salesDateView = view.findViewById(R.id.book_detail_sales_date);
         itemPriceView = view.findViewById(R.id.book_detail_price);
         isbnView = view.findViewById(R.id.book_detail_isbn);
-        readDateView = view.findViewById(R.id.book_detail_read_date);
+        readDateView = view.findViewById(R.id.book_detail_finish_read_date);
         readDateView.setOnClickListener(dateButtonOnClickListener);
         readDateView.setOnLongClickListener(dateButtonOnLongClickListener);
         mSpinnerReadStatus = view.findViewById(R.id.book_detail_spinner_read_status);
@@ -266,6 +269,11 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
 
             titleView.setText(book.getTitle());
+
+
+
+
+
             authorView.setText(book.getAuthor());
             publisherView.setText(book.getPublisher());
             if(!TextUtils.isEmpty(book.getSalesDate())) {
@@ -312,7 +320,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
                     String salesDate = salesDateView.getText().toString();
                     showDatePicker(REQUEST_CODE_SALES_DATE,salesDate);
                     break;
-                case R.id.book_detail_read_date:
+                case R.id.book_detail_finish_read_date:
                     if (D) Log.d(TAG, "ReadDate on Click");
                     String readDate = readDateView.getText().toString();
                     showDatePicker(REQUEST_CODE_READ_DATE,readDate);
@@ -331,7 +339,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
                     if (D) Log.d(TAG, "SalesDate on LongClick");
                     showDeleteDateDialog(REQUEST_CODE_SALES_DATE);
                     return true;
-                case R.id.book_detail_read_date:
+                case R.id.book_detail_finish_read_date:
                     if (D) Log.d(TAG, "ReadDate on LongClick");
                     showDeleteDateDialog(REQUEST_CODE_READ_DATE);
                     return true;
@@ -369,10 +377,10 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private void showDeleteDateDialog(int requestCode) {
         if (getActivity() != null) {
             Bundle bundle = new BundleBuilder()
-                    .put(BaseDialogFragment.KEY_TITLE, getString(R.string.DialogTitle_Clear_Date))
-                    .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.DialogMessage_Clear_Date))
-                    .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
-                    .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
+                    .put(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date))
+                    .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date))
+                    .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive))
+                    .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative))
                     .put(BaseDialogFragment.KEY_REQUEST_CODE, requestCode)
                     .put(BaseDialogFragment.KEY_CANCELABLE, true)
                     .build();
@@ -389,7 +397,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private List<BaseSpinnerItem> getSpinnerItem_ReadStatus() {
         List<BaseSpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.ReadStatusSpinner);
+        TypedArray array = res.obtainTypedArray(R.array.read_status_spinner);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {

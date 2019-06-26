@@ -189,7 +189,7 @@ public class FileBackupThread extends Thread {
 
         try {
             // export books
-            List<BookData> books = mApplicationData.loadShelfBooks(null);
+            List<BookData> books = mApplicationData.loadDatabaseBooks();
             count = 0;
             recodeCount = books.size();
             progress = count + "/" + recodeCount;

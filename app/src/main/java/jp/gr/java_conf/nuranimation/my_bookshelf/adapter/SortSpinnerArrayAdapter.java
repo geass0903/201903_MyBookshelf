@@ -1,6 +1,9 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +35,13 @@ public class SortSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
         TextView view = (TextView) super.getView(position, convertView, parent);
         BaseSpinnerItem item = getItem(position);
         if (item != null) {
+            Drawable[] drawables = view.getCompoundDrawables();
+            for(Drawable drawable : drawables){
+                if(drawable != null){
+                    drawable.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP);
+                }
+            }
+            view.setCompoundDrawablesWithIntrinsicBounds(drawables[0],drawables[1],drawables[2],drawables[3]);
             view.setText(item.getLabel());
         }
         return view;
@@ -48,12 +58,12 @@ public class SortSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
     }
 
 
-    public int getPosition(String label){
+    public int getPosition(String code){
         int position = -1;
         for (int i = 0; i < this.getCount(); i++) {
             BaseSpinnerItem item = getItem(i);
             if(item != null){
-                if(item.getCode().equals(label)) {
+                if(item.getCode().equals(code)) {
                     position = i;
                     break;
                 }

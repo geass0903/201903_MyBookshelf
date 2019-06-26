@@ -14,62 +14,63 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 @SuppressWarnings("WeakerAccess")
 public class BooksViewHolder extends RecyclerView.ViewHolder {
 
-    private TextView textView_Title;
-    private TextView textView_Author;
-    private TextView textView_Publisher;
-    private TextView textView_SalesDate;
-    private TextView textView_ItemPrice;
-    private TextView textView_ReadStatus;
-    private SimpleDraweeView draweeView_Image;
-    private RatingBar ratingBar;
-    private ImageView image_ReadStatus;
+    private SimpleDraweeView mBookImageView;
+    private TextView mTitleView;
+    private TextView mAuthorView;
+    private TextView mPublisherView;
+    private TextView mSalesDateView;
+    private TextView mPriceView;
+    private TextView mReadStatusTextView;
+    private ImageView mReadStatusImageView;
+    private RatingBar mRatingBar;
 
     BooksViewHolder(@NonNull View itemView) {
         super(itemView);
-        draweeView_Image = itemView.findViewById(R.id.item_book_image);
-        textView_Title = itemView.findViewById(R.id.item_book_title);
-        textView_Author = itemView.findViewById(R.id.item_book_author);
-        textView_Publisher = itemView.findViewById(R.id.item_book_publisher);
-        textView_SalesDate = itemView.findViewById(R.id.item_book_sales_date);
-        textView_ItemPrice = itemView.findViewById(R.id.item_book_price);
-        ratingBar = itemView.findViewById(R.id.item_book_rating);
-        image_ReadStatus = itemView.findViewById(R.id.item_book_read_status);
-        textView_ReadStatus = itemView.findViewById(R.id.item_book_read_status_text);
+        mBookImageView = itemView.findViewById(R.id.item_book_image);
+        mTitleView = itemView.findViewById(R.id.item_book_title);
+        mAuthorView = itemView.findViewById(R.id.item_book_author);
+        mPublisherView = itemView.findViewById(R.id.item_book_publisher);
+        mSalesDateView = itemView.findViewById(R.id.item_book_sales_date);
+        mPriceView = itemView.findViewById(R.id.item_book_price);
+        mReadStatusTextView = itemView.findViewById(R.id.item_book_read_status_text);
+        mReadStatusImageView = itemView.findViewById(R.id.item_book_read_status_image);
+        mRatingBar = itemView.findViewById(R.id.item_book_rating);
     }
 
-    public SimpleDraweeView getImageView(){
-        return draweeView_Image;
+    public SimpleDraweeView getBookImageView(){
+        return mBookImageView;
     }
 
     public TextView getTitleView(){
-        return textView_Title;
+        return mTitleView;
     }
 
     public TextView getAuthorView(){
-        return textView_Author;
+        return mAuthorView;
     }
 
     public TextView getPublisherView(){
-        return textView_Publisher;
+        return mPublisherView;
     }
 
     public TextView getSalesDateView(){
-        return textView_SalesDate;
+        return mSalesDateView;
     }
 
     public TextView getItemPriceView(){
-        return textView_ItemPrice;
+        return mPriceView;
+    }
+
+    public TextView getReadStatusTextView(){
+        return mReadStatusTextView;
+    }
+
+    public ImageView getReadStatusImageView() {
+        return mReadStatusImageView;
     }
 
     public RatingBar getRatingView(){
-        return ratingBar;
+        return mRatingBar;
     }
 
-    public ImageView getReadStatusImageView(){
-        return image_ReadStatus;
-    }
-
-    public TextView getReadStatusView(){
-        return textView_ReadStatus;
-    }
 }

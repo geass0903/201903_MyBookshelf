@@ -40,7 +40,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 
 public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener{
     private static final String TAG = BaseFragment.class.getSimpleName();
-    private static final boolean D = false;
+    private static final boolean D =true;
 
     public static final int MESSAGE_PROGRESS_DIALOG_SHOW        = 1;
     public static final int MESSAGE_PROGRESS_DIALOG_UPDATE      = 2;
@@ -194,27 +194,27 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                 break;
             case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
             case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
-                title = getString(R.string.ProgressTitle_Search);
+                title = getString(R.string.progress_title_search_books);
                 break;
             case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
             case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
-                title = getString(R.string.ProgressTitle_Reload);
+                title = getString(R.string.progress_title_reload_new_books);
                 break;
             case BookService.STATE_EXPORT_INCOMPLETE:
             case BookService.STATE_EXPORT_COMPLETE:
-                title = getString(R.string.ProgressTitle_Export);
+                title = getString(R.string.progress_title_export);
                 break;
             case BookService.STATE_IMPORT_INCOMPLETE:
             case BookService.STATE_IMPORT_COMPLETE:
-                title = getString(R.string.ProgressTitle_Import);
+                title = getString(R.string.progress_title_import);
                 break;
             case BookService.STATE_BACKUP_INCOMPLETE:
             case BookService.STATE_BACKUP_COMPLETE:
-                title = getString(R.string.ProgressTitle_Backup);
+                title = getString(R.string.progress_title_backup);
                 break;
             case BookService.STATE_RESTORE_INCOMPLETE:
             case BookService.STATE_RESTORE_COMPLETE:
-                title = getString(R.string.ProgressTitle_Restore);
+                title = getString(R.string.progress_title_restore);
                 break;
         }
         if (!TextUtils.isEmpty(title)) {
@@ -315,16 +315,16 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     }
 
     private void showRationaleFragment() {
-        String message = getString(R.string.Permission_Message) + "\n"
-                + getString(R.string.Permission_Message1) + "\n"
-                + getString(R.string.Permission_Message2) + "\n"
-                + getString(R.string.Permission_Message3);
+        String message = getString(R.string.permission_dialog_message) + "\n"
+                + getString(R.string.permission_dialog_message1) + "\n"
+                + getString(R.string.permission_dialog_message2) + "\n"
+                + getString(R.string.permission_dialog_message3);
         isShowingPermissionDialog = true;
         mBundlePermissionDialog = new BundleBuilder()
-                .put(BaseDialogFragment.KEY_TITLE, getString(R.string.Permission_Title))
+                .put(BaseDialogFragment.KEY_TITLE, getString(R.string.permission_dialog_title))
                 .put(BaseDialogFragment.KEY_MESSAGE, message)
-                .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.DialogButton_Label_Positive))
-                .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.DialogButton_Label_Negative))
+                .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive))
+                .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative))
                 .put(BaseDialogFragment.KEY_CANCELABLE, true)
                 .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS)
                 .build();
@@ -370,19 +370,36 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     protected void onAllowPermission(final String permission) {
         if(D) Log.d(TAG, "Allowed permission = " + permission);
-        Toast.makeText(getContext(), R.string.Toast_Success_Get_Permissions, Toast.LENGTH_SHORT).show();
+
     }
 
     protected void onDenyPermission(final String permission) {
         if(D) Log.d(TAG, "Denied permission = " + permission);
-        Toast.makeText(getContext(), R.string.Toast_Failed_Get_Permissions, Toast.LENGTH_SHORT).show();
+
     }
+
+    protected void onAllowAllPermissions(){
+        Toast.makeText(getContext(), R.string.toast_success_get_permissions, Toast.LENGTH_SHORT).show();
+    }
+
+    protected void onDenyPermissions(){
+        Toast.makeText(getContext(), R.string.toast_failed_get_permissions, Toast.LENGTH_SHORT).show();
+    }
+
+
 
     protected void onRequestPermissionsFinally() {
         // 保持していたパーミッションを破棄
         setRequestPermissions(null);
         isShowingRequestPermission = false;
         mApplicationData.setCheckedPermissions(true);
+
+        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+            onAllowAllPermissions();
+        }else{
+            onDenyPermissions();
+        }
+
         if (D) Log.d(TAG, "onRequestPermissionsFinally");
     }
 
