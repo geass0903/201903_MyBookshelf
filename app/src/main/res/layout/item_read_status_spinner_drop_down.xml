@@ -11,9 +11,10 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
     android:gravity="center_vertical"
+    android:background="@color/transparent"
     android:drawablePadding="@dimen/padding_small"
-    android:drawableLeft="@drawable/ic_vector_read_status_0_24dp"
-    android:drawableStart="@drawable/ic_vector_read_status_0_24dp"
+    android:drawableLeft="@drawable/ic_circle"
+    android:drawableStart="@drawable/ic_circle"
     android:checkMark="?android:attr/textCheckMark"
-    android:textSize="@dimen/text_size_large"
+    android:textSize="@dimen/text_size_normal"
     android:textColor="#FF000000" />

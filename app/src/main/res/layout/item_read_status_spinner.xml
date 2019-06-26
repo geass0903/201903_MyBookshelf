@@ -13,7 +13,7 @@
     android:gravity="center_vertical"
     android:background="@drawable/selector_rectangle_transparent"
     android:drawablePadding="@dimen/padding_small"
-    android:drawableLeft="@drawable/ic_vector_read_status_0_24dp"
-    android:drawableStart="@drawable/ic_vector_read_status_0_24dp"
+    android:drawableLeft="@drawable/ic_circle"
+    android:drawableStart="@drawable/ic_circle"
     android:textSize="@dimen/text_size_normal"
     android:textColor="#FF000000" />
