@@ -111,8 +111,8 @@
     <string name="label_unknown">不明</string>
     <string name="label_download_book_data">書籍情報の再取得</string>
     <string name="label_download_book_image">表紙画像の再取得</string>
-    <string name="label_shelf_books_sort_setting">本棚のソート設定</string>
-    <string name="label_search_books_sort_setting">検索結果のソート設定</string>
+    <string name="label_shelf_books_order">本棚のソート</string>
+    <string name="label_search_books_order">検索結果のソート</string>
     <string name="label_export_and_import">エクスポート／インポート</string>
     <string name="label_link_up_dropbox">Dropbox連携</string>
     <string name="label_export_csv">CSVファイルにエクスポート</string>
@@ -178,85 +178,85 @@
     </string-array>
 
 
-    <!-- ShelfBooksSortSetting -->
-    <string name="label_shelf_books_sort_title_ascending">タイトル(昇順)</string>
-    <string name="label_shelf_books_sort_title_descending">タイトル(降順)</string>
-    <string name="label_shelf_books_sort_author_ascending">著者(昇順)</string>
-    <string name="label_shelf_books_sort_author_descending">著者(降順)</string>
-    <string name="label_shelf_books_sort_sales_date_ascending">発売日(昇順)</string>
-    <string name="label_shelf_books_sort_sales_date_descending">発売日(降順)</string>
-    <string name="label_shelf_books_sort_registered_ascending">登録日(昇順)</string>
-    <string name="label_shelf_books_sort_registered_descending">登録日(降順)</string>
-    <string name="code_shelf_books_sort_title_ascending">" order by title asc"</string>
-    <string name="code_shelf_books_sort_title_descending">" order by title desc</string>
-    <string name="code_shelf_books_sort_author_ascending">" order by author asc"</string>
-    <string name="code_shelf_books_sort_author_descending">" order by author desc"</string>
-    <string name="code_shelf_books_sort_sales_date_ascending">" order by release_date asc"</string>
-    <string name="code_shelf_books_sort_sales_date_descending">" order by release_date desc"</string>
-    <string name="code_shelf_books_sort_registered_ascending">" order by register_date asc"</string>
-    <string name="code_shelf_books_sort_registered_descending">" order by register_date desc"</string>
-    <!-- ShelfBooksSortSetting Spinner -->
-    <string-array name="shelf_books_sort_spinner_item_title_asc">
-        <item name="code">@string/code_shelf_books_sort_title_ascending</item>
-        <item name="label">@string/label_shelf_books_sort_title_ascending</item>
+    <!-- ShelfBooksOrder -->
+    <string name="label_shelf_books_order_title_ascending">タイトル(昇順)</string>
+    <string name="label_shelf_books_order_title_descending">タイトル(降順)</string>
+    <string name="label_shelf_books_order_author_ascending">著者(昇順)</string>
+    <string name="label_shelf_books_order_author_descending">著者(降順)</string>
+    <string name="label_shelf_books_order_sales_date_ascending">発売日(昇順)</string>
+    <string name="label_shelf_books_order_sales_date_descending">発売日(降順)</string>
+    <string name="label_shelf_books_order_registered_ascending">登録日(昇順)</string>
+    <string name="label_shelf_books_order_registered_descending">登録日(降順)</string>
+    <string name="code_shelf_books_order_title_ascending">" order by title asc"</string>
+    <string name="code_shelf_books_order_title_descending">" order by title desc</string>
+    <string name="code_shelf_books_order_author_ascending">" order by author asc"</string>
+    <string name="code_shelf_books_order_author_descending">" order by author desc"</string>
+    <string name="code_shelf_books_order_sales_date_ascending">" order by release_date asc"</string>
+    <string name="code_shelf_books_order_sales_date_descending">" order by release_date desc"</string>
+    <string name="code_shelf_books_order_registered_ascending">" order by register_date asc"</string>
+    <string name="code_shelf_books_order_registered_descending">" order by register_date desc"</string>
+    <!-- ShelfBooksOrder Spinner -->
+    <string-array name="shelf_books_order_spinner_item_title_asc">
+        <item name="code">@string/code_shelf_books_order_title_ascending</item>
+        <item name="label">@string/label_shelf_books_order_title_ascending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_title_desc">
-        <item name="code">@string/code_shelf_books_sort_title_descending</item>
-        <item name="label">@string/label_shelf_books_sort_title_descending</item>
+    <string-array name="shelf_books_order_spinner_item_title_desc">
+        <item name="code">@string/code_shelf_books_order_title_descending</item>
+        <item name="label">@string/label_shelf_books_order_title_descending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_author_asc">
-        <item name="code">@string/code_shelf_books_sort_author_ascending</item>
-        <item name="label">@string/label_shelf_books_sort_author_ascending</item>
+    <string-array name="shelf_books_order_spinner_item_author_asc">
+        <item name="code">@string/code_shelf_books_order_author_ascending</item>
+        <item name="label">@string/label_shelf_books_order_author_ascending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_author_desc">
-        <item name="code">@string/code_shelf_books_sort_author_descending</item>
-        <item name="label">@string/label_shelf_books_sort_author_descending</item>
+    <string-array name="shelf_books_order_spinner_item_author_desc">
+        <item name="code">@string/code_shelf_books_order_author_descending</item>
+        <item name="label">@string/label_shelf_books_order_author_descending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_sales_date_asc">
-        <item name="code">@string/code_shelf_books_sort_sales_date_ascending</item>
-        <item name="label">@string/label_shelf_books_sort_sales_date_ascending</item>
+    <string-array name="shelf_books_order_spinner_item_sales_date_asc">
+        <item name="code">@string/code_shelf_books_order_sales_date_ascending</item>
+        <item name="label">@string/label_shelf_books_order_sales_date_ascending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_sales_date_desc">
-        <item name="code">@string/code_shelf_books_sort_sales_date_descending</item>
-        <item name="label">@string/label_shelf_books_sort_sales_date_descending</item>
+    <string-array name="shelf_books_order_spinner_item_sales_date_desc">
+        <item name="code">@string/code_shelf_books_order_sales_date_descending</item>
+        <item name="label">@string/label_shelf_books_order_sales_date_descending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_registered_asc">
-        <item name="code">@string/code_shelf_books_sort_registered_ascending</item>
-        <item name="label">@string/label_shelf_books_sort_registered_ascending</item>
+    <string-array name="shelf_books_order_spinner_item_registered_asc">
+        <item name="code">@string/code_shelf_books_order_registered_ascending</item>
+        <item name="label">@string/label_shelf_books_order_registered_ascending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner_item_registered_desc">
-        <item name="code">@string/code_shelf_books_sort_registered_descending</item>
-        <item name="label">@string/label_shelf_books_sort_registered_descending</item>
+    <string-array name="shelf_books_order_spinner_item_registered_desc">
+        <item name="code">@string/code_shelf_books_order_registered_descending</item>
+        <item name="label">@string/label_shelf_books_order_registered_descending</item>
     </string-array>
-    <string-array name="shelf_books_sort_spinner">
-        <item>@array/shelf_books_sort_spinner_item_title_asc</item>
-        <item>@array/shelf_books_sort_spinner_item_title_desc</item>
-        <item>@array/shelf_books_sort_spinner_item_author_asc</item>
-        <item>@array/shelf_books_sort_spinner_item_author_desc</item>
-        <item>@array/shelf_books_sort_spinner_item_sales_date_asc</item>
-        <item>@array/shelf_books_sort_spinner_item_sales_date_desc</item>
-        <item>@array/shelf_books_sort_spinner_item_registered_asc</item>
-        <item>@array/shelf_books_sort_spinner_item_registered_desc</item>
+    <string-array name="shelf_books_order_spinner">
+        <item>@array/shelf_books_order_spinner_item_title_asc</item>
+        <item>@array/shelf_books_order_spinner_item_title_desc</item>
+        <item>@array/shelf_books_order_spinner_item_author_asc</item>
+        <item>@array/shelf_books_order_spinner_item_author_desc</item>
+        <item>@array/shelf_books_order_spinner_item_sales_date_asc</item>
+        <item>@array/shelf_books_order_spinner_item_sales_date_desc</item>
+        <item>@array/shelf_books_order_spinner_item_registered_asc</item>
+        <item>@array/shelf_books_order_spinner_item_registered_desc</item>
     </string-array>
 
 
-    <!-- SearchBooksSortSetting -->
-    <string name="label_search_books_sort_sales_date_ascending">発売日(昇順)</string>
-    <string name="label_search_books_sort_sales_date_descending">発売日(降順)</string>
-    <string name="code_search_books_sort_sales_date_ascending">"+releaseDate"</string>
-    <string name="code_search_books_sort_sales_date_descending">"-releaseDate"</string>
-    <!-- SearchBooksSortSetting Spinner -->
-    <string-array name="search_books_sort_spinner_item_sales_date_asc">
-        <item name="code">@string/code_search_books_sort_sales_date_ascending</item>
-        <item name="label">@string/label_search_books_sort_sales_date_ascending</item>
+    <!-- SearchBooksOrder -->
+    <string name="label_search_books_order_sales_date_ascending">発売日(昇順)</string>
+    <string name="label_search_books_order_sales_date_descending">発売日(降順)</string>
+    <string name="code_search_books_order_sales_date_ascending">"+releaseDate"</string>
+    <string name="code_search_books_order_sales_date_descending">"-releaseDate"</string>
+    <!-- SearchBooksOrder Spinner -->
+    <string-array name="search_books_order_spinner_item_sales_date_asc">
+        <item name="code">@string/code_search_books_order_sales_date_ascending</item>
+        <item name="label">@string/label_search_books_order_sales_date_ascending</item>
     </string-array>
-    <string-array name="search_books_sort_spinner_item_sales_date_desc">
-        <item name="code">@string/code_search_books_sort_sales_date_descending</item>
-        <item name="label">@string/label_search_books_sort_sales_date_descending</item>
+    <string-array name="search_books_order_spinner_item_sales_date_desc">
+        <item name="code">@string/code_search_books_order_sales_date_descending</item>
+        <item name="label">@string/label_search_books_order_sales_date_descending</item>
     </string-array>
-    <string-array name="search_books_sort_spinner">
-        <item>@array/search_books_sort_spinner_item_sales_date_asc</item>
-        <item>@array/search_books_sort_spinner_item_sales_date_desc</item>
+    <string-array name="search_books_order_spinner">
+        <item>@array/search_books_order_spinner_item_sales_date_asc</item>
+        <item>@array/search_books_order_spinner_item_sales_date_desc</item>
     </string-array>
 
 </resources>
