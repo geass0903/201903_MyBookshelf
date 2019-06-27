@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Sort Shelf -->
+        <!-- ShelfBooks Order -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                     android:layout_margin="@dimen/margin_small"
                     android:textSize="@dimen/text_size_small"
                     android:textColor="#FF808080"
-                    android:text="@string/label_shelf_books_sort_setting" />
+                    android:text="@string/label_shelf_books_order" />
                 <View
                     android:layout_width="0dp"
                     android:layout_height="2dp"
@@ -46,7 +46,7 @@
                     android:background="@color/colorDividerLine" />
             </LinearLayout>
             <Spinner
-                android:id="@+id/shelf_books_sort_spinner"
+                android:id="@+id/shelf_books_order_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/margin_normal"
@@ -56,9 +56,8 @@
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:spinnerMode="dialog" />
         </LinearLayout>
-        <!-- end Sort Shelf -->
 
-        <!-- Sort Search Result -->
+        <!-- SearchBooks Order -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -80,7 +79,7 @@
                     android:layout_margin="@dimen/margin_small"
                     android:textSize="@dimen/text_size_small"
                     android:textColor="#FF808080"
-                    android:text="@string/label_search_books_sort_setting" />
+                    android:text="@string/label_search_books_order" />
                 <View
                     android:layout_width="0dp"
                     android:layout_height="2dp"
@@ -90,7 +89,7 @@
                     android:background="@color/colorDividerLine" />
             </LinearLayout>
             <Spinner
-                android:id="@+id/search_books_sort_spinner"
+                android:id="@+id/search_books_order_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/margin_normal"
@@ -100,7 +99,6 @@
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:spinnerMode="dialog" />
         </LinearLayout>
-        <!-- end Sort Search_Result -->
 
         <!-- Export/Import -->
         <LinearLayout
@@ -185,7 +183,6 @@
                 android:textColor="#FFFFFFFF"
                 android:text="@string/label_import_csv"/>
         </LinearLayout>
-        <!-- end Export/Import -->
 
         <!-- Dropbox Backup/Restore-->
         <LinearLayout
@@ -321,7 +318,6 @@
                 android:textColor="#FFFFFFFF"
                 android:text="@string/label_restore" />
         </LinearLayout>
-        <!-- end Dropbox Backup/Restore-->
 
     </LinearLayout>
 </ScrollView>
