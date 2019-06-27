@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.application;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,8 +25,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
 
 @SuppressWarnings({"WeakerAccess"})
 public class MyBookshelfUtils {

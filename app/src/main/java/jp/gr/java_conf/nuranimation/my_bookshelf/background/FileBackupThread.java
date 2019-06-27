@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
 @SuppressWarnings({"WeakerAccess","unused"})
@@ -317,7 +317,7 @@ public class FileBackupThread extends Thread {
     }
 
     private Result backupFile() {
-        String token = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, null);
+        String token = mApplicationData.getAccessToken();
         if (token == null) {
             return Result.error(TYPE_BACKUP, ERROR_DBX_EXCEPTION, "No token");
         }
@@ -369,7 +369,7 @@ public class FileBackupThread extends Thread {
     }
 
     private Result restoreFile() {
-        String token = mApplicationData.getSharedPreferences().getString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, null);
+        String token = mApplicationData.getAccessToken();
         if (token == null) {
             return Result.error(TYPE_BACKUP, ERROR_DBX_EXCEPTION, "No token");
         }

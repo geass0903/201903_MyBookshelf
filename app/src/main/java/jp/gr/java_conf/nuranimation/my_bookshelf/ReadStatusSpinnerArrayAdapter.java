@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -11,8 +11,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
 
 public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {

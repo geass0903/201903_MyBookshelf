@@ -19,8 +19,8 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
 
 @SuppressWarnings({"WeakerAccess","unused"})
 public class SearchBooksThread extends Thread {

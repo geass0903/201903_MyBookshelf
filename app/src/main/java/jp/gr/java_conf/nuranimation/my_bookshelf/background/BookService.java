@@ -17,7 +17,7 @@ import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
 
@@ -275,7 +275,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public void searchBooks(final String keyword, final int page){
         setServiceState(STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
         setSearchParam(keyword, page);
-        searchBooksThread = new SearchBooksThread(this, keyword, page, mApplicationData.getSearchBooksSortSetting());
+        searchBooksThread = new SearchBooksThread(this, keyword, page, mApplicationData.getSearchBooksOrder());
         searchBooksThread.start();
     }
 

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.application;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.Manifest;
 import android.app.Application;
@@ -16,7 +16,7 @@ import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import java.io.File;
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.base.NotificationChannelManager;
 
 
 @SuppressWarnings({"unused"})
@@ -25,17 +25,16 @@ public class MyBookshelfApplicationData extends Application {
     private static final boolean D = true;
 
     private static final String PREFERENCE_NAME = "MyBookshelfPreference";
-    public static final String KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN";
-    public static final String KEY_SHELF_BOOKS_ORDER = "KEY_SHELF_BOOKS_ORDER";
-    public static final String KEY_SEARCH_BOOKS_ORDER = "KEY_SEARCH_BOOKS_ORDER";
+    private static final String KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN";
+    private static final String KEY_SHELF_BOOKS_ORDER = "KEY_SHELF_BOOKS_ORDER";
+    private static final String KEY_SEARCH_BOOKS_ORDER = "KEY_SEARCH_BOOKS_ORDER";
 
-
+    private MyBookshelfDBOpenHelper mDatabaseHelper;
     private SharedPreferences mPreferences;
     private static final String[] Use_Permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private boolean isCheckedPermissions;
-    private UpdateBookData mUpdateBookData;
 
-    private MyBookshelfDBOpenHelper mDatabaseHelper;
+
 
 
 
@@ -45,13 +44,9 @@ public class MyBookshelfApplicationData extends Application {
         if(D) Log.d(TAG,"onCreate");
 
 //        File cacheDir = getCacheDir();
-
         String APPLICATION_DIRECTORY_PATH = "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
-
         File dir = Environment.getExternalStorageDirectory();
         File cacheDir = new File(dir.getPath() + APPLICATION_DIRECTORY_PATH);
-
-
 
         DiskCacheConfig largeImageCacheConfig = DiskCacheConfig.newBuilder(this)
                 .setBaseDirectoryName("largeImageCache")
@@ -99,14 +94,9 @@ public class MyBookshelfApplicationData extends Application {
         isCheckedPermissions = flag;
     }
 
-    public MyBookshelfDBOpenHelper getDatabaseHelper(){
-        return mDatabaseHelper;
-    }
-
-
 
     public List<BookData> loadDatabaseBooks(){
-        return mDatabaseHelper.loadShelfBooks(null, getString(R.string.code_shelf_books_sort_registered_ascending));
+        return mDatabaseHelper.loadShelfBooks(null, getString(R.string.code_shelf_books_order_registered_ascending));
     }
 
 
@@ -206,53 +196,46 @@ public class MyBookshelfApplicationData extends Application {
     }
 
 
-    public String getShelfBooksSortSetting(){
-        String sort = mPreferences.getString(KEY_SHELF_BOOKS_ORDER,null);
-        if(TextUtils.isEmpty(sort)){
-            sort = getString(R.string.code_shelf_books_sort_registered_ascending);
-            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.code_shelf_books_sort_registered_ascending)).apply();
+    public String getShelfBooksOrder(){
+        String order = mPreferences.getString(KEY_SHELF_BOOKS_ORDER,null);
+        if(TextUtils.isEmpty(order)){
+            order = getString(R.string.code_shelf_books_order_registered_ascending);
+            mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER,getString(R.string.code_shelf_books_order_registered_ascending)).apply();
         }
-        return sort;
+        return order;
     }
 
-    public String getSearchBooksSortSetting(){
-        String sort = mPreferences.getString(KEY_SEARCH_BOOKS_ORDER,null);
-        if(TextUtils.isEmpty(sort)){
-            sort = getString(R.string.code_search_books_sort_sales_date_descending);
-            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.code_search_books_sort_sales_date_descending)).apply();
-        }
-        return sort;
+    public void setShelfBooksOrder(String order){
+        mPreferences.edit().putString(KEY_SHELF_BOOKS_ORDER, order).apply();
     }
 
-
-
-    public static final class UpdateBookData {
-        private final int position;
-        private final BookData book;
-
-        private UpdateBookData(int position, BookData book) {
-            this.position = position;
-            this.book = book;
+    public String getSearchBooksOrder(){
+        String order = mPreferences.getString(KEY_SEARCH_BOOKS_ORDER,null);
+        if(TextUtils.isEmpty(order)){
+            order = getString(R.string.code_search_books_order_sales_date_descending);
+            mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER,getString(R.string.code_search_books_order_sales_date_descending)).apply();
         }
-
-        public BookData getBookData(){
-            return new BookData(book);
-        }
-
-        public int getPosition(){
-            return position;
-        }
-
-        public static UpdateBookData set(int position, BookData book){
-            return new UpdateBookData(position, book);
-        }
-
+        return order;
     }
 
+    public void setSearchBooksOrder(String order){
+        mPreferences.edit().putString(KEY_SEARCH_BOOKS_ORDER, order).apply();
+    }
 
+    public boolean containsKeyAccessToken(){
+        return mPreferences.contains(KEY_ACCESS_TOKEN);
+    }
 
+    public String getAccessToken(){
+        return mPreferences.getString(KEY_ACCESS_TOKEN, null);
+    }
 
+    public void setAccessToken(String token){
+        mPreferences.edit().putString(KEY_ACCESS_TOKEN, token).apply();
+    }
 
-
+    public void deleteAccessToken(){
+        mPreferences.edit().remove(KEY_ACCESS_TOKEN).apply();
+    }
 
 }

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.application;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 
 import android.content.Context;
@@ -13,9 +13,7 @@ import android.support.v4.content.res.ResourcesCompat;
 
 import java.util.Locale;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess","unused"})
 public class BookData implements Parcelable {
 
     public static final String JSON_KEY_ITEMS = "Items";
@@ -185,7 +183,7 @@ public class BookData implements Parcelable {
             case BookData.STATUS_UNREGISTERED:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.CLEAR);
                 }
                 break;
             case BookData.STATUS_INTERESTED:

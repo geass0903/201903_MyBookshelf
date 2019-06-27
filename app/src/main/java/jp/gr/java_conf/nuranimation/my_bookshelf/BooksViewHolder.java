@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;

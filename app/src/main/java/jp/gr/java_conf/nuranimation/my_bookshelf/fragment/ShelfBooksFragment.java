@@ -21,14 +21,14 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BooksListViewAdapter;
 
 
 public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
@@ -80,7 +80,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             }
         }
         if(mShelfBooks == null) {
-            mShelfBooks = mApplicationData.loadShelfBooks(mKeyword,mApplicationData.getShelfBooksSortSetting());
+            mShelfBooks = mApplicationData.loadShelfBooks(mKeyword,mApplicationData.getShelfBooksOrder());
         }
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS);
         mShelfBooksViewAdapter.setClickListener(this);
@@ -225,7 +225,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
     private void searchBooksInShelf(String keyword){
         scrollToTop();
-        List<BookData> books = mApplicationData.loadShelfBooks(keyword,mApplicationData.getShelfBooksSortSetting());
+        List<BookData> books = mApplicationData.loadShelfBooks(keyword,mApplicationData.getShelfBooksOrder());
         mShelfBooksViewAdapter.replaceBooksData(books);
     }
 

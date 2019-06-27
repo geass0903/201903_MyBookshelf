@@ -28,16 +28,16 @@ import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.SearchBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
 
 public class SearchBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener{
     public static final String TAG = SearchBooksFragment.class.getSimpleName();

@@ -32,17 +32,17 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.ReadStatusSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ReadStatusSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDatePickerFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
 
 
 public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener, BaseDialogFragment.OnBaseDialogListener{

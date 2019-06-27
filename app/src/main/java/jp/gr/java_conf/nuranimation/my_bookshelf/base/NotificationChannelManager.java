@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.application;
+package jp.gr.java_conf.nuranimation.my_bookshelf.base;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-@SuppressWarnings("WeakerAccess")
 public class NotificationChannelManager {
     @RequiresApi(Build.VERSION_CODES.O)
     public static void create(Context context, String channelId, int titleResId, int descriptionResId) {

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -15,11 +15,6 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import java.util.List;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfUtils;
 
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
@@ -170,15 +165,19 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void replaceBooksData(List<BookData> books){
         list.clear();
-        list.addAll(books);
+        if(books != null) {
+            list.addAll(books);
+        }
         notifyDataSetChanged();
     }
 
     public void addBooksData(List<BookData> books){
         int start = list.size();
-        int count = books.size();
-        list.addAll(books);
-        notifyItemRangeInserted(start,count);
+        if(books != null) {
+            int count = books.size();
+            list.addAll(books);
+            notifyItemRangeInserted(start, count);
+        }
     }
 
     public void refreshBook(int position){
@@ -217,71 +216,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
         }
     }
-
-/*
-    private String getReadStatusText(String status) {
-        String readStatus = mContext.getString(R.string.read_status_label_0);
-        if(status != null) {
-            switch (status) {
-                case BookData.STATUS_UNREGISTERED:
-                    readStatus = mContext.getString(R.string.read_status_label_0);
-                    break;
-                case BookData.STATUS_INTERESTED:
-                    readStatus = mContext.getString(R.string.read_status_label_1);
-                    break;
-                case BookData.STATUS_UNREAD:
-                    readStatus = mContext.getString(R.string.read_status_label_2);
-                    break;
-                case BookData.STATUS_READING:
-                    readStatus = mContext.getString(R.string.read_status_label_2);
-                    break;
-                case BookData.STATUS_ALREADY_READ:
-                    readStatus = mContext.getString(R.string.read_status_label_4);
-                    break;
-                case BookData.STATUS_NONE:
-                    readStatus = mContext.getString(R.string.read_status_label_5);
-                    break;
-                default:
-                    readStatus = mContext.getString(R.string.read_status_label_0);
-                    break;
-            }
-        }
-        return readStatus;
-    }
-
-    private Drawable getReadStatusIcon(String status){
-        Drawable icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_circle, null);
-        if(status != null) {
-            switch (status) {
-                case BookData.STATUS_UNREGISTERED:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_circle, null);
-                    break;
-                case BookData.STATUS_INTERESTED:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_favorites, null);
-                    break;
-                case BookData.STATUS_UNREAD:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_2_24dp, null);
-                    break;
-                case BookData.STATUS_READING:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_3_24dp, null);
-                    break;
-                case BookData.STATUS_ALREADY_READ:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_4_24dp, null);
-                    break;
-                case BookData.STATUS_NONE:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_vector_read_status_5_24dp, null);
-                    break;
-                default:
-                    icon = ResourcesCompat.getDrawable(mContext.getResources(), R.drawable.ic_circle, null);
-                    break;
-            }
-        }
-        return icon;
-    }
-*/
-
-
-
 
     private void bindViewHolder(BooksViewHolder holder, BookData book){
         Uri uri = Uri.parse(MyBookshelfUtils.parseUrlString(book.getImage(), MyBookshelfUtils.IMAGE_TYPE_SMALL));

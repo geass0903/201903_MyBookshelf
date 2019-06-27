@@ -27,14 +27,14 @@ import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.adapter.SortSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.OrderSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 
 
@@ -88,7 +88,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
                 isAllowedPermissions = true;
             }
-            if (mApplicationData.getSharedPreferences().contains(MyBookshelfApplicationData.KEY_ACCESS_TOKEN)) {
+            if(mApplicationData.containsKeyAccessToken()){
                 isLogged_in = true;
             }
         }
@@ -128,7 +128,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             switch (resultCode) {
                 case DialogInterface.BUTTON_POSITIVE:
                     if (D) Log.d(TAG, "Log out button pressed");
-                    mApplicationData.getSharedPreferences().edit().remove(MyBookshelfApplicationData.KEY_ACCESS_TOKEN).apply();
+                    mApplicationData.deleteAccessToken();
                     isLogged_in = false;
                     enableDropboxFunction(false);
                     break;
@@ -264,18 +264,18 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
     private void initSpinner(View view) {
-        Spinner mShelfBooksSortSpinner = view.findViewById(R.id.shelf_books_sort_spinner);
-        SortSpinnerArrayAdapter mShelfBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.shelf_books_sort_spinner));
-        mShelfBooksSortSpinner.setAdapter(mShelfBooksSortAdapter);
-        String sort = mApplicationData.getShelfBooksSortSetting();
-        mShelfBooksSortSpinner.setSelection(mShelfBooksSortAdapter.getPosition(sort));
-        mShelfBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        Spinner mShelfBooksOrderSpinner = view.findViewById(R.id.shelf_books_order_spinner);
+        OrderSpinnerArrayAdapter mShelfBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getSpinnerItemList(R.array.shelf_books_order_spinner));
+        mShelfBooksOrderSpinner.setAdapter(mShelfBooksOrderAdapter);
+        String order = mApplicationData.getShelfBooksOrder();
+        mShelfBooksOrderSpinner.setSelection(mShelfBooksOrderAdapter.getPosition(order));
+        mShelfBooksOrderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
                                        View v, int position, long id) {
                 BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
                 if (D) Log.d(TAG, "selected: " + item.getLabel());
-                mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_SHELF_BOOKS_ORDER, item.getCode()).apply();
+                mApplicationData.setShelfBooksOrder(item.getCode());
             }
 
             @Override
@@ -283,18 +283,18 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             }
         });
 
-        Spinner mSearchBooksSortSpinner = view.findViewById(R.id.search_books_sort_spinner);
-        SortSpinnerArrayAdapter mSearchBooksSortAdapter = new SortSpinnerArrayAdapter(getContext(), R.layout.item_sort_spinner, getSpinnerItemList(R.array.search_books_sort_spinner));
-        mSearchBooksSortSpinner.setAdapter(mSearchBooksSortAdapter);
-        sort = mApplicationData.getSearchBooksSortSetting();
-        mSearchBooksSortSpinner.setSelection(mSearchBooksSortAdapter.getPosition(sort));
-        mSearchBooksSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        Spinner mSearchBooksOrderSpinner = view.findViewById(R.id.search_books_order_spinner);
+        OrderSpinnerArrayAdapter mSearchBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getSpinnerItemList(R.array.search_books_order_spinner));
+        mSearchBooksOrderSpinner.setAdapter(mSearchBooksOrderAdapter);
+        order = mApplicationData.getSearchBooksOrder();
+        mSearchBooksOrderSpinner.setSelection(mSearchBooksOrderAdapter.getPosition(order));
+        mSearchBooksOrderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
                                        View v, int position, long id) {
                 BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
                 if (D) Log.d(TAG, "selected: " + item.getLabel());
-                mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_SEARCH_BOOKS_ORDER, item.getCode()).apply();
+                mApplicationData.setSearchBooksOrder(item.getCode());
             }
 
             @Override
@@ -456,7 +456,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                         if (token != null) {
                             // Log-in Success
                             if(D) Log.d(TAG,"Log-in Success");
-                            mApplicationData.getSharedPreferences().edit().putString(MyBookshelfApplicationData.KEY_ACCESS_TOKEN, token).apply();
+                            mApplicationData.setAccessToken(token);
                             isLogged_in = true;
                             enableDropboxFunction(true);
                         }

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.adapter;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -16,15 +16,15 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
 
-public class SortSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
+public class OrderSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
 
     @SuppressWarnings("unused")
-    public SortSpinnerArrayAdapter(Context context, int textViewResourceId) {
+    public OrderSpinnerArrayAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
         setDropDownViewResource(R.layout.item_sort_spinner_drop_down);
     }
 
-    public SortSpinnerArrayAdapter(Context context, int textViewResourceId, List<BaseSpinnerItem> list) {
+    public OrderSpinnerArrayAdapter(Context context, int textViewResourceId, List<BaseSpinnerItem> list) {
         super(context, textViewResourceId, list);
         setDropDownViewResource(R.layout.item_sort_spinner_drop_down);
     }

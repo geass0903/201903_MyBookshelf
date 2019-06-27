@@ -28,8 +28,8 @@ import java.util.Queue;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 
 /**
@@ -557,7 +557,6 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(D) Log.d(TAG,"handleMessage");
             processMessage(msg);
         }
     }

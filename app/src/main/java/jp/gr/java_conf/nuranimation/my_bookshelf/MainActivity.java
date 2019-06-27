@@ -15,11 +15,9 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.application.MyBookshelfApplicationData;
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener{
     private static final String TAG = MainActivity.class.getSimpleName();
