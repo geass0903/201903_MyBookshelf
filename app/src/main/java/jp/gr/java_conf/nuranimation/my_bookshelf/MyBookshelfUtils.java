@@ -1,20 +1,18 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,6 +23,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 
 @SuppressWarnings({"WeakerAccess"})
 public class MyBookshelfUtils {
@@ -50,38 +49,6 @@ public class MyBookshelfUtils {
     public static final int IMAGE_TYPE_LARGE    = 1;
     public static final int IMAGE_TYPE_SMALL    = 2;
 
-
-
-    public static BufferedReader getBufferedReaderSkipBOM(InputStream is, Charset charSet) throws IOException {
-        InputStreamReader isr;
-        BufferedReader br;
-
-        if (!(charSet == Charset.forName("UTF-8"))) {
-            isr = new InputStreamReader(is);
-            br = new BufferedReader(isr);
-            return br;
-        }
-
-        if (!is.markSupported()) {
-            is = new BufferedInputStream(is);
-        }
-        is.mark(3);
-        if (is.available() >= 3) {
-            byte[] b = {0, 0, 0};
-            int bytes = is.read(b, 0, 3);
-            if (bytes == 3 && b[0] != (byte) 0xEF || b[1] != (byte) 0xBB || b[2] != (byte) 0xBF) {
-                is.reset();
-            }
-        }
-        isr = new InputStreamReader(is, charSet);
-        br = new BufferedReader(isr);
-        return br;
-    }
-
-    public static BufferedWriter getBufferedWriter(OutputStream os, Charset charSet){
-        OutputStreamWriter osr = new OutputStreamWriter(os, charSet);
-        return new BufferedWriter(osr);
-    }
 
     public static String[] getShelfBooksIndex() {
         List<String> list = new ArrayList<>();
@@ -381,7 +348,8 @@ public class MyBookshelfUtils {
         if(TextUtils.isEmpty(date)){
             return "";
         }
-        Calendar calendar = parseDate(date);
+        Calendar calendar = getCalendar(date);
+//        Calendar calendar = parseDate(date);
         if(calendar == null){
             return "";
         }
@@ -418,5 +386,118 @@ public class MyBookshelfUtils {
         }
         return "";
     }
+
+    public static Calendar getCalendar(String source){
+        String[] formats = {"yyyy/MM/dd","yyyy年MM月dd日","yyyy年MM月","yyyy年"};
+        for(String format : formats){
+            Calendar calendar = parseDate(format, source);
+            if(calendar != null){
+                return calendar;
+            }
+        }
+        return null;
+    }
+
+    private  static Calendar parseDate(String format, String source) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.JAPAN);
+        sdf.setLenient(false);
+        try {
+            Date date = sdf.parse(source);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            switch (format) {
+                case "yyyy年MM月":
+                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    break;
+                case "yyyy年":
+                    calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
+                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    break;
+            }
+            return calendar;
+        } catch (ParseException e) {
+            if(D) e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static Drawable getReadStatusImage(Context context, String status) {
+        Resources res = context.getResources();
+        Drawable read_status_image;
+        switch (status) {
+            case BookData.STATUS_UNREGISTERED:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.CLEAR);
+                }
+                break;
+            case BookData.STATUS_INTERESTED:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_favorites, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FFDD0000"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_UNREAD:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FFDDDD00"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_READING:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FF00DD00"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_ALREADY_READ:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FF0000DD"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            case BookData.STATUS_NONE:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#FF808080"), PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+            default:
+                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
+                if (read_status_image != null) {
+                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
+                }
+        }
+        return read_status_image;
+    }
+
+
+    public static String getReadStatusText(Context context, String status){
+        String read_status_text;
+        switch (status){
+            case BookData.STATUS_UNREGISTERED:
+                read_status_text = context.getString(R.string.read_status_label_0);
+                break;
+            case BookData.STATUS_INTERESTED:
+                read_status_text = context.getString(R.string.read_status_label_1);
+                break;
+            case BookData.STATUS_UNREAD:
+                read_status_text = context.getString(R.string.read_status_label_2);
+                break;
+            case BookData.STATUS_READING:
+                read_status_text = context.getString(R.string.read_status_label_3);
+                break;
+            case BookData.STATUS_ALREADY_READ:
+                read_status_text = context.getString(R.string.read_status_label_4);
+                break;
+            case BookData.STATUS_NONE:
+                read_status_text = context.getString(R.string.read_status_label_5);
+                break;
+            default:
+                read_status_text = context.getString(R.string.read_status_label_0);
+        }
+        return read_status_text;
+    }
+
 
 }

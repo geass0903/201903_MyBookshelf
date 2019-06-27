@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.base;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,19 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
 
-/**
- * Created by Kamada on 2019/03/11.
- */
-
-
-
-public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener{
+public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener {
     private static final String TAG = BaseFragment.class.getSimpleName();
     private static final boolean D =true;
 
@@ -80,7 +69,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     private Bundle mBundleProgressDialog;
     private Bundle mBundlePermissionDialog;
     private String[] mRequestPermissions;
-    private BaseProgressDialogFragment mProgressDialogFragment;
+    private ProgressDialogFragment mProgressDialogFragment;
     private BaseDialogFragment mPermissionDialogFragment;
     private boolean isClickEnabled = true;
     private MyBookshelfApplicationData mApplicationData;
@@ -220,8 +209,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         if (!TextUtils.isEmpty(title)) {
             isShowingProgressDialog = true;
             mBundleProgressDialog = new BundleBuilder()
-                    .put(BaseProgressDialogFragment.title, title)
-                    .put(BaseProgressDialogFragment.message, "")
+                    .put(ProgressDialogFragment.title, title)
+                    .put(ProgressDialogFragment.message, "")
                     .build();
         }
     }
@@ -496,8 +485,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         if (fragment.getActivity() != null && bundle_progress != null) {
                             if (fragment.mProgressDialogFragment == null) {
                                 FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-                                fragment.mProgressDialogFragment = BaseProgressDialogFragment.newInstance(bundle_progress);
-                                fragment.mProgressDialogFragment.show(manager, BaseProgressDialogFragment.TAG);
+                                fragment.mProgressDialogFragment = ProgressDialogFragment.newInstance(bundle_progress);
+                                fragment.mProgressDialogFragment.show(manager, ProgressDialogFragment.TAG);
                             }
                         }
                         break;
@@ -505,8 +494,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
                         if (fragment.mProgressDialogFragment != null) {
                             if (msg.obj instanceof Bundle){
                                 Bundle bundle = (Bundle) msg.obj;
-                                String message = bundle.getString(BaseProgressDialogFragment.message);
-                                String progress = bundle.getString(BaseProgressDialogFragment.progress);
+                                String message = bundle.getString(ProgressDialogFragment.message);
+                                String progress = bundle.getString(ProgressDialogFragment.progress);
                                 fragment.mProgressDialogFragment.setDialogProgress(message, progress);
                             }
                         }

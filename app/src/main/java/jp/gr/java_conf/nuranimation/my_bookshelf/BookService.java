@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.background;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -15,15 +15,12 @@ import com.dropbox.core.android.Auth;
 
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-
 
 public class BookService extends Service implements SearchBooksThread.ThreadFinishListener, NewBooksThread.ThreadFinishListener, FileBackupThread.ThreadFinishListener {
     public static final String TAG = BookService.class.getSimpleName();
     private static final boolean D = true;
+
+    private static final String DROP_BOX_KEY = "fh2si4dchz272b1";
 
     public static final String KEY_SERVICE_STATE = "KEY_SERVICE_STATE";
     public static final String KEY_PARAM_SEARCH_KEYWORD = "KEY_PARAM_SEARCH_KEYWORD";
@@ -209,7 +206,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     }
 
     public void startAuthenticate(){
-        Auth.startOAuth2Authentication(this,getString(R.string.dropbox_key));
+        Auth.startOAuth2Authentication(this,DROP_BOX_KEY);
     }
 
     public String getAccessToken(){

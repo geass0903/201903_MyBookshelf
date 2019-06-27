@@ -8,20 +8,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.BookDetailFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.NewBooksFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.SearchBooksFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.SettingsFragment;
-
-/**
- * Created by Kamada on 2019/03/11.
- */
-
-
 public enum MyBookshelfEvent {
     SELECT_SHELF_BOOKS {
         @Override

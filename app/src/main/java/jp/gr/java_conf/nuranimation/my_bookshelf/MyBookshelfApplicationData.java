@@ -16,8 +16,6 @@ import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import java.io.File;
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.NotificationChannelManager;
-
 
 @SuppressWarnings({"unused"})
 public class MyBookshelfApplicationData extends Application {

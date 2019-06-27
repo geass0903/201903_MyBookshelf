@@ -13,10 +13,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-
-public class OrderSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
+public class OrderSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
 
     @SuppressWarnings("unused")
     public OrderSpinnerArrayAdapter(Context context, int textViewResourceId) {
@@ -24,7 +21,7 @@ public class OrderSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
         setDropDownViewResource(R.layout.item_sort_spinner_drop_down);
     }
 
-    public OrderSpinnerArrayAdapter(Context context, int textViewResourceId, List<BaseSpinnerItem> list) {
+    public OrderSpinnerArrayAdapter(Context context, int textViewResourceId, List<SpinnerItem> list) {
         super(context, textViewResourceId, list);
         setDropDownViewResource(R.layout.item_sort_spinner_drop_down);
     }
@@ -33,7 +30,7 @@ public class OrderSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         TextView view = (TextView) super.getView(position, convertView, parent);
-        BaseSpinnerItem item = getItem(position);
+        SpinnerItem item = getItem(position);
         if (item != null) {
             Drawable[] drawables = view.getCompoundDrawables();
             for(Drawable drawable : drawables){
@@ -50,7 +47,7 @@ public class OrderSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
     @Override
     public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         CheckedTextView view = (CheckedTextView) super.getDropDownView(position, convertView, parent);
-        BaseSpinnerItem item = getItem(position);
+        SpinnerItem item = getItem(position);
         if (item != null) {
             view.setText(item.getLabel());
         }
@@ -61,7 +58,7 @@ public class OrderSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
     public int getPosition(String code){
         int position = -1;
         for (int i = 0; i < this.getCount(); i++) {
-            BaseSpinnerItem item = getItem(i);
+            SpinnerItem item = getItem(i);
             if(item != null){
                 if(item.getCode().equals(code)) {
                     position = i;

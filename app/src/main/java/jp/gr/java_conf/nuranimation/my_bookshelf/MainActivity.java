@@ -14,11 +14,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.fragment.ShelfBooksFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
-
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener{
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean D = true;
@@ -60,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         mBottomNavigationView.setOnNavigationItemReselectedListener(mOnNavigationItemReselectedListener);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.contents_container, new ShelfBooksFragment(), ShelfBooksFragment.TAG).commit();
+            onFragmentEvent(MyBookshelfEvent.SELECT_SHELF_BOOKS, null);
         }
     }
 

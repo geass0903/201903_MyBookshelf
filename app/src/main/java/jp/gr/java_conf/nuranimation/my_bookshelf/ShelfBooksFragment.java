@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,15 +20,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.util.List;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.BooksListViewAdapter;
 
 
 public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {

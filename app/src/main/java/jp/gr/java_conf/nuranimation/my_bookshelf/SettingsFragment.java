@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,18 +24,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.OrderSpinnerArrayAdapter;
-import jp.gr.java_conf.nuranimation.my_bookshelf.background.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.background.FileBackupThread;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseProgressDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
 
 
 public class SettingsFragment extends BaseFragment implements View.OnClickListener {
@@ -249,8 +237,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                             break;
                     }
                     Bundle bundle = new BundleBuilder()
-                            .put(BaseProgressDialogFragment.message, message)
-                            .put(BaseProgressDialogFragment.progress, progress)
+                            .put(ProgressDialogFragment.message, message)
+                            .put(ProgressDialogFragment.progress, progress)
                             .build();
                     getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
                     break;
@@ -273,7 +261,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             @Override
             public void onItemSelected(AdapterView<?> adapter,
                                        View v, int position, long id) {
-                BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
+                SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
                 if (D) Log.d(TAG, "selected: " + item.getLabel());
                 mApplicationData.setShelfBooksOrder(item.getCode());
             }
@@ -292,7 +280,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             @Override
             public void onItemSelected(AdapterView<?> adapter,
                                        View v, int position, long id) {
-                BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
+                SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
                 if (D) Log.d(TAG, "selected: " + item.getLabel());
                 mApplicationData.setSearchBooksOrder(item.getCode());
             }
@@ -337,15 +325,15 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         button.setCompoundDrawablesWithIntrinsicBounds(drawables[0],drawables[1],drawables[2],drawables[3]);
     }
 
-    private List<BaseSpinnerItem> getSpinnerItemList(int array_id){
-        List<BaseSpinnerItem> list = new ArrayList<>();
+    private List<SpinnerItem> getSpinnerItemList(int array_id){
+        List<SpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
         TypedArray array = res.obtainTypedArray(array_id);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
                 String[] item = res.getStringArray(id);
-                list.add(new BaseSpinnerItem(item[0], item[1]));
+                list.add(new SpinnerItem(item[0], item[1]));
             }
         }
         array.recycle();

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.background;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -18,9 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
 
 @SuppressWarnings({"WeakerAccess","unused"})
 public class SearchBooksThread extends Thread {

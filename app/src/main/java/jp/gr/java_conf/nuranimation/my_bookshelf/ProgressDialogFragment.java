@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.base;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,11 +10,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-
-public class BaseProgressDialogFragment extends DialogFragment{
+public class ProgressDialogFragment extends DialogFragment{
     private static final boolean D = true;
-    public static final String TAG = BaseProgressDialogFragment.class.getSimpleName();
+    public static final String TAG = ProgressDialogFragment.class.getSimpleName();
 
     public static final String title = "KEY_TITLE";
     public static final String message = "KEY_MESSAGE";
@@ -28,8 +26,8 @@ public class BaseProgressDialogFragment extends DialogFragment{
     private String mProgress;
 
 
-    public static BaseProgressDialogFragment newInstance(Bundle bundle){
-        BaseProgressDialogFragment instance = new BaseProgressDialogFragment();
+    public static ProgressDialogFragment newInstance(Bundle bundle){
+        ProgressDialogFragment instance = new ProgressDialogFragment();
         instance.setArguments(bundle);
         return instance;
     }
@@ -57,9 +55,9 @@ public class BaseProgressDialogFragment extends DialogFragment{
         }
         Bundle bundle = this.getArguments();
         setCancelable(false);
-        mTitle = bundle.getString(BaseProgressDialogFragment.title);
-        mMessage = bundle.getString(BaseProgressDialogFragment.message);
-        mProgress = bundle.getString(BaseProgressDialogFragment.progress);
+        mTitle = bundle.getString(ProgressDialogFragment.title);
+        mMessage = bundle.getString(ProgressDialogFragment.message);
+        mProgress = bundle.getString(ProgressDialogFragment.progress);
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(R.layout.fragment_progress_dialog);
         return builder.create();

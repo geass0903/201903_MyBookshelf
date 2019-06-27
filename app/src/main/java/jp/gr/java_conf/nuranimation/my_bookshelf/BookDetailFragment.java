@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.fragment;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,18 +31,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BundleBuilder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ReadStatusSpinnerArrayAdapter;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseDatePickerFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
 
 
 public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener, BaseDialogFragment.OnBaseDialogListener{
@@ -300,7 +288,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         book.setItemPrice(itemPriceView.getText().toString());
         book.setISBN(isbnView.getText().toString());
         book.setFinishReadDate(readDateView.getText().toString());
-        BaseSpinnerItem item = (BaseSpinnerItem)mSpinnerReadStatus.getSelectedItem();
+        SpinnerItem item = (SpinnerItem)mSpinnerReadStatus.getSelectedItem();
         book.setReadStatus(item.getCode());
         book.setRating(mRatingBar.getRating());
         return book;
@@ -352,7 +340,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         @Override
         public void onItemSelected(AdapterView<?> adapter,
                                    View v, int position, long id) {
-            BaseSpinnerItem item = (BaseSpinnerItem) adapter.getItemAtPosition(position);
+            SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
             if (D) Log.d(TAG, "selected: " + item.getLabel());
             detailBook.setReadStatus(item.getCode());
         }
@@ -394,15 +382,15 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
 
 
-    private List<BaseSpinnerItem> getSpinnerItem_ReadStatus() {
-        List<BaseSpinnerItem> list = new ArrayList<>();
+    private List<SpinnerItem> getSpinnerItem_ReadStatus() {
+        List<SpinnerItem> list = new ArrayList<>();
         Resources res = getResources();
         TypedArray array = res.obtainTypedArray(R.array.read_status_spinner);
         for (int i = 0; i < array.length(); ++i) {
             int id = array.getResourceId(i, -1);
             if (id > -1) {
                 String[] item = res.getStringArray(id);
-                list.add(new BaseSpinnerItem(item[0], item[1]));
+                list.add(new SpinnerItem(item[0], item[1]));
             }
         }
         array.recycle();

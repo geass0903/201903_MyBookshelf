@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.background;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,10 +21,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
 @SuppressWarnings({"WeakerAccess","unused"})
 public class NewBooksThread extends Thread {
@@ -317,7 +313,8 @@ public class NewBooksThread extends Thread {
     private boolean isNewBook(BookData book){
         Calendar baseDate = Calendar.getInstance();
         baseDate.add(Calendar.DAY_OF_MONTH, -14);
-        Calendar salesDate = MyBookshelfUtils.parseDate(book.getSalesDate());
+        Calendar salesDate = MyBookshelfUtils.getCalendar(book.getSalesDate());
+//        Calendar salesDate = MyBookshelfUtils.parseDate(book.getSalesDate());
         if(salesDate != null){
             return salesDate.compareTo(baseDate) >= 0;
         }else{

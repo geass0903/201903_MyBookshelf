@@ -1,10 +1,10 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.base;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
-public final class BaseSpinnerItem {
+public final class SpinnerItem {
     private final String mCode;
     private final String mLabel;
 
-    public BaseSpinnerItem(String code, String label){
+    public SpinnerItem(String code, String label){
         mCode = code;
         mLabel = label;
     }

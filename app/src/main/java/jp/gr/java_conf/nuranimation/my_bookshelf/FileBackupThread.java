@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.background;
+package jp.gr.java_conf.nuranimation.my_bookshelf;
 
 
 import android.content.Context;
@@ -32,11 +32,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfApplicationData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.MyBookshelfUtils;
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseFragment;
 
 @SuppressWarnings({"WeakerAccess","unused"})
 public class FileBackupThread extends Thread {
@@ -194,7 +189,7 @@ public class FileBackupThread extends Thread {
             recodeCount = books.size();
             progress = count + "/" + recodeCount;
             sendProgressMessage(PROGRESS_TYPE_EXPORT_BOOKS, progress);
-            BufferedWriter bw_books = MyBookshelfUtils.getBufferedWriter(new FileOutputStream(file_books), Charset.forName("UTF-8"));
+            BufferedWriter bw_books = BaseUtils.getBufferedWriter(new FileOutputStream(file_books), Charset.forName("UTF-8"));
             String[] index = MyBookshelfUtils.getShelfBooksIndex();
             line = TextUtils.join(",", index);
             bw_books.write(line + "\r\n");
@@ -216,7 +211,7 @@ public class FileBackupThread extends Thread {
             recodeCount = authors.size();
             progress = count + "/" + recodeCount;
             sendProgressMessage(PROGRESS_TYPE_EXPORT_AUTHORS, progress);
-            BufferedWriter bw_authors = MyBookshelfUtils.getBufferedWriter(new FileOutputStream(file_authors), Charset.forName("UTF-8"));
+            BufferedWriter bw_authors = BaseUtils.getBufferedWriter(new FileOutputStream(file_authors), Charset.forName("UTF-8"));
             for (String author : authors) {
                 bw_authors.write(author + "\r\n");
                 count++;
@@ -268,7 +263,7 @@ public class FileBackupThread extends Thread {
             size = getLineCount(new FileInputStream(file_books), Charset.forName("UTF-8")) - 1; // remove count index line
             progress = count + "/" + size;
             sendProgressMessage(PROGRESS_TYPE_IMPORT_BOOKS, progress);
-            BufferedReader br_books = MyBookshelfUtils.getBufferedReaderSkipBOM(new FileInputStream(file_books), Charset.forName("UTF-8"));
+            BufferedReader br_books = BaseUtils.getBufferedReaderSkipBOM(new FileInputStream(file_books), Charset.forName("UTF-8"));
             String[] index =  br_books.readLine().split(",");
             while( (line = br_books.readLine()) != null ) {
                 BookData book = MyBookshelfUtils.convertToBookData(index, line);
@@ -285,7 +280,7 @@ public class FileBackupThread extends Thread {
             size = getLineCount(new FileInputStream(file_authors), Charset.forName("UTF-8"));
             progress = count + "/" + size;
             sendProgressMessage(PROGRESS_TYPE_IMPORT_AUTHORS, progress);
-            BufferedReader br_authors = MyBookshelfUtils.getBufferedReaderSkipBOM(new FileInputStream(file_authors), Charset.forName("UTF-8"));
+            BufferedReader br_authors = BaseUtils.getBufferedReaderSkipBOM(new FileInputStream(file_authors), Charset.forName("UTF-8"));
             while ((line = br_authors.readLine()) != null) {
                 authors.add(line);
                 count++;
@@ -445,7 +440,7 @@ public class FileBackupThread extends Thread {
 
     private int getLineCount(InputStream is, Charset charSet) throws IOException{
         int count = 0;
-        BufferedReader br = MyBookshelfUtils.getBufferedReaderSkipBOM(is, charSet);
+        BufferedReader br = BaseUtils.getBufferedReaderSkipBOM(is, charSet);
         while(br.readLine() != null) {
             count++;
         }

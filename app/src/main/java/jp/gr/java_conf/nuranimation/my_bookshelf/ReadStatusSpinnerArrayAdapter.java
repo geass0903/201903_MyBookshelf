@@ -11,9 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.base.BaseSpinnerItem;
-
-public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem> {
+public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
     private Drawable[] drawables;
 
     @SuppressWarnings("unused")
@@ -22,11 +20,11 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem>
         setDropDownViewResource(R.layout.item_read_status_spinner_drop_down);
     }
 
-    public ReadStatusSpinnerArrayAdapter(Context context, int textViewResourceId, List<BaseSpinnerItem> list) {
+    public ReadStatusSpinnerArrayAdapter(Context context, int textViewResourceId, List<SpinnerItem> list) {
         super(context, textViewResourceId, list);
         drawables = new Drawable[list.size()];
         for(int i=0;i< list.size();i++){
-            drawables[i] = BookData.getReadStatusImage(context, list.get(i).getCode());
+            drawables[i] = MyBookshelfUtils.getReadStatusImage(context, list.get(i).getCode());
         }
         setDropDownViewResource(R.layout.item_read_status_spinner_drop_down);
     }
@@ -35,7 +33,7 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem>
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         TextView view = (TextView) super.getView(position, convertView, parent);
-        BaseSpinnerItem item = getItem(position);
+        SpinnerItem item = getItem(position);
         if (item != null) {
             view.setCompoundDrawablesWithIntrinsicBounds(drawables[position],null,null,null);
             view.setText(item.getLabel());
@@ -46,7 +44,7 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem>
     @Override
     public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         CheckedTextView view = (CheckedTextView) super.getDropDownView(position, convertView, parent);
-        BaseSpinnerItem item = getItem(position);
+        SpinnerItem item = getItem(position);
         if (item != null) {
             view.setCompoundDrawablesWithIntrinsicBounds(drawables[position],null,null,null);
             view.setText(item.getLabel());
@@ -58,7 +56,7 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<BaseSpinnerItem>
     public int getPosition(String code){
         int position = -1;
         for (int i = 0; i < this.getCount(); i++) {
-            BaseSpinnerItem item = getItem(i);
+            SpinnerItem item = getItem(i);
             if(item != null){
                 if(item.getCode().equals(code)) {
                     position = i;

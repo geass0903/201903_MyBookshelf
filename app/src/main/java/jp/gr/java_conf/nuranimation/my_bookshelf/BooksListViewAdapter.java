@@ -234,9 +234,9 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         holder.getItemPriceView().setText(book.getItemPrice());
         holder.getRatingView().setRating(book.getFloatRating());
 
-        Drawable read_status_image = BookData.getReadStatusImage(mContext, book.getReadStatus());
+        Drawable read_status_image = MyBookshelfUtils.getReadStatusImage(mContext, book.getReadStatus());
         holder.getReadStatusImageView().setImageDrawable(read_status_image);
-        String read_status_text = BookData.getReadStatusText(mContext, book.getReadStatus());
+        String read_status_text = MyBookshelfUtils.getReadStatusText(mContext, book.getReadStatus());
         holder.getReadStatusTextView().setText(read_status_text);
     }
 
