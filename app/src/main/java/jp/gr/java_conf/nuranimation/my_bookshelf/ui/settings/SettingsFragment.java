@@ -1,10 +1,8 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.settings;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -25,6 +23,19 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.OrderSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+
 
 public class SettingsFragment extends BaseFragment implements View.OnClickListener {
     public static final String TAG = SettingsFragment.class.getSimpleName();
@@ -34,7 +45,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     private static final String KEY_IS_ALLOWED_PERMISSIONS = "KEY_IS_ALLOWED_PERMISSIONS";
     private static final String KEY_IS_LOGGED_IN = "KEY_IS_LOGGED_IN";
 
-    private MyBookshelfApplicationData mApplicationData;
+    private MyBookshelfPreferences mPreferences;
 
     private Button mButtonExport;
     private Button mButtonImport;
@@ -50,7 +61,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
     }
 
 
@@ -73,10 +84,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             isLogged_in = savedInstanceState.getBoolean(KEY_IS_LOGGED_IN, false);
             mSettingsState = savedInstanceState.getInt(KEY_CURRENT_STATE, BookService.STATE_NONE);
         } else {
-            if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+            if (isAllowedAllPermissions(USE_PERMISSIONS)) {
                 isAllowedPermissions = true;
             }
-            if(mApplicationData.containsKeyAccessToken()){
+            if(mPreferences.containsKeyAccessToken()){
                 isLogged_in = true;
             }
         }
@@ -116,7 +127,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             switch (resultCode) {
                 case DialogInterface.BUTTON_POSITIVE:
                     if (D) Log.d(TAG, "Log out button pressed");
-                    mApplicationData.deleteAccessToken();
+                    mPreferences.deleteAccessToken();
                     isLogged_in = false;
                     enableDropboxFunction(false);
                     break;
@@ -236,10 +247,10 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                             message = getString(R.string.progress_message_register);
                             break;
                     }
-                    Bundle bundle = new BundleBuilder()
-                            .put(ProgressDialogFragment.message, message)
-                            .put(ProgressDialogFragment.progress, progress)
-                            .build();
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString(ProgressDialogFragment.message, message);
+                    bundle.putString(ProgressDialogFragment.progress, progress);
                     getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
                     break;
             }
@@ -253,17 +264,17 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     private void initSpinner(View view) {
         Spinner mShelfBooksOrderSpinner = view.findViewById(R.id.shelf_books_order_spinner);
-        OrderSpinnerArrayAdapter mShelfBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getSpinnerItemList(R.array.shelf_books_order_spinner));
+        OrderSpinnerArrayAdapter mShelfBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getShelfBooksOrderSpinnerList());
         mShelfBooksOrderSpinner.setAdapter(mShelfBooksOrderAdapter);
-        String order = mApplicationData.getShelfBooksOrder();
-        mShelfBooksOrderSpinner.setSelection(mShelfBooksOrderAdapter.getPosition(order));
+        String code = mPreferences.getShelfBooksOrderCode();
+        mShelfBooksOrderSpinner.setSelection(mShelfBooksOrderAdapter.getPosition(code));
         mShelfBooksOrderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
                                        View v, int position, long id) {
                 SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
                 if (D) Log.d(TAG, "selected: " + item.getLabel());
-                mApplicationData.setShelfBooksOrder(item.getCode());
+                mPreferences.setShelfBooksOrderCode(item.getCode());
             }
 
             @Override
@@ -272,17 +283,17 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         });
 
         Spinner mSearchBooksOrderSpinner = view.findViewById(R.id.search_books_order_spinner);
-        OrderSpinnerArrayAdapter mSearchBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getSpinnerItemList(R.array.search_books_order_spinner));
+        OrderSpinnerArrayAdapter mSearchBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getSearchBooksOrderSpinnerList());
         mSearchBooksOrderSpinner.setAdapter(mSearchBooksOrderAdapter);
-        order = mApplicationData.getSearchBooksOrder();
-        mSearchBooksOrderSpinner.setSelection(mSearchBooksOrderAdapter.getPosition(order));
+        code = mPreferences.getSearchBooksOrderCode();
+        mSearchBooksOrderSpinner.setSelection(mSearchBooksOrderAdapter.getPosition(code));
         mSearchBooksOrderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter,
                                        View v, int position, long id) {
                 SpinnerItem item = (SpinnerItem) adapter.getItemAtPosition(position);
                 if (D) Log.d(TAG, "selected: " + item.getLabel());
-                mApplicationData.setSearchBooksOrder(item.getCode());
+                mPreferences.setSearchBooksOrderCode(item.getCode());
             }
 
             @Override
@@ -325,20 +336,27 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         button.setCompoundDrawablesWithIntrinsicBounds(drawables[0],drawables[1],drawables[2],drawables[3]);
     }
 
-    private List<SpinnerItem> getSpinnerItemList(int array_id){
+
+    private List<SpinnerItem> getShelfBooksOrderSpinnerList(){
         List<SpinnerItem> list = new ArrayList<>();
-        Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(array_id);
-        for (int i = 0; i < array.length(); ++i) {
-            int id = array.getResourceId(i, -1);
-            if (id > -1) {
-                String[] item = res.getStringArray(id);
-                list.add(new SpinnerItem(item[0], item[1]));
-            }
-        }
-        array.recycle();
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_TITLE_ASC,       getString(R.string.label_shelf_books_order_title_ascending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_TITLE_DESC,      getString(R.string.label_shelf_books_order_title_descending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_AUTHOR_ASC,      getString(R.string.label_shelf_books_order_author_ascending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_AUTHOR_DESC,     getString(R.string.label_shelf_books_order_author_descending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_SALES_DATE_ASC,  getString(R.string.label_shelf_books_order_sales_date_ascending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_SALES_DATE_DESC, getString(R.string.label_shelf_books_order_sales_date_descending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_REGISTERED_ASC,  getString(R.string.label_shelf_books_order_registered_ascending)));
+        list.add(new SpinnerItem(BooksOrder.SHELF_BOOKS_ORDER_CODE_REGISTERED_DESC, getString(R.string.label_shelf_books_order_registered_descending)));
         return list;
     }
+
+    private List<SpinnerItem> getSearchBooksOrderSpinnerList(){
+        List<SpinnerItem> list = new ArrayList<>();
+        list.add(new SpinnerItem(BooksOrder.SEARCH_BOOKS_ORDER_CODE_SALES_DATE_ASC,  getString(R.string.label_search_books_order_sales_date_ascending)));
+        list.add(new SpinnerItem(BooksOrder.SEARCH_BOOKS_ORDER_CODE_SALES_DATE_DESC, getString(R.string.label_search_books_order_sales_date_descending)));
+        return list;
+    }
+
 
     private void enableDropboxFunction(boolean enable){
         if(enable){
@@ -370,7 +388,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
     private void onClickBackup(int type){
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+        if (isAllowedAllPermissions(USE_PERMISSIONS)) {
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
@@ -396,7 +414,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 }
             }
         } else {
-            requestPermissions(mApplicationData.getUse_Permissions());
+            requestPermissions(USE_PERMISSIONS);
         }
     }
 
@@ -444,7 +462,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                         if (token != null) {
                             // Log-in Success
                             if(D) Log.d(TAG,"Log-in Success");
-                            mApplicationData.setAccessToken(token);
+                            mPreferences.setAccessToken(token);
                             isLogged_in = true;
                             enableDropboxFunction(true);
                         }
@@ -465,7 +483,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service != null) {
-                FileBackupThread.Result result = service.getFileBackupResult();
+                Result result = service.getFileBackupResult();
                 if(result.isSuccess()) {
                     switch (service.getServiceState()){
                         case BookService.STATE_EXPORT_COMPLETE:

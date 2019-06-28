@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.util;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -16,6 +16,10 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import java.util.List;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
     private static final String TAG = BooksListViewAdapter.class.getSimpleName();
@@ -25,14 +29,11 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     public static final int LIST_TYPE_SEARCH_BOOKS  = 2;
     public static final int LIST_TYPE_NEW_BOOKS     = 3;
 
-    public static final int VIEW_TYPE_BOOK         = 1;
-    public static final int VIEW_TYPE_BUTTON_LOAD  = 2;
-    public static final int VIEW_TYPE_LOADING      = 3;
 
     private List<BookData> list;
 
     private Context mContext;
-    private MyBookshelfApplicationData mApplicationData;
+    private MyBookshelfDBOpenHelper mDBOpenHelper;
     private RecyclerView mRecyclerView;
     private OnBookClickListener mListener;
 
@@ -60,7 +61,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         this.mContext = context;
         this.list = list;
         this.list_type = list_type;
-        mApplicationData = (MyBookshelfApplicationData) mContext.getApplicationContext();
+        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
     }
 
     @Override
@@ -90,17 +91,17 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType){
         View inflate;
         switch (viewType){
-            case VIEW_TYPE_BOOK:
+            case BookData.TYPE_BOOK:
                 inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_book, viewGroup, false);
                 inflate.setOnClickListener(this);
                 inflate.setOnLongClickListener(this);
                 return new BooksViewHolder(inflate);
-            case VIEW_TYPE_BUTTON_LOAD:
+            case BookData.TYPE_BUTTON_LOAD:
                 inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_load_next,viewGroup,false);
                 inflate.setOnClickListener(this);
                 inflate.setOnLongClickListener(this);
                 return new LoadViewHolder(inflate);
-            case VIEW_TYPE_LOADING:
+            case BookData.TYPE_VIEW_LOADING:
                 inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_loading,viewGroup,false);
                 inflate.setOnClickListener(this);
                 inflate.setOnLongClickListener(this);
@@ -114,12 +115,12 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (holder.getItemViewType() == VIEW_TYPE_BOOK && holder instanceof BooksViewHolder) {
+        if (holder.getItemViewType() == BookData.TYPE_BOOK && holder instanceof BooksViewHolder) {
             BooksViewHolder viewHolder = (BooksViewHolder) holder;
-            BookData registered_book = mApplicationData.loadBookDataFromShelfBooks(list.get(position));
+            BookData registered_book = mDBOpenHelper.loadBookDataFromShelfBooks(list.get(position));
             switch(list_type) {
                 case LIST_TYPE_SHELF_BOOKS:
-                    if (registered_book != null) {
+                    if (registered_book.getView_type() == BookData.TYPE_BOOK) {
                         bindViewHolder(viewHolder, registered_book);
                     } else {
                         bindViewHolder(viewHolder, list.get(position));
@@ -128,7 +129,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                 case LIST_TYPE_SEARCH_BOOKS:
                 case LIST_TYPE_NEW_BOOKS:
                     BookData book = new BookData(list.get(position));
-                    if(registered_book != null){
+                    if (registered_book.getView_type() == BookData.TYPE_BOOK) {
                         book.setRating(registered_book.getRating());
                         book.setReadStatus(registered_book.getReadStatus());
                     }
@@ -203,7 +204,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         if(list.size() > 0) {
             int lastPosition = list.size() - 1;
             // delete old footer
-            if (list.get(lastPosition).getView_type() != VIEW_TYPE_BOOK) {
+            if (list.get(lastPosition).getView_type() != BookData.TYPE_BOOK) {
                 if (D) Log.d(TAG, "remove footer type: " + list.get(lastPosition).getView_type());
                 list.remove(lastPosition);
                 notifyItemRemoved(lastPosition);

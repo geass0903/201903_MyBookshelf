@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -12,6 +12,9 @@ import android.widget.CheckedTextView;
 import android.widget.TextView;
 
 import java.util.List;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
 
 public class OrderSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
 

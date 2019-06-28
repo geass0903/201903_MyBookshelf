@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.shelf_books;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,6 +21,17 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+
 
 public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
     public static final String TAG = ShelfBooksFragment.class.getSimpleName();
@@ -31,7 +42,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     private static final String KEY_POSITION = "KEY_POSITION";
     private static final String KEY_BOOK_DATA = "KEY_BOOK_DATA";
 
-    private MyBookshelfApplicationData mApplicationData;
+    private MyBookshelfDBOpenHelper mDBOpenHelper;
+    private MyBookshelfPreferences mPreferences;
     private BooksListViewAdapter mShelfBooksViewAdapter;
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
@@ -44,7 +56,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
     }
 
     @Override
@@ -71,7 +84,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             }
         }
         if(mShelfBooks == null) {
-            mShelfBooks = mApplicationData.loadShelfBooks(mKeyword,mApplicationData.getShelfBooksOrder());
+            mShelfBooks = mDBOpenHelper.loadShelfBooks(mKeyword, BooksOrder.getShelfBooksOrder(mPreferences.getShelfBooksOrderCode()));
         }
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS);
         mShelfBooksViewAdapter.setClickListener(this);
@@ -120,12 +133,12 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         if(isClickable()){
             setClickDisable();
             int view_type = adapter.getItemViewType(position);
-            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+            if (view_type == BookData.TYPE_BOOK) {
                 if(getFragmentListener() != null){
                     Bundle bundle = new Bundle();
                     bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
-                    BookData book = mApplicationData.loadBookDataFromShelfBooks(data);
-                    if(book == null){
+                    BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
+                    if(book.getView_type() == BookData.TYPE_EMPTY){
                         book = new BookData(data);
                     }
                     bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
@@ -140,20 +153,19 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         if (isClickable()) {
             setClickDisable();
             int view_type = adapter.getItemViewType(position);
-            if (view_type == BooksListViewAdapter.VIEW_TYPE_BOOK) {
+            if (view_type == BookData.TYPE_BOOK) {
                 Bundle bundle_book = new Bundle();
                 bundle_book.putInt(KEY_POSITION, position);
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
-                Bundle bundle = new BundleBuilder()
-                        .put(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book))
-                        .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book))
-                        .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive))
-                        .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative))
-                        .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK)
-                        .put(BaseDialogFragment.KEY_PARAMS, bundle_book)
-                        .put(BaseDialogFragment.KEY_CANCELABLE, true)
-                        .build();
+                Bundle bundle = new Bundle();
+                bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book));
+                bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
+                bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
+                bundle.putBundle(BaseDialogFragment.KEY_PARAMS, bundle_book);
+                bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
@@ -170,7 +182,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
             if (book != null) {
-                mApplicationData.unregisterFromShelfBooks(book);
+                mDBOpenHelper.unregisterFromShelfBooks(book);
                 mShelfBooksViewAdapter.deleteBook(position);
                 Toast.makeText(getContext(), getString(R.string.toast_success_unregister_book), Toast.LENGTH_SHORT).show();
             }
@@ -216,7 +228,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
     private void searchBooksInShelf(String keyword){
         scrollToTop();
-        List<BookData> books = mApplicationData.loadShelfBooks(keyword,mApplicationData.getShelfBooksOrder());
+        List<BookData> books = mDBOpenHelper.loadShelfBooks(keyword,BooksOrder.getShelfBooksOrder(mPreferences.getShelfBooksOrderCode()));
         mShelfBooksViewAdapter.replaceBooksData(books);
     }
 

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.net;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,15 +22,15 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-@SuppressWarnings({"WeakerAccess","unused"})
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+
+@SuppressWarnings({"unused"})
 public class NewBooksThread extends Thread {
     private static final String TAG = NewBooksThread.class.getSimpleName();
     private static final boolean D = false;
-
-    public static final int NO_ERROR = 0;
-    public static final int ERROR_EMPTY_AUTHORS_LIST = 1;
-    public static final int ERROR_IO_EXCEPTION = 2;
-    public static final int ERROR_UNKNOWN = 3;
 
     private static final String urlBase = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId=1028251347039610250";
     private static final String urlFormat = "&format=" + "json";
@@ -46,90 +46,10 @@ public class NewBooksThread extends Thread {
     private ThreadFinishListener mListener;
     private LocalBroadcastManager mLocalBroadcastManager;
 
-    public static final class Result {
-        private final boolean isSuccess;
-        private final int errorCode;
-        private final String errorMessage;
-        private final List<BookData> books;
-
-        private Result(boolean isSuccess, int errorCode, String errorMessage, List<BookData> books) {
-            this.isSuccess = isSuccess;
-            this.errorCode = errorCode;
-            this.errorMessage = errorMessage;
-            this.books = books;
-        }
-
-        public boolean isSuccess() {
-            return this.isSuccess;
-        }
-
-        public int getErrorCode() {
-            return this.errorCode;
-        }
-
-        public String getErrorMessage() {
-            return this.errorMessage;
-        }
-
-        public List<BookData> getBooks() {
-            return new ArrayList<>(this.books);
-        }
-
-        public static Result success(List<BookData> books) {
-            return new Result(true, NO_ERROR, "no error", books);
-        }
-
-        public static Result error(int errorCode, String errorMessage) {
-            return new Result(false, errorCode, errorMessage, null);
-        }
-
-    }
-
-    private static final class SearchResult {
-        private final boolean isSuccess;
-        private final String errorMessage;
-        private final boolean hasNext;
-        private final List<BookData> books;
-
-        private SearchResult(boolean isSuccess, String errorMessage, boolean hasNext, List<BookData> books) {
-            this.isSuccess = isSuccess;
-            this.errorMessage = errorMessage;
-            this.hasNext = hasNext;
-            this.books = books;
-        }
-
-        public boolean isSuccess() {
-            return this.isSuccess;
-        }
-
-        public String getErrorMessage() {
-            return this.errorMessage;
-        }
-
-        public boolean hasNext() {
-            return this.hasNext;
-        }
-
-        public List<BookData> getBooks() {
-            return new ArrayList<>(this.books);
-        }
-
-        public static SearchResult success(boolean hasNext, List<BookData> books) {
-            return new SearchResult(true, "no error", hasNext, books);
-        }
-
-        public static SearchResult error(String errorMessage) {
-            return new SearchResult(false, errorMessage, false, null);
-        }
-
-    }
-
-
 
     public interface ThreadFinishListener {
         void deliverNewBooksResult(Result result);
     }
-
 
     public NewBooksThread(Context context, List<String> authors) {
         this.authors = authors;
@@ -153,7 +73,7 @@ public class NewBooksThread extends Thread {
         int size  = authorsList.size();
 
         if (authorsList.size() == 0) {
-            mResult = Result.error(ERROR_EMPTY_AUTHORS_LIST, "empty authors");
+            mResult = Result.ReloadError(Result.ERROR_EMPTY_AUTHORS_LIST, "empty authors");
         } else {
             count = 0;
             progress = count + "/" + size;
@@ -166,7 +86,7 @@ public class NewBooksThread extends Thread {
                     int page = 1;
                     boolean hasNext = true;
                     while (hasNext) {
-                        SearchResult result = search(author, page);
+                        Result result = search(author, page);
                         if (result.isSuccess()) {
                             hasNext = result.hasNext();
                             List<BookData> check = result.getBooks();
@@ -195,9 +115,9 @@ public class NewBooksThread extends Thread {
                 }
             }
             if(books.size() > 0) {
-                mResult = Result.success(books);
+                mResult = Result.ReloadSuccess(books);
             }else{
-                mResult = Result.error(ERROR_IO_EXCEPTION, "no books");
+                mResult = Result.ReloadError(Result.ERROR_IO_EXCEPTION, "no books");
             }
         }
         if (mListener != null && !isCanceled) {
@@ -213,14 +133,14 @@ public class NewBooksThread extends Thread {
 
 
 
-    private SearchResult search(String keyword, int page) {
+    private Result search(String keyword, int page) {
         int count = 0;
         int last = 0;
 
         int retried = 0;
         while (retried < 3) {
             if (isCanceled) {
-                return SearchResult.error("search canceled");
+                return Result.SearchError(Result.ERROR_IO_EXCEPTION, "search canceled");
             }
 
             HttpsURLConnection connection = null;
@@ -230,7 +150,7 @@ public class NewBooksThread extends Thread {
                 }
                 Thread.sleep(1000);
                 if (TextUtils.isEmpty(keyword)) {
-                    return SearchResult.error("empty keyword");
+                    return Result.SearchError(Result.ERROR_EMPTY_KEYWORD, "empty keyword");
                 }
                 String urlPage = "&page=" + page;
                 String urlKeyword = "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
@@ -238,7 +158,7 @@ public class NewBooksThread extends Thread {
                         + urlPage + urlKeyword;
                 URL url = new URL(urlString);
                 if (isCanceled) {
-                    return SearchResult.error("search canceled");
+                    return Result.SearchError(Result.ERROR_IO_EXCEPTION, "search canceled");
                 }
                 connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -274,12 +194,12 @@ public class NewBooksThread extends Thread {
                             }
                             boolean hasNext = count - last > 0;
                             List<BookData> books = new ArrayList<>(tmp);
-                            return SearchResult.success(hasNext, books);
+                            return Result.SearchSuccess(books, hasNext);
                         } else {
-                            return SearchResult.error("No json item");
+                            return Result.SearchError(Result.ERROR_IO_EXCEPTION, "No json item");
                         }
                     case HttpURLConnection.HTTP_BAD_REQUEST:    // 400 wrong parameter
-                        return SearchResult.error("wrong parameter");
+                        return Result.SearchError(Result.ERROR_IO_EXCEPTION, "wrong parameter");
                     case HttpURLConnection.HTTP_NOT_FOUND:      // 404 not success
                     case 429:                                   // 429 too many requests
                     case HttpURLConnection.HTTP_INTERNAL_ERROR: // 500 system error
@@ -306,7 +226,7 @@ public class NewBooksThread extends Thread {
             }
             retried++;
         }
-        return SearchResult.error("search failed");
+        return Result.SearchError(Result.ERROR_IO_EXCEPTION, "search failed");
     }
 
 

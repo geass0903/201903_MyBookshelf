@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -14,11 +14,14 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener{
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+
+public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean D = true;
 
-    private MyBookshelfApplicationData mApplicationData;
     private BookService mBookService;
     private BottomNavigationView mBottomNavigationView;
 
@@ -48,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         super.onCreate(savedInstanceState);
         if (D) Log.e(TAG, "+++ ON CREATE +++");
         setContentView(R.layout.activity_main);
-        mApplicationData = (MyBookshelfApplicationData)getApplicationContext();
         Toolbar toolbar = findViewById(R.id.activity_main_toolbar);
         setSupportActionBar(toolbar);
         mBottomNavigationView = findViewById(R.id.navigation);
@@ -109,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
     public void onDestroy() {
         super.onDestroy();
         if (D) Log.e(TAG, "--- ON DESTROY ---");
-        mApplicationData.setCheckedPermissions(false);
         if(mBookService != null) {
             unbindService(connection);
             mBookService = null;
@@ -136,11 +137,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
                 if (navigation_state != R.id.navigation_search_books) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_search_books).setChecked(true);
-                    bundle = new BundleBuilder()
-                            .put(BookService.KEY_SERVICE_STATE, serviceState)
-                            .put(BookService.KEY_PARAM_SEARCH_KEYWORD, bookService.getSearchKeyword())
-                            .put(BookService.KEY_PARAM_SEARCH_PAGE, bookService.getSearchPage())
-                            .build();
+                    bundle = new Bundle();
+                    bundle.putInt(BookService.KEY_SERVICE_STATE, serviceState);
+                    bundle.putString(BookService.KEY_PARAM_SEARCH_KEYWORD, bookService.getSearchKeyword());
+                    bundle.putInt(BookService.KEY_PARAM_SEARCH_PAGE, bookService.getSearchPage());
                     onFragmentEvent(MyBookshelfEvent.SELECT_SEARCH_BOOKS, bundle);
                 }else {
                     onFragmentEvent(MyBookshelfEvent.CHECK_SEARCH_STATE, null);
@@ -150,9 +150,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
                 if (navigation_state != R.id.navigation_new_books) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_new_books).setChecked(true);
-                    bundle = new BundleBuilder()
-                            .put(BookService.KEY_SERVICE_STATE, serviceState)
-                            .build();
+                    bundle = new Bundle();
+                    bundle.putInt(BookService.KEY_SERVICE_STATE, serviceState);
                     onFragmentEvent(MyBookshelfEvent.SELECT_NEW_BOOKS, bundle);
                 }else {
                     onFragmentEvent(MyBookshelfEvent.CHECK_RELOAD_STATE, null);
@@ -169,9 +168,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             case BookService.STATE_DROPBOX_LOGIN:
                 if (navigation_state != R.id.navigation_settings) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
-                    bundle = new BundleBuilder()
-                            .put(BookService.KEY_SERVICE_STATE, serviceState)
-                            .build();
+                    bundle = new Bundle();
+                    bundle.putInt(BookService.KEY_SERVICE_STATE, serviceState);
                     onFragmentEvent(MyBookshelfEvent.SELECT_SETTINGS, bundle);
                 }else {
                     onFragmentEvent(MyBookshelfEvent.CHECK_SETTINGS_STATE, null);

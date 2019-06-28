@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.net;
 
 
 import android.content.Context;
@@ -33,16 +33,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
-@SuppressWarnings({"WeakerAccess","unused"})
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BaseUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
+
+
+//@SuppressWarnings({"WeakerAccess","unused"})
 public class FileBackupThread extends Thread {
     private static final String TAG = FileBackupThread.class.getSimpleName();
     private static final boolean D = true;
 
-    public static final int TYPE_UNKNOWN = 0;
-    public static final int TYPE_EXPORT = 1;
-    public static final int TYPE_IMPORT = 2;
-    public static final int TYPE_BACKUP = 3;
-    public static final int TYPE_RESTORE = 4;
+    public static final int TYPE_UNKNOWN    = 0;
+    public static final int TYPE_EXPORT     = 1;
+    public static final int TYPE_IMPORT     = 2;
+    public static final int TYPE_BACKUP     = 3;
+    public static final int TYPE_RESTORE    = 4;
 
     public static final int PROGRESS_TYPE_EXPORT_BOOKS      = 1;
     public static final int PROGRESS_TYPE_EXPORT_AUTHORS    = 2;
@@ -54,7 +64,6 @@ public class FileBackupThread extends Thread {
     public static final int PROGRESS_TYPE_DOWNLOAD_AUTHORS  = 8;
     public static final int PROGRESS_TYPE_REGISTER          = 9;
 
-
     private static final String CLIENT_IDENTIFIER = "MyBookshelf/1.0";
 
     private static final String DROPBOX_APP_DIRECTORY_PATH = "/MyBookshelf/";
@@ -62,62 +71,14 @@ public class FileBackupThread extends Thread {
     private static final String FILE_NAME_BOOKS = "backup_books.csv";
     private static final String FILE_NAME_AUTHORS = "backup_authors.csv";
 
-
-    public static final int NO_ERROR                        = 0;
-    public static final int ERROR_FILE_NOT_FOUND            = 1;
-    public static final int ERROR_IO_EXCEPTION              = 2;
-    public static final int ERROR_DBX_EXCEPTION             = 3;
-    public static final int ERROR_PATTERN_SYNTAX_EXCEPTION  = 4;
-    public static final int ERROR_UNKNOWN                   = 5;
-    public static final int ERROR_INTERRUPTED_EXCEPTION     = 6;
-
-    private final int type;
+    private int type;
 
     private Result mResult;
     private ThreadFinishListener mListener;
     private LocalBroadcastManager mLocalBroadcastManager;
-    private MyBookshelfApplicationData mApplicationData;
+    private MyBookshelfPreferences mPreferences;
+    private MyBookshelfDBOpenHelper mDBOpenHelper;
     private boolean isCanceled;
-
-    public static final class Result {
-        private final boolean isSuccess;
-        private final int type;
-        private final int errorCode;
-        private final String errorMessage;
-
-        private Result(boolean isSuccess, int type, int errorCode, String errorMessage) {
-            this.isSuccess = isSuccess;
-            this.type = type;
-            this.errorCode = errorCode;
-            this.errorMessage = errorMessage;
-        }
-
-        public boolean isSuccess() {
-            return this.isSuccess;
-        }
-
-        public int getType() {
-            return this.type;
-        }
-
-        public int getErrorCode() {
-            return this.errorCode;
-        }
-
-        public String getErrorMessage() {
-            return this.errorMessage;
-        }
-
-        public static Result success(int type) {
-            return new Result(true, type, NO_ERROR, "no error");
-        }
-
-        public static Result error(int type, int errorCode, String errorMessage) {
-            return new Result(false, type, errorCode, errorMessage);
-        }
-
-    }
-
 
     public interface ThreadFinishListener {
         void deliverBackupResult(Result result);
@@ -127,7 +88,9 @@ public class FileBackupThread extends Thread {
     public FileBackupThread(Context context, int type) {
         this.type = type;
         this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
-        this.mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
+
         isCanceled = false;
         if (context instanceof ThreadFinishListener) {
             mListener = (ThreadFinishListener) context;
@@ -176,7 +139,7 @@ public class FileBackupThread extends Thread {
         if (!dir.exists()) {
             boolean isSuccess = dir.mkdirs();
             if (D) Log.d(TAG, "mkdirs(): " + isSuccess);
-            return Result.error(TYPE_EXPORT, ERROR_IO_EXCEPTION, "dir.mkdirs() failed");
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_IO_EXCEPTION, "dir.mkdirs() failed");
         }
 
         File file_books = new File(dirPath + FILE_NAME_BOOKS);
@@ -184,7 +147,7 @@ public class FileBackupThread extends Thread {
 
         try {
             // export books
-            List<BookData> books = mApplicationData.loadDatabaseBooks();
+            List<BookData> books = mDBOpenHelper.loadShelfBooks(null, BooksOrder.getShelfBooksOrder(BooksOrder.SHELF_BOOKS_ORDER_CODE_REGISTERED_ASC));
             count = 0;
             recodeCount = books.size();
             progress = count + "/" + recodeCount;
@@ -206,7 +169,7 @@ public class FileBackupThread extends Thread {
 
 
             // export authors
-            List<String> authors = mApplicationData.loadAuthorsList();
+            List<String> authors = mDBOpenHelper.loadAuthorsList();
             count = 0;
             recodeCount = authors.size();
             progress = count + "/" + recodeCount;
@@ -222,16 +185,16 @@ public class FileBackupThread extends Thread {
             bw_authors.flush();
             bw_authors.close();
 
-            return Result.success(TYPE_EXPORT);
+            return Result.BackupSuccess(TYPE_EXPORT);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return Result.error(TYPE_EXPORT, ERROR_FILE_NOT_FOUND, "FileNotFoundException");
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.error(TYPE_EXPORT, ERROR_IO_EXCEPTION, "IOException");
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_IO_EXCEPTION, "IOException");
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return Result.error(TYPE_EXPORT, ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
         }
     }
 
@@ -249,12 +212,12 @@ public class FileBackupThread extends Thread {
         File file_books = new File(dirPath + FILE_NAME_BOOKS);
         if (!file_books.exists()) {
             if (D) Log.e(TAG, "file_books not found");
-            return Result.error(TYPE_IMPORT, ERROR_FILE_NOT_FOUND, "file not found");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_FILE_NOT_FOUND, "file not found");
         }
         File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
         if (!file_authors.exists()) {
             if (D) Log.e(TAG, "file_authors not found");
-            return Result.error(TYPE_IMPORT, ERROR_FILE_NOT_FOUND, "file not found");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_FILE_NOT_FOUND, "file not found");
         }
 
         try {
@@ -292,29 +255,30 @@ public class FileBackupThread extends Thread {
 
             // register database
             sendProgressMessage(PROGRESS_TYPE_REGISTER, "");
-            mApplicationData.registerToShelfBooks(books);
-            mApplicationData.registerToAuthorsList(authors);
-
-            return Result.success(TYPE_IMPORT);
+            mDBOpenHelper.dropTableShelfBooks();
+            mDBOpenHelper.registerToShelfBooks(books);
+            mDBOpenHelper.dropTableAuthorsList();
+            mDBOpenHelper.registerToAuthorsList(authors);
+            return Result.BackupSuccess(TYPE_IMPORT);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return Result.error(TYPE_IMPORT, ERROR_FILE_NOT_FOUND, "FileNotFoundException");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.error(TYPE_IMPORT, ERROR_IO_EXCEPTION, "IOException");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_IO_EXCEPTION, "IOException");
         } catch (PatternSyntaxException e) {
             e.printStackTrace();
-            return Result.error(TYPE_IMPORT, ERROR_PATTERN_SYNTAX_EXCEPTION, "PatternSyntaxException");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_PATTERN_SYNTAX_EXCEPTION, "PatternSyntaxException");
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return Result.error(TYPE_IMPORT, ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
         }
     }
 
     private Result backupFile() {
-        String token = mApplicationData.getAccessToken();
+        String token = mPreferences.getAccessToken();
         if (token == null) {
-            return Result.error(TYPE_BACKUP, ERROR_DBX_EXCEPTION, "No token");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_DBX_EXCEPTION, "No token");
         }
         DbxRequestConfig config = new DbxRequestConfig(CLIENT_IDENTIFIER);
         DbxClientV2 mClient = new DbxClientV2(config, token);
@@ -324,12 +288,12 @@ public class FileBackupThread extends Thread {
         try {
             File file_books = new File(dirPath + FILE_NAME_BOOKS);
             if (!file_books.exists()) {
-                return Result.error(TYPE_BACKUP, ERROR_FILE_NOT_FOUND, "file_books not found");
+                return Result.BackupError(TYPE_BACKUP, Result.ERROR_FILE_NOT_FOUND, "file_books not found");
             }
             File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
             if (!file_authors.exists()) {
                 if (D) Log.e(TAG, "file_authors not found");
-                return Result.error(TYPE_BACKUP, ERROR_FILE_NOT_FOUND, "file_authors not found");
+                return Result.BackupError(TYPE_BACKUP, Result.ERROR_FILE_NOT_FOUND, "file_authors not found");
             }
 
             sendProgressMessage(PROGRESS_TYPE_UPLOAD_BOOKS, "0");
@@ -350,23 +314,23 @@ public class FileBackupThread extends Thread {
                 }
             });
 
-            return Result.success(TYPE_BACKUP);
+            return Result.BackupSuccess(TYPE_BACKUP);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return Result.error(TYPE_BACKUP, ERROR_FILE_NOT_FOUND, "FileNotFoundException");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.error(TYPE_BACKUP, ERROR_IO_EXCEPTION, "IOException");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_IO_EXCEPTION, "IOException");
         } catch (DbxException e) {
             e.printStackTrace();
-            return Result.error(TYPE_BACKUP, ERROR_DBX_EXCEPTION, "DbxException");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_DBX_EXCEPTION, "DbxException");
         }
     }
 
     private Result restoreFile() {
-        String token = mApplicationData.getAccessToken();
+        String token = mPreferences.getAccessToken();
         if (token == null) {
-            return Result.error(TYPE_BACKUP, ERROR_DBX_EXCEPTION, "No token");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_DBX_EXCEPTION, "No token");
         }
         DbxRequestConfig config = new DbxRequestConfig(CLIENT_IDENTIFIER);
         DbxClientV2 mClient = new DbxClientV2(config, token);
@@ -376,17 +340,17 @@ public class FileBackupThread extends Thread {
         if (!dir.exists()) {
             boolean isSuccess = dir.mkdirs();
             if (D) Log.d(TAG, "mkdirs(): " + isSuccess);
-            return Result.error(TYPE_IMPORT, ERROR_IO_EXCEPTION, "dir.mkdirs() failed");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_IO_EXCEPTION, "dir.mkdirs() failed");
         }
 
         try {
             Metadata metadata_books = getMetadata(mClient, FILE_NAME_BOOKS);
             if(metadata_books == null){
-                return Result.error(TYPE_RESTORE, ERROR_FILE_NOT_FOUND, "metadata_books not found");
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_FILE_NOT_FOUND, "metadata_books not found");
             }
             Metadata metadata_authors = getMetadata(mClient, FILE_NAME_AUTHORS);
             if(metadata_authors == null){
-                return Result.error(TYPE_RESTORE, ERROR_FILE_NOT_FOUND, "metadata_authors not found");
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_FILE_NOT_FOUND, "metadata_authors not found");
             }
 
             sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_BOOKS, "0");
@@ -409,22 +373,22 @@ public class FileBackupThread extends Thread {
                 }
             });
 
-            return Result.success(TYPE_RESTORE);
+            return Result.BackupSuccess(TYPE_RESTORE);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return Result.error(TYPE_RESTORE, ERROR_FILE_NOT_FOUND, "FileNotFoundException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.error(TYPE_RESTORE, ERROR_IO_EXCEPTION, "IOException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_IO_EXCEPTION, "IOException");
         } catch (DownloadErrorException e) {
             e.printStackTrace();
-            return Result.error(TYPE_RESTORE, ERROR_DBX_EXCEPTION, "DownloadErrorException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_DBX_EXCEPTION, "DownloadErrorException");
         } catch (SearchErrorException e) {
             e.printStackTrace();
-            return Result.error(TYPE_RESTORE, ERROR_DBX_EXCEPTION, "SearchErrorException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_DBX_EXCEPTION, "SearchErrorException");
         } catch (DbxException e) {
             e.printStackTrace();
-            return Result.error(TYPE_RESTORE, ERROR_DBX_EXCEPTION, "DbxException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_DBX_EXCEPTION, "DbxException");
         }
     }
 

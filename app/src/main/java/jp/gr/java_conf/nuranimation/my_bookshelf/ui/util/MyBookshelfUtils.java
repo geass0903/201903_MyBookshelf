@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.util;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -23,6 +23,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 
 
 @SuppressWarnings({"WeakerAccess"})
@@ -177,7 +180,7 @@ public class MyBookshelfUtils {
 
     public static BookData convertToBookData(JSONObject data) throws JSONException {
         BookData temp = new BookData();
-        temp.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+        temp.setView_type(BookData.TYPE_BOOK);
         String title = getStringParam(data, BookData.JSON_KEY_TITLE);
         temp.setTitle(title);
         String author = getStringParam(data, BookData.JSON_KEY_AUTHOR);

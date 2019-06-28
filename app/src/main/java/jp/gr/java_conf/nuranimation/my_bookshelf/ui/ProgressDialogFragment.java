@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -9,6 +9,8 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 public class ProgressDialogFragment extends DialogFragment{
     private static final boolean D = true;

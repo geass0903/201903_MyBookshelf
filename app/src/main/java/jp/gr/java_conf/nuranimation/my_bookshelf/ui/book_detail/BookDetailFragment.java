@@ -1,9 +1,7 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -32,6 +30,17 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ReadStatusSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDatePickerFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+
 
 public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener, BaseDialogFragment.OnBaseDialogListener{
     public static final String TAG = BookDetailFragment.class.getSimpleName();
@@ -45,7 +54,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     public static final String KEY_SAVED_BOOK = "KEY_SAVED_BOOK";
     public static final String KEY_SAVED_POSITION = "KEY_SAVED_POSITION";
 
-    private MyBookshelfApplicationData mApplicationData;
+    private MyBookshelfDBOpenHelper mDBOpenHelper;
 
     private SimpleDraweeView mBookImageView;
     private ReadStatusSpinnerArrayAdapter mArrayAdapter;
@@ -75,7 +84,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
     }
 
 
@@ -157,7 +166,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
             String registerDate = sdf.format(calendar.getTime());
             book.setRegisterDate(registerDate);
-            mApplicationData.registerToShelfBooks(book);
+            mDBOpenHelper.registerToShelfBooks(book);
             Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
             if(getFragmentListener() != null){
                 getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK_BOOK_DETAIL, null);
@@ -352,10 +361,11 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private void showDatePicker(int requestCode,String date){
         if(getActivity() != null){
-            Bundle mBundle_DatePicker = new BundleBuilder()
-                    .put(BaseDatePickerFragment.KEY_DATE,date)
-                    .put(BaseDatePickerFragment.KEY_REQUEST_CODE,requestCode)
-                    .build();
+            Bundle mBundle_DatePicker = new Bundle();
+            mBundle_DatePicker.putString(BaseDatePickerFragment.KEY_DATE, date);
+            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_REQUEST_CODE, requestCode);
+
+
             FragmentManager manager = getActivity().getSupportFragmentManager();
             BaseDatePickerFragment mDatePicker = BaseDatePickerFragment.newInstance(this,mBundle_DatePicker);
             mDatePicker.show(manager, BaseDatePickerFragment.TAG);
@@ -364,14 +374,13 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private void showDeleteDateDialog(int requestCode) {
         if (getActivity() != null) {
-            Bundle bundle = new BundleBuilder()
-                    .put(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date))
-                    .put(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date))
-                    .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive))
-                    .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative))
-                    .put(BaseDialogFragment.KEY_REQUEST_CODE, requestCode)
-                    .put(BaseDialogFragment.KEY_CANCELABLE, true)
-                    .build();
+            Bundle bundle = new Bundle();
+            bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date));
+            bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date));
+            bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+            bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+            bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, requestCode);
+            bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
             FragmentManager manager = getActivity().getSupportFragmentManager();
             BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
             fragment.show(manager, BaseDialogFragment.TAG);
@@ -384,16 +393,11 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private List<SpinnerItem> getSpinnerItem_ReadStatus() {
         List<SpinnerItem> list = new ArrayList<>();
-        Resources res = getResources();
-        TypedArray array = res.obtainTypedArray(R.array.read_status_spinner);
-        for (int i = 0; i < array.length(); ++i) {
-            int id = array.getResourceId(i, -1);
-            if (id > -1) {
-                String[] item = res.getStringArray(id);
-                list.add(new SpinnerItem(item[0], item[1]));
-            }
-        }
-        array.recycle();
+        list.add(new SpinnerItem(BookData.STATUS_INTERESTED,    getString(R.string.read_status_label_1)));
+        list.add(new SpinnerItem(BookData.STATUS_UNREAD,        getString(R.string.read_status_label_2)));
+        list.add(new SpinnerItem(BookData.STATUS_READING,       getString(R.string.read_status_label_3)));
+        list.add(new SpinnerItem(BookData.STATUS_ALREADY_READ,  getString(R.string.read_status_label_4)));
+        list.add(new SpinnerItem(BookData.STATUS_NONE,          getString(R.string.read_status_label_5)));
         return list;
     }
 

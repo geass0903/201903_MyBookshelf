@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui;
 
 
 import android.os.Bundle;
@@ -7,6 +7,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.new_books.NewBooksFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.search_books.SearchBooksFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.settings.SettingsFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.shelf_books.ShelfBooksFragment;
 
 public enum MyBookshelfEvent {
     SELECT_SHELF_BOOKS {

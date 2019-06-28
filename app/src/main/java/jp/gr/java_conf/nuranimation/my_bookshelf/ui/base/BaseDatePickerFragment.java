@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.base;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

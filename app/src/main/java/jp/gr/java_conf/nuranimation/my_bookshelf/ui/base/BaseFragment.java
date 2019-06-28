@@ -1,5 +1,6 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.base;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,7 +15,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +25,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 
 
 public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseDialogListener {
@@ -55,13 +61,13 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     private static final String KEY_BUNDLE_PERMISSION_DIALOG    = "KEY_BUNDLE_PERMISSION_DIALOG";
     private static final String KEY_IS_SHOW_REQUEST_PERMISSION  = "KEY_IS_SHOW_REQUEST_PERMISSION";
 
+    protected static final String[] USE_PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver mReceiver;
     private IntentFilter mIntentFilter;
 
     private PausedHandler handler = new PausedHandler(this);
-    private AppCompatActivity mActivity = null;
     private FragmentListener mFragmentListener = null;
     private boolean isShowingProgressDialog;
     private boolean isShowingPermissionDialog;
@@ -72,9 +78,10 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     private ProgressDialogFragment mProgressDialogFragment;
     private BaseDialogFragment mPermissionDialogFragment;
     private boolean isClickEnabled = true;
-    private MyBookshelfApplicationData mApplicationData;
 
-    @SuppressWarnings("unused")
+    private MyBookshelfPreferences mPreferences;
+
+
     public interface FragmentListener {
         void onFragmentEvent(MyBookshelfEvent event, Bundle bundle);
     }
@@ -86,23 +93,16 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mApplicationData = (MyBookshelfApplicationData) context.getApplicationContext();
+        mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
         mReceiver = new LocalReceiver();
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(FILTER_ACTION_UPDATE_SERVICE_STATE);
         mIntentFilter.addAction(FILTER_ACTION_UPDATE_PROGRESS);
-
         if (context instanceof FragmentListener) {
             mFragmentListener = (FragmentListener) context;
         } else {
             throw new UnsupportedOperationException("Listener is not Implementation.");
-        }
-
-        if (context instanceof AppCompatActivity) {
-            mActivity = (MainActivity) context;
-        } else {
-            throw new UnsupportedOperationException("Activity is not Implementation.");
         }
     }
 
@@ -133,11 +133,11 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
             if (isShowingPermissionDialog) {
                 showPermissionDialog();
             } else {
-                if (!mApplicationData.isCheckedPermissions()) {
-                    mApplicationData.setCheckedPermissions(true);
-                    if (!isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+                if (!mPreferences.isCheckedPermissions()) {
+                    mPreferences.setCheckedPermissions(true);
+                    if (!isAllowedAllPermissions(USE_PERMISSIONS)) {
                         if (D) Log.d(TAG, "requestPermissions");
-                        requestPermissions(mApplicationData.getUse_Permissions());
+                        requestPermissions(USE_PERMISSIONS);
                     } else {
                         if (D) Log.d(TAG, "AllowedAllPermissions");
                     }
@@ -208,10 +208,9 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         }
         if (!TextUtils.isEmpty(title)) {
             isShowingProgressDialog = true;
-            mBundleProgressDialog = new BundleBuilder()
-                    .put(ProgressDialogFragment.title, title)
-                    .put(ProgressDialogFragment.message, "")
-                    .build();
+            mBundleProgressDialog = new Bundle();
+            mBundleProgressDialog.putString(ProgressDialogFragment.title, title);
+            mBundleProgressDialog.putString(ProgressDialogFragment.message, "");
         }
     }
 
@@ -306,17 +305,16 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     private void showRationaleFragment() {
         String message = getString(R.string.permission_dialog_message) + "\n"
                 + getString(R.string.permission_dialog_message1) + "\n"
-                + getString(R.string.permission_dialog_message2) + "\n"
-                + getString(R.string.permission_dialog_message3);
+                + getString(R.string.permission_dialog_message2);
         isShowingPermissionDialog = true;
-        mBundlePermissionDialog = new BundleBuilder()
-                .put(BaseDialogFragment.KEY_TITLE, getString(R.string.permission_dialog_title))
-                .put(BaseDialogFragment.KEY_MESSAGE, message)
-                .put(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive))
-                .put(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative))
-                .put(BaseDialogFragment.KEY_CANCELABLE, true)
-                .put(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS)
-                .build();
+
+        mBundlePermissionDialog = new Bundle();
+        mBundlePermissionDialog.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.permission_dialog_title));
+        mBundlePermissionDialog.putString(BaseDialogFragment.KEY_MESSAGE, message);
+        mBundlePermissionDialog.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+        mBundlePermissionDialog.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+        mBundlePermissionDialog.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
+        mBundlePermissionDialog.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS);
         showPermissionDialog();
     }
 
@@ -381,9 +379,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         // 保持していたパーミッションを破棄
         setRequestPermissions(null);
         isShowingRequestPermission = false;
-        mApplicationData.setCheckedPermissions(true);
 
-        if (isAllowedAllPermissions(mApplicationData.getUse_Permissions())) {
+        if (isAllowedAllPermissions(USE_PERMISSIONS)) {
             onAllowAllPermissions();
         }else{
             onDenyPermissions();
@@ -416,12 +413,6 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         }
     }
 
-    @SuppressWarnings({"unused"})
-    protected AppCompatActivity getAppCompatActivity(){
-        return mActivity;
-    }
-
-    @SuppressWarnings({"unused"})
     protected FragmentListener getFragmentListener(){
         return mFragmentListener;
     }
@@ -441,7 +432,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         return isClickEnabled;
     }
 
-    Runnable enableClick = new Runnable() {
+    private Runnable enableClick = new Runnable() {
         @Override
         public void run() {
             if(D) Log.d(TAG,"click enable");
@@ -450,10 +441,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     };
 
 
-
     public static class PausedHandler extends Handler {
         private final WeakReference<BaseFragment> mWeakReference;
-
         private Queue<Message> mQueue = new LinkedList<>();
         private boolean isPaused;
 
@@ -555,14 +544,11 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
 
     }
 
-
-
     private class LocalReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             onReceiveBroadcast(context, intent);
         }
     }
-
 
 }

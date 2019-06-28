@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.net;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -19,19 +19,14 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-@SuppressWarnings({"WeakerAccess","unused"})
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+
+@SuppressWarnings({"unused"})
 public class SearchBooksThread extends Thread {
     private static final String TAG = SearchBooksThread.class.getSimpleName();
     private static final boolean D = false;
-
-    public static final int NO_ERROR                    = 0;
-    public static final int ERROR_EMPTY_KEYWORD         = 1;
-    public static final int ERROR_HTTP_ERROR            = 2;
-    public static final int ERROR_INTERRUPTED_EXCEPTION = 3;
-    public static final int ERROR_IO_EXCEPTION          = 4;
-    public static final int ERROR_JSON_EXCEPTION        = 5;
-    public static final int ERROR_UNKNOWN               = 6;
-
 
     private static final String urlBase = "https://app.rakuten.co.jp/services/api/BooksTotal/Search/20170404?applicationId=1028251347039610250";
     private static final String urlFormat = "&format=" + "json";
@@ -46,51 +41,6 @@ public class SearchBooksThread extends Thread {
     private boolean isCanceled;
     private Result mResult;
     private ThreadFinishListener mListener;
-
-    public static final class Result {
-        private final boolean isSuccess;
-        private final int errorCode;
-        private final String errorMessage;
-        private final boolean hasNext;
-        private final List<BookData> books;
-
-        private Result(boolean isSuccess, int errorCode, String errorMessage, boolean hasNext, List<BookData> books) {
-            this.isSuccess = isSuccess;
-            this.errorCode = errorCode;
-            this.errorMessage = errorMessage;
-            this.hasNext = hasNext;
-            this.books = books;
-        }
-
-        public boolean isSuccess() {
-            return this.isSuccess;
-        }
-
-        public int getErrorCode() {
-            return this.errorCode;
-        }
-
-        public String getErrorMessage() {
-            return this.errorMessage;
-        }
-
-        public boolean hasNext() {
-            return this.hasNext;
-        }
-
-        public List<BookData> getBooks() {
-            return new ArrayList<>(this.books);
-        }
-
-        public static Result success(boolean hasNext, List<BookData> books) {
-            return new Result(true, NO_ERROR, "no error", hasNext, books);
-        }
-
-        public static Result error(int errorCode, String errorMessage) {
-            return new Result(false, errorCode, errorMessage, false, null);
-        }
-
-    }
 
     public interface ThreadFinishListener {
         void deliverSearchBooksResult(Result result);
@@ -129,7 +79,7 @@ public class SearchBooksThread extends Thread {
                 }
                 Thread.sleep(1000);
                 if (TextUtils.isEmpty(keyword)) {
-                    mResult = Result.error(ERROR_EMPTY_KEYWORD, "empty keyword");
+                    mResult = Result.SearchError(Result.ERROR_EMPTY_KEYWORD, "empty keyword");
                     break;
                 }
 
@@ -176,9 +126,9 @@ public class SearchBooksThread extends Thread {
                             }
                             boolean hasNext = count - last > 0;
                             List<BookData> books = new ArrayList<>(tmp);
-                            mResult = Result.success(hasNext, books);
+                            mResult = Result.SearchSuccess(books, hasNext);
                         }else{
-                            mResult = Result.error(ERROR_IO_EXCEPTION, "JSONException");
+                            mResult = Result.SearchError(Result.ERROR_IO_EXCEPTION, "JSONException");
                         }
                         break;
                     case HttpURLConnection.HTTP_BAD_REQUEST:    // 400 wrong parameter
@@ -192,26 +142,26 @@ public class SearchBooksThread extends Thread {
                         }
                         reader.close();
                         JSONObject errorJSON = new JSONObject(sb.toString());
-                        if (errorJSON.has(BookData.JSON_KEY_ERROR_DESCRIPTION)) {
+                        if(errorJSON.has(BookData.JSON_KEY_ERROR) && errorJSON.has(BookData.JSON_KEY_ERROR_DESCRIPTION)){
                             String errorMessage = errorJSON.getString(BookData.JSON_KEY_ERROR_DESCRIPTION);
-                            mResult = Result.error(ERROR_HTTP_ERROR, errorMessage);
-                        }else{
-                            mResult = Result.error(ERROR_IO_EXCEPTION, "JSONException");
+                            mResult = Result.SearchError(Result.ERROR_HTTP_ERROR, errorMessage);
+                        }else {
+                            mResult = Result.SearchError(Result.ERROR_IO_EXCEPTION, "JSONException");
                         }
                         break;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "InterruptedException");
-                mResult = Result.error(ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
+                mResult = Result.SearchError(Result.ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
             } catch (IOException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "IOException");
-                mResult = Result.error(ERROR_IO_EXCEPTION, "IOException");
+                mResult = Result.SearchError(Result.ERROR_IO_EXCEPTION, "IOException");
             } catch (JSONException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "JSONException");
-                mResult = Result.error(ERROR_JSON_EXCEPTION, "JSONException");
+                mResult = Result.SearchError(Result.ERROR_JSON_EXCEPTION, "JSONException");
             } finally {
                 if (connection != null) {
                     connection.disconnect();

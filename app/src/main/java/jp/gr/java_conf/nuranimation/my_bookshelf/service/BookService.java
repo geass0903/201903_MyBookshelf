@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -14,6 +14,17 @@ import android.util.Log;
 import com.dropbox.core.android.Auth;
 
 import java.util.List;
+
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.NewBooksThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.SearchBooksThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 
 
 public class BookService extends Service implements SearchBooksThread.ThreadFinishListener, NewBooksThread.ThreadFinishListener, FileBackupThread.ThreadFinishListener {
@@ -44,13 +55,14 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private static final int notifyId = 1;
     private NotificationManager mNotificationManager;
     private LocalBroadcastManager mLocalBroadcastManager;
-    private MyBookshelfApplicationData mApplicationData;
+    private MyBookshelfDBOpenHelper mDBOpenHelper;
+    private MyBookshelfPreferences mPreferences;
     private SearchBooksThread searchBooksThread;
-    private SearchBooksThread.Result mSearchBooksResult;
+    private Result mSearchBooksResult;
     private NewBooksThread newBooksThread;
-    private NewBooksThread.Result mNewBooksResult;
+    private Result mNewBooksResult;
     private FileBackupThread fileBackupThread;
-    private FileBackupThread.Result mFileBackupResult;
+    private Result mFileBackupResult;
 
     private String mParamSEARCH_KEYWORD;
     private int mParamSEARCH_PAGE;
@@ -90,7 +102,8 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public void onCreate() {
         if (D) Log.d(TAG, "onCreate");
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-        mApplicationData = (MyBookshelfApplicationData) this.getApplicationContext();
+        mDBOpenHelper = new MyBookshelfDBOpenHelper(this.getApplicationContext());
+        mPreferences = new MyBookshelfPreferences(this.getApplicationContext());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
@@ -126,11 +139,11 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
 
     @Override
-    public void deliverSearchBooksResult(SearchBooksThread.Result result) {
+    public void deliverSearchBooksResult(Result result) {
         if(mState == STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE){
             mSearchBooksResult = result;
             if (result.isSuccess()) {
-                mApplicationData.registerToSearchBooks(result.getBooks());
+                mDBOpenHelper.registerToSearchBooks(result.getBooks());
             }
             setServiceState(STATE_SEARCH_BOOKS_SEARCH_COMPLETE);
         }else{
@@ -140,11 +153,12 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     }
 
     @Override
-    public void deliverNewBooksResult(NewBooksThread.Result result) {
+    public void deliverNewBooksResult(Result result) {
         if(mState == STATE_NEW_BOOKS_RELOAD_INCOMPLETE) {
             mNewBooksResult = result;
             if (result.isSuccess()) {
-                mApplicationData.registerToNewBooks(result.getBooks());
+                mDBOpenHelper.dropTableNewBooks();
+                mDBOpenHelper.registerToNewBooks(result.getBooks());
             }
             setServiceState(STATE_NEW_BOOKS_RELOAD_COMPLETE);
         }else{
@@ -154,7 +168,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     }
 
     @Override
-    public void deliverBackupResult(FileBackupThread.Result result) {
+    public void deliverBackupResult(Result result) {
         switch (mState) {
             case STATE_EXPORT_INCOMPLETE:
                 mFileBackupResult = result;
@@ -272,13 +286,13 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public void searchBooks(final String keyword, final int page){
         setServiceState(STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
         setSearchParam(keyword, page);
-        searchBooksThread = new SearchBooksThread(this, keyword, page, mApplicationData.getSearchBooksOrder());
+        searchBooksThread = new SearchBooksThread(this, keyword, page, BooksOrder.getSearchBooksOrder(mPreferences.getSearchBooksOrderCode()));
         searchBooksThread.start();
     }
 
-    public SearchBooksThread.Result getSearchBooksResult(){
+    public Result getSearchBooksResult(){
         if(mSearchBooksResult == null){
-            return SearchBooksThread.Result.error(SearchBooksThread.ERROR_UNKNOWN, "get result failed");
+            return Result.SearchError(Result.ERROR_UNKNOWN, "get result failed");
         }
         return mSearchBooksResult;
     }
@@ -289,9 +303,9 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         newBooksThread.start();
     }
 
-    public NewBooksThread.Result getNewBooksResult(){
+    public Result getNewBooksResult(){
         if(mNewBooksResult == null){
-            return NewBooksThread.Result.error(NewBooksThread.ERROR_UNKNOWN, "get result failed");
+            return Result.ReloadError(Result.ERROR_UNKNOWN, "get result failed");
         }
         return mNewBooksResult;
     }
@@ -323,9 +337,9 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
         fileBackupThread.start();
     }
 
-    public FileBackupThread.Result getFileBackupResult(){
+    public Result getFileBackupResult(){
         if(mFileBackupResult == null){
-            return FileBackupThread.Result.error(FileBackupThread.TYPE_UNKNOWN,FileBackupThread.ERROR_UNKNOWN,"get result failed");
+            return Result.BackupError(FileBackupThread.TYPE_UNKNOWN,Result.ERROR_UNKNOWN,"get result failed");
         }
         return mFileBackupResult;
     }
