@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.entity;
 
 public final class SpinnerItem {
     private final String mCode;

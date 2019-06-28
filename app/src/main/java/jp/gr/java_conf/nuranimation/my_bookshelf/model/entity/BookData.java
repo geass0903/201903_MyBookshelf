@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -6,8 +6,12 @@ import android.support.annotation.Nullable;
 
 import java.util.Locale;
 
-@SuppressWarnings({"WeakerAccess","unused"})
 public class BookData implements Parcelable {
+
+    public static final int TYPE_EMPTY             = 0;
+    public static final int TYPE_BOOK              = 1;
+    public static final int TYPE_BUTTON_LOAD       = 2;
+    public static final int TYPE_VIEW_LOADING      = 3;
 
     public static final String JSON_KEY_ITEMS = "Items";
     public static final String JSON_KEY_COUNT = "count";
@@ -24,12 +28,12 @@ public class BookData implements Parcelable {
     public static final String JSON_KEY_IMAGE_URL = "largeImageUrl";
     public static final String JSON_KEY_REVIEW_AVERAGE = "reviewAverage";
 
-    public static final String STATUS_UNREGISTERED = "0";
-    public static final String STATUS_INTERESTED = "1";
-    public static final String STATUS_UNREAD = "2";
-    public static final String STATUS_READING = "3";
-    public static final String STATUS_ALREADY_READ = "4";
-    public static final String STATUS_NONE = "5";
+    public static final String STATUS_UNREGISTERED  = "0";
+    public static final String STATUS_INTERESTED    = "1";
+    public static final String STATUS_UNREAD        = "2";
+    public static final String STATUS_READING       = "3";
+    public static final String STATUS_ALREADY_READ  = "4";
+    public static final String STATUS_NONE          = "5";
 
     private int view_type;
     private String ISBN;
@@ -68,26 +72,6 @@ public class BookData implements Parcelable {
             this.registerDate = book.getRegisterDate();
         }
     }
-
-    @SuppressWarnings("unused")
-    public BookData(int view_type, String ISBN, String title, String image, String author, String publisher, String salesDate, String itemPrice,
-             String rakutenUrl, String rating, String readStatus, String tags, String finishReadDate, String registerDate){
-        this.view_type = view_type;
-        this.ISBN = ISBN;
-        this.title = title;
-        this.image = image;
-        this.author = author;
-        this.publisher = publisher;
-        this.salesDate = salesDate;
-        this.itemPrice = itemPrice;
-        this.rakutenUrl = rakutenUrl;
-        this.rating = rating;
-        this.readStatus = readStatus;
-        this.tags = tags;
-        this.finishReadDate = finishReadDate;
-        this.registerDate = registerDate;
-    }
-
 
     public void setView_type(int type){
         this.view_type = type;
@@ -168,8 +152,6 @@ public class BookData implements Parcelable {
     public String getReadStatus() {
         return readStatus;
     }
-
-
 
     public void setTags(String tags) {
         this.tags = tags;
