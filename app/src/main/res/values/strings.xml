@@ -1,7 +1,6 @@
 <resources>
     <!-- Application -->
     <string name="app_name">My Bookshelf</string>
-    <string name="dropbox_key">fh2si4dchz272b1</string>
 
     <!-- Dialog -->
     <string name="dialog_button_label_positive">はい</string>
@@ -19,9 +18,8 @@
     <!-- Permission -->
     <string name="permission_dialog_title">ストレージの書き込み権限取得許可</string>
     <string name="permission_dialog_message">以下の機能の使用には書き込み権限が必要です</string>
-    <string name="permission_dialog_message1">・表紙画像の保存(パケット通信量の節約)</string>
-    <string name="permission_dialog_message2">・本棚のインポート・エクスポート機能</string>
-    <string name="permission_dialog_message3">・Dropbox連携</string>
+    <string name="permission_dialog_message1">・本棚のインポート・エクスポート機能</string>
+    <string name="permission_dialog_message2">・Dropboxへのバックアップ・リストア機能</string>
 
     <!-- Toast -->
     <string name="toast_failed">エラーが発生しました</string>
