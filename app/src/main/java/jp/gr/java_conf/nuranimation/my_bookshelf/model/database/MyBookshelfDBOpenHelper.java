@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,7 +11,10 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"WeakerAccess","unused"})
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+
+
+@SuppressWarnings({"unused"})
 public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     public static final String TAG = MyBookshelfDBOpenHelper.class.getSimpleName();
     private static final boolean D = true;
@@ -92,9 +95,16 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + KEY_REGISTER_DATE + " text"  // 登録日
             + ");";
 
+    private static final String DROP_TABLE_TABLE_AUTHOR = "drop table " + TABLE_AUTHORS + ";";
+    private static final String DROP_TABLE_SHELF_BOOKS  = "drop table " + TABLE_SHELF_BOOKS + ";";
+    private static final String DROP_TABLE_SEARCH_BOOKS = "drop table " + TABLE_SEARCH_BOOKS+ ";";
+    private static final String DROP_TABLE_NEW_BOOKS    = "drop table " + TABLE_NEW_BOOKS + ";";
+
+
     public MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -107,30 +117,30 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        dropTable(TABLE_AUTHORS);
-        dropTable(TABLE_SHELF_BOOKS);
-        dropTable(TABLE_SEARCH_BOOKS);
-        dropTable(TABLE_NEW_BOOKS);
+        // UPDATE
     }
 
     private void dropTable(final String table){
         SQLiteDatabase db = this.getWritableDatabase();
-        String drop = "drop table " + table + ";";
-        db.execSQL(drop);
         switch(table){
             case TABLE_AUTHORS:
+                db.execSQL(DROP_TABLE_TABLE_AUTHOR);
                 db.execSQL(CREATE_TABLE_AUTHOR);
                 break;
             case TABLE_SHELF_BOOKS:
+                db.execSQL(DROP_TABLE_SHELF_BOOKS);
                 db.execSQL(CREATE_TABLE_SHELF_BOOKS);
                 break;
             case TABLE_SEARCH_BOOKS:
+                db.execSQL(DROP_TABLE_SEARCH_BOOKS);
                 db.execSQL(CREATE_TABLE_SEARCH_BOOKS);
                 break;
             case TABLE_NEW_BOOKS:
+                db.execSQL(DROP_TABLE_NEW_BOOKS);
                 db.execSQL(CREATE_TABLE_NEW_BOOKS);
                 break;
         }
+        db.close();
     }
 
     private void registerBook(final String table, final BookData book) {
@@ -163,16 +173,13 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 db.insert(table, "", insertValues);
             }
             c.close();
+            db.close();
         }
     }
 
     private void registerBooks(final String table, final List<BookData> books){
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
-
-        if (TABLE_NEW_BOOKS.equals(table)) {
-            dropTable(TABLE_NEW_BOOKS);
-        }
 
         for (BookData book : books) {
             if (book != null && !TextUtils.isEmpty(book.getISBN())) {
@@ -207,6 +214,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
         db.setTransactionSuccessful();
         db.endTransaction();
+        db.close();
     }
 
     private void unregisterBook(final String table, final BookData book){
@@ -222,34 +230,63 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 db.delete(TABLE_SHELF_BOOKS, sql_ISBN, new String[]{ISBN});
             }
             c.close();
+            db.close();
         }
+    }
+
+    private BookData loadBookData(String table, BookData book){
+        BookData result = new BookData();
+        result.setView_type(BookData.TYPE_EMPTY);
+        if(book == null || TextUtils.isEmpty(book.getISBN())){
+            return result;
+        }
+        String ISBN = book.getISBN();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
+        Cursor c = db.rawQuery(sql, new String[]{ISBN});
+        boolean mov = c.moveToFirst();
+        if (mov) {
+            result.setView_type(BookData.TYPE_BOOK);
+            result.setISBN(c.getString(c.getColumnIndex(KEY_ISBN)));
+            result.setImage(c.getString(c.getColumnIndex(KEY_IMAGES)));
+            result.setTitle(c.getString(c.getColumnIndex(KEY_TITLE)));
+            result.setAuthor(c.getString(c.getColumnIndex(KEY_AUTHOR)));
+            result.setPublisher(c.getString(c.getColumnIndex(KEY_PUBLISHER)));
+            result.setSalesDate(c.getString(c.getColumnIndex(KEY_RELEASE_DATE)));
+            result.setItemPrice(c.getString(c.getColumnIndex(KEY_PRICE)));
+            result.setRakutenUrl(c.getString(c.getColumnIndex(KEY_RAKUTEN_URL)));
+            result.setRating(c.getString(c.getColumnIndex(KEY_RATING)));
+            result.setReadStatus(c.getString(c.getColumnIndex(KEY_READ_STATUS)));
+            result.setTags(c.getString(c.getColumnIndex(KEY_TAGS)));
+            result.setFinishReadDate(c.getString(c.getColumnIndex(KEY_FINISH_READ_DATE)));
+            result.setRegisterDate(c.getString(c.getColumnIndex(KEY_REGISTER_DATE)));
+        }
+        c.close();
+        db.close();
+        return result;
     }
 
     private List<BookData> loadBooks(final String table, final String keyword, final String order) {
         List<BookData> books = new ArrayList<>(1000);
-        String where = "";
+        String sql_where = "";
         if (!TextUtils.isEmpty(keyword)) {
-            where = " where "
+            sql_where = " where "
                     + KEY_TITLE + " like " + "'%" + keyword + "%'" + " or "
                     + KEY_AUTHOR + " like " + "'%" + keyword + "%'" + " or "
                     + KEY_ISBN + " = " + "'" + keyword + "'";
         }
-
-        String sql = "select * from " + table;
-        if(!TextUtils.isEmpty(where)){
-            sql = sql + where;
+        String sql_order = "";
+        if( !TextUtils.isEmpty(order)){
+            sql_order = order;
         }
-        if(!TextUtils.isEmpty(order)){
-            sql = sql + order;
-        }
-        sql = sql + ";";
 
+        String sql = "select * from " + table + sql_where + sql_order + ";";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(sql, null);
         boolean mov = c.moveToFirst();
         while (mov) {
             BookData book = new BookData();
-            book.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
+            book.setView_type(BookData.TYPE_BOOK);
             book.setISBN(c.getString(c.getColumnIndex(KEY_ISBN)));
             book.setImage(c.getString(c.getColumnIndex(KEY_IMAGES)));
             book.setTitle(c.getString(c.getColumnIndex(KEY_TITLE)));
@@ -267,48 +304,9 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             mov = c.moveToNext();
         }
         c.close();
+        db.close();
         return books;
     }
-
-    private BookData loadBookData(String table, BookData book){
-        if(book == null){
-            return null;
-        }
-        if(TextUtils.isEmpty(book.getISBN())){
-            return null;
-        }
-        String ISBN = book.getISBN();
-        BookData result = null;
-        SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
-        Cursor c = db.rawQuery(sql, new String[]{ISBN});
-        boolean mov = c.moveToFirst();
-        if (mov) {
-            result = new BookData();
-            result.setView_type(BooksListViewAdapter.VIEW_TYPE_BOOK);
-            result.setISBN(c.getString(c.getColumnIndex(KEY_ISBN)));
-            result.setImage(c.getString(c.getColumnIndex(KEY_IMAGES)));
-            result.setTitle(c.getString(c.getColumnIndex(KEY_TITLE)));
-            result.setAuthor(c.getString(c.getColumnIndex(KEY_AUTHOR)));
-            result.setPublisher(c.getString(c.getColumnIndex(KEY_PUBLISHER)));
-            result.setSalesDate(c.getString(c.getColumnIndex(KEY_RELEASE_DATE)));
-            result.setItemPrice(c.getString(c.getColumnIndex(KEY_PRICE)));
-            result.setRakutenUrl(c.getString(c.getColumnIndex(KEY_RAKUTEN_URL)));
-            result.setRating(c.getString(c.getColumnIndex(KEY_RATING)));
-            result.setReadStatus(c.getString(c.getColumnIndex(KEY_READ_STATUS)));
-            result.setTags(c.getString(c.getColumnIndex(KEY_TAGS)));
-            result.setFinishReadDate(c.getString(c.getColumnIndex(KEY_FINISH_READ_DATE)));
-            result.setRegisterDate(c.getString(c.getColumnIndex(KEY_REGISTER_DATE)));
-        }
-        c.close();
-        return result;
-    }
-
-
-
-
-
-
 
 
 
@@ -334,6 +332,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 db.insert(TABLE_AUTHORS, "", insertValues);
             }
             c.close();
+            db.close();
         }
     }
 
@@ -360,6 +359,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
         db.setTransactionSuccessful();
         db.endTransaction();
+        db.close();
     }
 
     public List<String> loadAuthorsList() {
@@ -373,6 +373,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             mov = c.moveToNext();
         }
         c.close();
+        db.close();
         return authors;
     }
 
@@ -401,7 +402,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     public void unregisterFromShelfBooks(BookData book) {
         unregisterBook(TABLE_SHELF_BOOKS, book);
     }
-
 
 
     /* --- SearchBooks --- */
@@ -455,48 +455,6 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     public void unregisterFromNewBooks(BookData book) {
         unregisterBook(TABLE_NEW_BOOKS, book);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
