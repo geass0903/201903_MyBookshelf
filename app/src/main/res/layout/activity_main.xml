@@ -6,7 +6,7 @@
     android:id="@+id/activity_main_contents"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity">
+    tools:context="jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity">
 
     <LinearLayout
         android:orientation="vertical"
