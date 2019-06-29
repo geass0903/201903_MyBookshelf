@@ -4,16 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Result{
-    public static final int ERROR_IO_EXCEPTION              =  1;
-    public static final int ERROR_INTERRUPTED_EXCEPTION     =  2;
-    public static final int ERROR_PATTERN_SYNTAX_EXCEPTION  =  3;
-    public static final int ERROR_JSON_EXCEPTION            =  4;
-    public static final int ERROR_DBX_EXCEPTION             =  5;
-    public static final int ERROR_HTTP_ERROR                =  6;
-    public static final int ERROR_FILE_NOT_FOUND            =  7;
-    public static final int ERROR_EMPTY_KEYWORD             =  8;
-    public static final int ERROR_EMPTY_AUTHORS_LIST        =  9;
-    public static final int ERROR_UNKNOWN                   = 10;
+    public static final int ERROR_CODE_IO_EXCEPTION             =   1;
+    public static final int ERROR_CODE_JSON_EXCEPTION           =   2;
+    public static final int ERROR_CODE_DBX_EXCEPTION            =   3;
+    public static final int ERROR_CODE_HTTP_ERROR               =   4;
+    public static final int ERROR_CODE_INTERRUPTED_EXCEPTION    =   5;
+    public static final int ERROR_CODE_FILE_NOT_FOUND           =   6;
+    public static final int ERROR_CODE_EMPTY_KEYWORD            =   7;
+    public static final int ERROR_CODE_EMPTY_AUTHORS_LIST       =   8;
+    public static final int ERROR_CODE_EXPORT_DIR_NOT_FOUND     =   9;
+    public static final int ERROR_CODE_EXPORT_CANCELED          =  10;
+    public static final int ERROR_CODE_IMPORT_DIR_NOT_FOUND     =  11;
+    public static final int ERROR_CODE_IMPORT_CANCELED          =  12;
+    public static final int ERROR_CODE_UPLOAD_DIR_NOT_FOUND     =  13;
+    public static final int ERROR_CODE_UPLOAD_CANCELED          =  14;
+    public static final int ERROR_CODE_DOWNLOAD_DIR_NOT_FOUND   =  15;
+    public static final int ERROR_CODE_DOWNLOAD_CANCELED        =  16;
+
+    public static final int ERROR_CODE_UNKNOWN                  = 100;
 
 
     private final boolean isSuccess;

@@ -19,7 +19,7 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 
@@ -79,7 +79,7 @@ public class SearchBooksThread extends Thread {
                 }
                 Thread.sleep(1000);
                 if (TextUtils.isEmpty(keyword)) {
-                    mResult = Result.SearchError(Result.ERROR_EMPTY_KEYWORD, "empty keyword");
+                    mResult = Result.SearchError(Result.ERROR_CODE_EMPTY_KEYWORD, "empty keyword");
                     break;
                 }
 
@@ -107,28 +107,28 @@ public class SearchBooksThread extends Thread {
                         }
                         reader.close();
                         JSONObject json = new JSONObject(sb.toString());
-                        if (json.has(BookData.JSON_KEY_ITEMS)) {
+                        if (json.has(BookDataUtils.JSON_KEY_ITEMS)) {
                             List<BookData> tmp = new ArrayList<>();
-                            JSONArray jsonArray = json.getJSONArray(BookData.JSON_KEY_ITEMS);
+                            JSONArray jsonArray = json.getJSONArray(BookDataUtils.JSON_KEY_ITEMS);
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject data = jsonArray.getJSONObject(i);
                                 if (D) Log.d(TAG, "data: " + data.toString());
-                                BookData book = MyBookshelfUtils.convertToBookData(data);
+                                BookData book = BookDataUtils.convertToBookData(data);
                                 tmp.add(book);
                             }
-                            if (json.has(BookData.JSON_KEY_COUNT)) {
-                                count = json.getInt(BookData.JSON_KEY_COUNT);
+                            if (json.has(BookDataUtils.JSON_KEY_COUNT)) {
+                                count = json.getInt(BookDataUtils.JSON_KEY_COUNT);
                                 if (D) Log.d(TAG, "count: " + count);
                             }
-                            if (json.has(BookData.JSON_KEY_LAST)) {
-                                last = json.getInt(BookData.JSON_KEY_LAST);
+                            if (json.has(BookDataUtils.JSON_KEY_LAST)) {
+                                last = json.getInt(BookDataUtils.JSON_KEY_LAST);
                                 if (D) Log.d(TAG, "last: " + last);
                             }
                             boolean hasNext = count - last > 0;
                             List<BookData> books = new ArrayList<>(tmp);
                             mResult = Result.SearchSuccess(books, hasNext);
                         }else{
-                            mResult = Result.SearchError(Result.ERROR_IO_EXCEPTION, "JSONException");
+                            mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "JSONException");
                         }
                         break;
                     case HttpURLConnection.HTTP_BAD_REQUEST:    // 400 wrong parameter
@@ -142,26 +142,26 @@ public class SearchBooksThread extends Thread {
                         }
                         reader.close();
                         JSONObject errorJSON = new JSONObject(sb.toString());
-                        if(errorJSON.has(BookData.JSON_KEY_ERROR) && errorJSON.has(BookData.JSON_KEY_ERROR_DESCRIPTION)){
-                            String errorMessage = errorJSON.getString(BookData.JSON_KEY_ERROR_DESCRIPTION);
-                            mResult = Result.SearchError(Result.ERROR_HTTP_ERROR, errorMessage);
+                        if(errorJSON.has(BookDataUtils.JSON_KEY_ERROR) && errorJSON.has(BookDataUtils.JSON_KEY_ERROR_DESCRIPTION)){
+                            String errorMessage = errorJSON.getString(BookDataUtils.JSON_KEY_ERROR_DESCRIPTION);
+                            mResult = Result.SearchError(Result.ERROR_CODE_HTTP_ERROR, errorMessage);
                         }else {
-                            mResult = Result.SearchError(Result.ERROR_IO_EXCEPTION, "JSONException");
+                            mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "JSONException");
                         }
                         break;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "InterruptedException");
-                mResult = Result.SearchError(Result.ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
+                mResult = Result.SearchError(Result.ERROR_CODE_INTERRUPTED_EXCEPTION, "InterruptedException");
             } catch (IOException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "IOException");
-                mResult = Result.SearchError(Result.ERROR_IO_EXCEPTION, "IOException");
+                mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "IOException");
             } catch (JSONException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "JSONException");
-                mResult = Result.SearchError(Result.ERROR_JSON_EXCEPTION, "JSONException");
+                mResult = Result.SearchError(Result.ERROR_CODE_JSON_EXCEPTION, "JSONException");
             } finally {
                 if (connection != null) {
                     connection.disconnect();

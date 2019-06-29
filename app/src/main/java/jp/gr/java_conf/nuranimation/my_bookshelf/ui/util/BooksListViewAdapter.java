@@ -1,9 +1,13 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.ui.util;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +23,7 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
@@ -61,7 +66,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         this.mContext = context;
         this.list = list;
         this.list_type = list_type;
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context);
     }
 
     @Override
@@ -219,7 +224,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void bindViewHolder(BooksViewHolder holder, BookData book){
-        Uri uri = Uri.parse(MyBookshelfUtils.parseUrlString(book.getImage(), MyBookshelfUtils.IMAGE_TYPE_SMALL));
+        Uri uri = Uri.parse(BookDataUtils.parseUrlString(book.getImage(), BookDataUtils.IMAGE_TYPE_SMALL));
         ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
                 .setCacheChoice(ImageRequest.CacheChoice.SMALL)
                 .build();
@@ -233,11 +238,11 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         holder.getPublisherView().setText(book.getPublisher());
         holder.getSalesDateView().setText(book.getSalesDate());
         holder.getItemPriceView().setText(book.getItemPrice());
-        holder.getRatingView().setRating(book.getFloatRating());
+        holder.getRatingView().setRating(BookDataUtils.convertRating(book.getRating()));
 
-        Drawable read_status_image = MyBookshelfUtils.getReadStatusImage(mContext, book.getReadStatus());
+        Drawable read_status_image = BookDataUtils.getReadStatusImage(mContext, book.getReadStatus());
         holder.getReadStatusImageView().setImageDrawable(read_status_image);
-        String read_status_text = MyBookshelfUtils.getReadStatusText(mContext, book.getReadStatus());
+        String read_status_text = BookDataUtils.getReadStatusText(mContext, book.getReadStatus());
         holder.getReadStatusTextView().setText(read_status_text);
     }
 

@@ -12,8 +12,9 @@ import android.widget.TextView;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
 
 public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
     private Drawable[] drawables;
@@ -28,7 +29,7 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
         super(context, textViewResourceId, list);
         drawables = new Drawable[list.size()];
         for(int i=0;i< list.size();i++){
-            drawables[i] = MyBookshelfUtils.getReadStatusImage(context, list.get(i).getCode());
+            drawables[i] = BookDataUtils.getReadStatusImage(context, list.get(i).getCode());
         }
         setDropDownViewResource(R.layout.item_read_status_spinner_drop_down);
     }

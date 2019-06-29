@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
@@ -63,7 +64,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
     }
 
     @Override
@@ -187,7 +188,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
                     if(book.getView_type() == BookData.TYPE_EMPTY){
                         book = new BookData(data);
-                        book.setRating(0.0f);
+                        book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);
                     }
                     bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
@@ -251,8 +252,8 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
                         String registerDate = sdf.format(calendar.getTime());
                         book.setRegisterDate(registerDate);
-                        book.setRating("0.0");
-                        book.setReadStatus("5");
+                        book.setRating(BookDataUtils.convertRating(0.0f));
+                        book.setReadStatus(BookData.STATUS_NONE);
                         mDBOpenHelper.registerToShelfBooks(book);
                         mNewBooksViewAdapter.refreshBook(position_register);
                         Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();

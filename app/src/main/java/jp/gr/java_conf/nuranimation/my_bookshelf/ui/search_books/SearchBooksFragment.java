@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import java.util.Locale;
 import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
@@ -34,9 +36,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragme
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.SearchBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
 
@@ -71,7 +71,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
     }
 
     @Override
@@ -163,7 +163,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
                     if(book.getView_type() == BookData.TYPE_EMPTY){
                         book = new BookData(data);
-                        book.setRating(0.0f);
+                        book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);
                     }
                     bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
@@ -232,7 +232,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
                         String registerDate = sdf.format(calendar.getTime());
                         book.setRegisterDate(registerDate);
-                        book.setRating(0.0f);
+                        book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);
                         mDBOpenHelper.registerToShelfBooks(book);
                         mSearchBooksViewAdapter.refreshBook(position_register);
@@ -387,7 +387,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
     private void searchBooks(String keyword, int page) {
         try{
-            if(!MyBookshelfUtils.isSearchable(keyword)){
+            if(!isSearchable(keyword)){
                 Toast.makeText(getContext(), getString(R.string.toast_failed_search_keyword_error), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -454,6 +454,60 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         mSearchState = BookService.STATE_NONE;
         getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
     }
+
+
+
+    public static boolean isSearchable(String word) throws PatternSyntaxException {
+        if (TextUtils.isEmpty(word)) {
+//            if (D) Log.d(TAG, "No word");
+            return false;
+        }
+        if (word.length() >= 2) {
+//            if (D) Log.d(TAG, "over 2characters. OK");
+            return true;
+        }
+
+        int bytes = 0;
+        char[] array = word.toCharArray();
+        for (char c : array) {
+//            if (D) Log.d(TAG, "Unicode Block: " + Character.UnicodeBlock.of(c));
+            if (String.valueOf(c).getBytes().length <= 1) {
+                bytes += 1;
+            } else {
+                bytes += 2;
+            }
+        }
+        if (bytes <= 1) {
+//            if (D) Log.d(TAG, "1 half width character. NG");
+            return false;
+        }
+        String regex_InHIRAGANA = "\\p{InHIRAGANA}";
+        String regex_InKATAKANA = "\\p{InKATAKANA}";
+        String regex_InHALFWIDTH_AND_FULLWIDTH_FORMS = "\\p{InHALFWIDTH_AND_FULLWIDTH_FORMS}";
+        String regex_InCJK_SYMBOLS_AND_PUNCTUATION = "\\p{InCJK_SYMBOLS_AND_PUNCTUATION}";
+
+
+        if (word.matches(regex_InHIRAGANA)) {
+//            if (D) Log.d(TAG, "1 character in HIRAGANA");
+            return false;
+        }
+        if (word.matches(regex_InKATAKANA)) {
+//            if (D) Log.d(TAG, "1 character in KATAKANA");
+            return false;
+        }
+        if (word.matches(regex_InHALFWIDTH_AND_FULLWIDTH_FORMS)) {
+//            if (D) Log.d(TAG, "1 character in HALFWIDTH_AND_FULLWIDTH_FORMS");
+            return false;
+        }
+        if (word.matches(regex_InCJK_SYMBOLS_AND_PUNCTUATION)) {
+//            if (D) Log.d(TAG, "1 character in CJK_SYMBOLS_AND_PUNCTUATION");
+            return false;
+        }
+//        if (D) Log.d(TAG, "OK");
+        return true;
+    }
+
+
 
 
 }

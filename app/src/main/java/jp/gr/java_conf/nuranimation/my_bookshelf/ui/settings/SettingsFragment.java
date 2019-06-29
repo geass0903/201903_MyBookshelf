@@ -206,48 +206,14 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                     }
                     break;
                 case FILTER_ACTION_UPDATE_PROGRESS:
-                    int type = intent.getIntExtra(KEY_PROGRESS_TYPE,FileBackupThread.TYPE_UNKNOWN);
                     String progress = intent.getStringExtra(KEY_PROGRESS);
                     if(progress == null){
                         progress = "";
                     }
-                    String message = null;
-                    switch (type){
-                        case FileBackupThread.PROGRESS_TYPE_EXPORT_BOOKS:
-                            message = getString(R.string.progress_message_export_books);
-                            progress = progress + getString(R.string.progress_unit_book);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_EXPORT_AUTHORS:
-                            message = getString(R.string.progress_message_export_authors);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_IMPORT_BOOKS:
-                            message = getString(R.string.progress_message_import_books);
-                            progress = progress + getString(R.string.progress_unit_book);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_IMPORT_AUTHORS:
-                            message = getString(R.string.progress_message_import_authors);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_UPLOAD_BOOKS:
-                            message = getString(R.string.progress_message_upload_books);
-                            progress = progress + getString(R.string.progress_unit_byte);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_UPLOAD_AUTHORS:
-                            message = getString(R.string.progress_message_upload_authors);
-                            progress = progress + getString(R.string.progress_unit_byte);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_BOOKS:
-                            message = getString(R.string.progress_message_download_books);
-                            progress = progress + getString(R.string.progress_unit_byte);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_DOWNLOAD_AUTHORS:
-                            message = getString(R.string.progress_message_download_authors);
-                            progress = progress + getString(R.string.progress_unit_byte);
-                            break;
-                        case FileBackupThread.PROGRESS_TYPE_REGISTER:
-                            message = getString(R.string.progress_message_register);
-                            break;
+                    String message = intent.getStringExtra(KEY_PROGRESS_MESSAGE);
+                    if(message == null){
+                        message = "";
                     }
-
                     Bundle bundle = new Bundle();
                     bundle.putString(ProgressDialogFragment.message, message);
                     bundle.putString(ProgressDialogFragment.progress, progress);

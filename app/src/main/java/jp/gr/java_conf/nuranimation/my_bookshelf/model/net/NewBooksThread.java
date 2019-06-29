@@ -22,8 +22,8 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 
@@ -73,7 +73,7 @@ public class NewBooksThread extends Thread {
         int size  = authorsList.size();
 
         if (authorsList.size() == 0) {
-            mResult = Result.ReloadError(Result.ERROR_EMPTY_AUTHORS_LIST, "empty authors");
+            mResult = Result.ReloadError(Result.ERROR_CODE_EMPTY_AUTHORS_LIST, "empty authors");
         } else {
             count = 0;
             progress = count + "/" + size;
@@ -117,7 +117,7 @@ public class NewBooksThread extends Thread {
             if(books.size() > 0) {
                 mResult = Result.ReloadSuccess(books);
             }else{
-                mResult = Result.ReloadError(Result.ERROR_IO_EXCEPTION, "no books");
+                mResult = Result.ReloadError(Result.ERROR_CODE_IO_EXCEPTION, "no books");
             }
         }
         if (mListener != null && !isCanceled) {
@@ -140,7 +140,7 @@ public class NewBooksThread extends Thread {
         int retried = 0;
         while (retried < 3) {
             if (isCanceled) {
-                return Result.SearchError(Result.ERROR_IO_EXCEPTION, "search canceled");
+                return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search canceled");
             }
 
             HttpsURLConnection connection = null;
@@ -150,7 +150,7 @@ public class NewBooksThread extends Thread {
                 }
                 Thread.sleep(1000);
                 if (TextUtils.isEmpty(keyword)) {
-                    return Result.SearchError(Result.ERROR_EMPTY_KEYWORD, "empty keyword");
+                    return Result.SearchError(Result.ERROR_CODE_EMPTY_KEYWORD, "empty keyword");
                 }
                 String urlPage = "&page=" + page;
                 String urlKeyword = "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
@@ -158,7 +158,7 @@ public class NewBooksThread extends Thread {
                         + urlPage + urlKeyword;
                 URL url = new URL(urlString);
                 if (isCanceled) {
-                    return Result.SearchError(Result.ERROR_IO_EXCEPTION, "search canceled");
+                    return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search canceled");
                 }
                 connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -175,31 +175,31 @@ public class NewBooksThread extends Thread {
                         }
                         reader.close();
                         JSONObject json = new JSONObject(sb.toString());
-                        if (json.has(BookData.JSON_KEY_ITEMS)) {
+                        if (json.has(BookDataUtils.JSON_KEY_ITEMS)) {
                             List<BookData> tmp = new ArrayList<>();
-                            JSONArray jsonArray = json.getJSONArray(BookData.JSON_KEY_ITEMS);
+                            JSONArray jsonArray = json.getJSONArray(BookDataUtils.JSON_KEY_ITEMS);
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject data = jsonArray.getJSONObject(i);
                                 if (D) Log.d(TAG, "data: " + data.toString());
-                                BookData book = MyBookshelfUtils.convertToBookData(data);
+                                BookData book = BookDataUtils.convertToBookData(data);
                                 tmp.add(book);
                             }
-                            if (json.has(BookData.JSON_KEY_COUNT)) {
-                                count = json.getInt(BookData.JSON_KEY_COUNT);
+                            if (json.has(BookDataUtils.JSON_KEY_COUNT)) {
+                                count = json.getInt(BookDataUtils.JSON_KEY_COUNT);
                                 if (D) Log.d(TAG, "count: " + count);
                             }
-                            if (json.has(BookData.JSON_KEY_LAST)) {
-                                last = json.getInt(BookData.JSON_KEY_LAST);
+                            if (json.has(BookDataUtils.JSON_KEY_LAST)) {
+                                last = json.getInt(BookDataUtils.JSON_KEY_LAST);
                                 if (D) Log.d(TAG, "last: " + last);
                             }
                             boolean hasNext = count - last > 0;
                             List<BookData> books = new ArrayList<>(tmp);
                             return Result.SearchSuccess(books, hasNext);
                         } else {
-                            return Result.SearchError(Result.ERROR_IO_EXCEPTION, "No json item");
+                            return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "No json item");
                         }
                     case HttpURLConnection.HTTP_BAD_REQUEST:    // 400 wrong parameter
-                        return Result.SearchError(Result.ERROR_IO_EXCEPTION, "wrong parameter");
+                        return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "wrong parameter");
                     case HttpURLConnection.HTTP_NOT_FOUND:      // 404 not success
                     case 429:                                   // 429 too many requests
                     case HttpURLConnection.HTTP_INTERNAL_ERROR: // 500 system error
@@ -226,14 +226,14 @@ public class NewBooksThread extends Thread {
             }
             retried++;
         }
-        return Result.SearchError(Result.ERROR_IO_EXCEPTION, "search failed");
+        return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search failed");
     }
 
 
     private boolean isNewBook(BookData book){
         Calendar baseDate = Calendar.getInstance();
         baseDate.add(Calendar.DAY_OF_MONTH, -14);
-        Calendar salesDate = MyBookshelfUtils.getCalendar(book.getSalesDate());
+        Calendar salesDate = BookDataUtils.getCalendar(book.getSalesDate());
 //        Calendar salesDate = MyBookshelfUtils.parseDate(book.getSalesDate());
         if(salesDate != null){
             return salesDate.compareTo(baseDate) >= 0;

@@ -51,7 +51,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public static final String FILTER_ACTION_UPDATE_SERVICE_STATE = "FILTER_ACTION_UPDATE_SERVICE_STATE";
     public static final String KEY_UPDATE_SERVICE_STATE = "KEY_UPDATE_SERVICE_STATE";
     public static final String FILTER_ACTION_UPDATE_PROGRESS = "FILTER_ACTION_UPDATE_PROGRESS";
-    public static final String KEY_PROGRESS_TYPE = "KEY_PROGRESS_TYPE";
+    public static final String KEY_PROGRESS_MESSAGE = "KEY_PROGRESS_MESSAGE";
     public static final String KEY_PROGRESS = "KEY_PROGRESS";
 
     private static final String KEY_SAVED_REQUEST_PERMISSIONS   = "KEY_SAVED_REQUEST_PERMISSIONS";

@@ -2,22 +2,24 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 
 public class MyBookshelfPreferences {
 
-    private static final String PREFERENCE_NAME = "MyBookshelfPreference";
     private static final String KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN";
     private static final String KEY_SHELF_BOOKS_ORDER_CODE = "KEY_SHELF_BOOKS_ORDER_CODE";
     private static final String KEY_SEARCH_BOOKS_ORDER_CODE = "KEY_SEARCH_BOOKS_ORDER_CODE";
     private static final String KEY_IS_REQUEST_PERMISSION = "KEY_IS_REQUEST_PERMISSION";
 
-    private SharedPreferences mPreferences;
+    private static SharedPreferences mPreferences;
 
-    public MyBookshelfPreferences(Context context){
-        mPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
+    public MyBookshelfPreferences(Context context) {
+        if(mPreferences == null) {
+            mPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        }
     }
 
     public String getShelfBooksOrderCode(){

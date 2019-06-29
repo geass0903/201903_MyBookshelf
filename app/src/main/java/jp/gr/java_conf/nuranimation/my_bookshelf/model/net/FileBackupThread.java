@@ -10,37 +10,35 @@ import android.util.Log;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.util.IOUtil;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.files.SearchErrorException;
 import com.dropbox.core.v2.files.SearchMatch;
 import com.dropbox.core.v2.files.SearchResult;
 import com.dropbox.core.v2.files.WriteMode;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.PatternSyntaxException;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BaseUtils;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
 
 
 //@SuppressWarnings({"WeakerAccess","unused"})
@@ -54,43 +52,31 @@ public class FileBackupThread extends Thread {
     public static final int TYPE_BACKUP     = 3;
     public static final int TYPE_RESTORE    = 4;
 
-    public static final int PROGRESS_TYPE_EXPORT_BOOKS      = 1;
-    public static final int PROGRESS_TYPE_EXPORT_AUTHORS    = 2;
-    public static final int PROGRESS_TYPE_IMPORT_BOOKS      = 3;
-    public static final int PROGRESS_TYPE_IMPORT_AUTHORS    = 4;
-    public static final int PROGRESS_TYPE_UPLOAD_BOOKS      = 5;
-    public static final int PROGRESS_TYPE_UPLOAD_AUTHORS    = 6;
-    public static final int PROGRESS_TYPE_DOWNLOAD_BOOKS    = 7;
-    public static final int PROGRESS_TYPE_DOWNLOAD_AUTHORS  = 8;
-    public static final int PROGRESS_TYPE_REGISTER          = 9;
-
     private static final String CLIENT_IDENTIFIER = "MyBookshelf/1.0";
 
     private static final String DROPBOX_APP_DIRECTORY_PATH = "/MyBookshelf/";
-    private static final String APPLICATION_DIRECTORY_PATH = "/Android/data/jp.gr.java_conf.nuranimation.my_bookshelf/";
     private static final String FILE_NAME_BOOKS = "backup_books.csv";
     private static final String FILE_NAME_AUTHORS = "backup_authors.csv";
 
-    private int type;
+    private final MyBookshelfPreferences mPreferences;
+    private final MyBookshelfDBOpenHelper mDBOpenHelper;
+    private final LocalBroadcastManager mLocalBroadcastManager;
+    private final ThreadFinishListener mListener;
+    private final Context mContext;
+    private final int type;
 
-    private Result mResult;
-    private ThreadFinishListener mListener;
-    private LocalBroadcastManager mLocalBroadcastManager;
-    private MyBookshelfPreferences mPreferences;
-    private MyBookshelfDBOpenHelper mDBOpenHelper;
     private boolean isCanceled;
 
     public interface ThreadFinishListener {
         void deliverBackupResult(Result result);
     }
 
-
     public FileBackupThread(Context context, int type) {
-        this.type = type;
+        this.mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
+        this.mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
         this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
-        mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
-
+        this.mContext = context;
+        this.type = type;
         isCanceled = false;
         if (context instanceof ThreadFinishListener) {
             mListener = (ThreadFinishListener) context;
@@ -99,9 +85,9 @@ public class FileBackupThread extends Thread {
         }
     }
 
-
     @Override
     public void run() {
+        Result mResult;
         switch (type) {
             case TYPE_EXPORT:
                 mResult = exportFile();
@@ -115,8 +101,11 @@ public class FileBackupThread extends Thread {
             case TYPE_RESTORE:
                 mResult = restoreFile();
                 break;
+            default:
+                mResult = Result.BackupError(TYPE_UNKNOWN, Result.ERROR_CODE_UNKNOWN, "Unknown BackupType");
+                break;
         }
-        if (mListener != null && mResult != null && !isCanceled) {
+        if (mListener != null) {
             mListener.deliverBackupResult(mResult);
         }
     }
@@ -126,290 +115,289 @@ public class FileBackupThread extends Thread {
         isCanceled = true;
     }
 
+
     private Result exportFile() {
-        int recodeCount;
-        int count;
-        String line;
-        String progress;
-
-        File extDir = Environment.getExternalStorageDirectory();
-        String dirPath = extDir.getPath() + APPLICATION_DIRECTORY_PATH;
-        File dir = new File(dirPath);
-
-        if (!dir.exists()) {
-            boolean isSuccess = dir.mkdirs();
+        String state = Environment.getExternalStorageState();
+        if (!state.equals(Environment.MEDIA_MOUNTED)) {
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_CODE_EXPORT_DIR_NOT_FOUND, "MEDIA NOT MOUNTED");
+        }
+        File exportDir = mContext.getExternalFilesDir(null);
+        if (exportDir == null) {
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_CODE_EXPORT_DIR_NOT_FOUND, "getExternalFilesDir == null");
+        }
+        if (!exportDir.exists()) {
+            boolean isSuccess = exportDir.mkdirs();
             if (D) Log.d(TAG, "mkdirs(): " + isSuccess);
-            return Result.BackupError(TYPE_EXPORT, Result.ERROR_IO_EXCEPTION, "dir.mkdirs() failed");
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_CODE_EXPORT_DIR_NOT_FOUND, "mkdirs() failed");
         }
 
-        File file_books = new File(dirPath + FILE_NAME_BOOKS);
-        File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
+        File file_books = new File(exportDir, FILE_NAME_BOOKS);
+        File file_authors = new File(exportDir, FILE_NAME_AUTHORS);
 
         try {
             // export books
             List<BookData> books = mDBOpenHelper.loadShelfBooks(null, BooksOrder.getShelfBooksOrder(BooksOrder.SHELF_BOOKS_ORDER_CODE_REGISTERED_ASC));
-            count = 0;
-            recodeCount = books.size();
-            progress = count + "/" + recodeCount;
-            sendProgressMessage(PROGRESS_TYPE_EXPORT_BOOKS, progress);
-            BufferedWriter bw_books = BaseUtils.getBufferedWriter(new FileOutputStream(file_books), Charset.forName("UTF-8"));
-            String[] index = MyBookshelfUtils.getShelfBooksIndex();
-            line = TextUtils.join(",", index);
+            int recodeCount = books.size();
+            int exportCount = 0;
+            String message = mContext.getString(R.string.progress_message_export_books);
+            String unit = mContext.getString(R.string.progress_unit_book);
+            String progress = exportCount + "/" + recodeCount + unit;
+            sendProgressMessage(message, progress);
+            BufferedWriter bw_books = getBufferedWriter(new FileOutputStream(file_books), Charset.forName("UTF-8"));
+            String[] index = BookDataUtils.getShelfBooksIndex();
+            String line = TextUtils.join(",", index);
             bw_books.write(line + "\r\n");
             for (BookData book : books) {
-                line = MyBookshelfUtils.convertBookDataToLine(index, book) + "\r\n";
+                if(isCanceled){
+                    bw_books.flush();
+                    bw_books.close();
+                    return Result.BackupError(TYPE_EXPORT,Result.ERROR_CODE_EXPORT_CANCELED, "export canceled");
+                }
+                line = BookDataUtils.convertBookDataToLine(index, book) + "\r\n";
                 bw_books.write(line);
-                count++;
-                progress = count + "/" + recodeCount;
-                sendProgressMessage(PROGRESS_TYPE_EXPORT_BOOKS, progress);
-                Thread.sleep(2);
+                exportCount++;
+                progress = exportCount + "/" + recodeCount + unit;
+                sendProgressMessage(message, progress);
             }
             bw_books.flush();
             bw_books.close();
 
-
             // export authors
             List<String> authors = mDBOpenHelper.loadAuthorsList();
-            count = 0;
             recodeCount = authors.size();
-            progress = count + "/" + recodeCount;
-            sendProgressMessage(PROGRESS_TYPE_EXPORT_AUTHORS, progress);
-            BufferedWriter bw_authors = BaseUtils.getBufferedWriter(new FileOutputStream(file_authors), Charset.forName("UTF-8"));
+            exportCount = 0;
+            message = mContext.getString(R.string.progress_message_export_authors);
+            progress = exportCount + "/" + recodeCount;
+            sendProgressMessage(message, progress);
+            BufferedWriter bw_authors = getBufferedWriter(new FileOutputStream(file_authors), Charset.forName("UTF-8"));
             for (String author : authors) {
+                if(isCanceled){
+                    bw_authors.flush();
+                    bw_authors.close();
+                    return Result.BackupError(TYPE_EXPORT,Result.ERROR_CODE_EXPORT_CANCELED, "export canceled");
+                }
                 bw_authors.write(author + "\r\n");
-                count++;
-                progress = count + "/" + recodeCount;
-                sendProgressMessage(PROGRESS_TYPE_EXPORT_AUTHORS, progress);
-                Thread.sleep(2);
+                exportCount++;
+                progress = exportCount + "/" + recodeCount;
+                sendProgressMessage(message, progress);
             }
             bw_authors.flush();
             bw_authors.close();
-
-            return Result.BackupSuccess(TYPE_EXPORT);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_EXPORT, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.BackupError(TYPE_EXPORT, Result.ERROR_IO_EXCEPTION, "IOException");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_EXPORT, Result.ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
+            return Result.BackupError(TYPE_EXPORT, Result.ERROR_CODE_IO_EXCEPTION, "IOException");
         }
+        return Result.BackupSuccess(TYPE_EXPORT);
     }
 
     private Result importFile() {
-        int count;
-        int size;
-        String progress;
-        String line;
-        List<BookData> books = new ArrayList<>();
-        List<String> authors = new ArrayList<>();
-
-        File extDir = Environment.getExternalStorageDirectory();
-        String dirPath = extDir.getPath() + APPLICATION_DIRECTORY_PATH;
-
-        File file_books = new File(dirPath + FILE_NAME_BOOKS);
+        String state = Environment.getExternalStorageState();
+        if (!state.equals(Environment.MEDIA_MOUNTED)) {
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_DIR_NOT_FOUND, "MEDIA NOT MOUNTED");
+        }
+        File importDir = mContext.getExternalFilesDir(null);
+        if (importDir == null) {
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_DIR_NOT_FOUND, "getExternalFilesDir == null");
+        }
+        File file_books = new File(importDir, FILE_NAME_BOOKS);
         if (!file_books.exists()) {
             if (D) Log.e(TAG, "file_books not found");
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_FILE_NOT_FOUND, "file not found");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_FILE_NOT_FOUND, "file not found");
         }
-        File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
+        File file_authors = new File(importDir, FILE_NAME_AUTHORS);
         if (!file_authors.exists()) {
             if (D) Log.e(TAG, "file_authors not found");
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_FILE_NOT_FOUND, "file not found");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_FILE_NOT_FOUND, "file not found");
         }
 
         try {
             // import books
-            count = 0;
-            size = getLineCount(new FileInputStream(file_books), Charset.forName("UTF-8")) - 1; // remove count index line
-            progress = count + "/" + size;
-            sendProgressMessage(PROGRESS_TYPE_IMPORT_BOOKS, progress);
-            BufferedReader br_books = BaseUtils.getBufferedReaderSkipBOM(new FileInputStream(file_books), Charset.forName("UTF-8"));
-            String[] index =  br_books.readLine().split(",");
-            while( (line = br_books.readLine()) != null ) {
-                BookData book = MyBookshelfUtils.convertToBookData(index, line);
+            int recodeCount = getLineCount(new FileInputStream(file_books), Charset.forName("UTF-8")) - 1; // remove count index line
+            int importCount = 0;
+            String message = mContext.getString(R.string.progress_message_import_books);
+            String unit = mContext.getString(R.string.progress_unit_book);
+            String progress = importCount + "/" + recodeCount + unit;
+            sendProgressMessage(message, progress);
+
+            List<BookData> books = new ArrayList<>(1000);
+            BufferedReader br_books = getBufferedReaderSkipBOM(new FileInputStream(file_books), Charset.forName("UTF-8"));
+            String line = br_books.readLine();
+            String[] index = BookDataUtils.splitLineWithComma(line);
+            while ((line = br_books.readLine()) != null) {
+                if (isCanceled) {
+                    br_books.close();
+                    return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_CANCELED, "import canceled");
+                }
+                BookData book = BookDataUtils.convertToBookData(index, line);
                 books.add(book);
-                count++;
-                progress = count + "/" + size;
-                sendProgressMessage(PROGRESS_TYPE_IMPORT_BOOKS, progress);
-                Thread.sleep(2);
+                importCount++;
+                progress = importCount + "/" + recodeCount + unit;
+                sendProgressMessage(message, progress);
             }
             br_books.close();
 
             // import authors
-            count = 0;
-            size = getLineCount(new FileInputStream(file_authors), Charset.forName("UTF-8"));
-            progress = count + "/" + size;
-            sendProgressMessage(PROGRESS_TYPE_IMPORT_AUTHORS, progress);
-            BufferedReader br_authors = BaseUtils.getBufferedReaderSkipBOM(new FileInputStream(file_authors), Charset.forName("UTF-8"));
+            recodeCount = getLineCount(new FileInputStream(file_authors), Charset.forName("UTF-8"));
+            importCount = 0;
+            message = mContext.getString(R.string.progress_message_import_authors);
+            progress = importCount + "/" + recodeCount;
+            sendProgressMessage(message, progress);
+
+            List<String> authors = new ArrayList<>();
+            BufferedReader br_authors = getBufferedReaderSkipBOM(new FileInputStream(file_authors), Charset.forName("UTF-8"));
             while ((line = br_authors.readLine()) != null) {
+                if (isCanceled) {
+                    br_authors.close();
+                    return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_CANCELED, "import canceled");
+                }
                 authors.add(line);
-                count++;
-                progress = count + "/" + size;
-                sendProgressMessage(PROGRESS_TYPE_IMPORT_AUTHORS, progress);
-                Thread.sleep(2);
+                importCount++;
+                progress = importCount + "/" + recodeCount;
+                sendProgressMessage(message, progress);
             }
             br_authors.close();
 
             // register database
-            sendProgressMessage(PROGRESS_TYPE_REGISTER, "");
+            message = mContext.getString(R.string.progress_message_register);
+            sendProgressMessage(message, "");
+            if (isCanceled) {
+                return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_CANCELED, "import canceled");
+            }
             mDBOpenHelper.dropTableShelfBooks();
             mDBOpenHelper.registerToShelfBooks(books);
             mDBOpenHelper.dropTableAuthorsList();
             mDBOpenHelper.registerToAuthorsList(authors);
             return Result.BackupSuccess(TYPE_IMPORT);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_IO_EXCEPTION, "IOException");
-        } catch (PatternSyntaxException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_PATTERN_SYNTAX_EXCEPTION, "PatternSyntaxException");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_INTERRUPTED_EXCEPTION, "InterruptedException");
+            return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IO_EXCEPTION, "IOException");
         }
     }
 
     private Result backupFile() {
+        String state = Environment.getExternalStorageState();
+        if (!state.equals(Environment.MEDIA_MOUNTED)) {
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_IMPORT_DIR_NOT_FOUND, "MEDIA NOT MOUNTED");
+        }
+        File importDir = mContext.getExternalFilesDir(null);
+        if (importDir == null) {
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_IMPORT_DIR_NOT_FOUND, "getExternalFilesDir == null");
+        }
+        File file_books = new File(importDir, FILE_NAME_BOOKS);
+        if (!file_books.exists()) {
+            if (D) Log.e(TAG, "file_books not found");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_FILE_NOT_FOUND, "file not found");
+        }
+        File file_authors = new File(importDir, FILE_NAME_AUTHORS);
+        if (!file_authors.exists()) {
+            if (D) Log.e(TAG, "file_authors not found");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_FILE_NOT_FOUND, "file not found");
+        }
+
         String token = mPreferences.getAccessToken();
         if (token == null) {
-            return Result.BackupError(TYPE_BACKUP, Result.ERROR_DBX_EXCEPTION, "No token");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_DBX_EXCEPTION, "No token");
         }
         DbxRequestConfig config = new DbxRequestConfig(CLIENT_IDENTIFIER);
         DbxClientV2 mClient = new DbxClientV2(config, token);
-        File extDir = Environment.getExternalStorageDirectory();
-        String dirPath = extDir.getPath() + APPLICATION_DIRECTORY_PATH;
 
         try {
-            File file_books = new File(dirPath + FILE_NAME_BOOKS);
-            if (!file_books.exists()) {
-                return Result.BackupError(TYPE_BACKUP, Result.ERROR_FILE_NOT_FOUND, "file_books not found");
+            // Upload books
+            if(isCanceled){
+                return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_UPLOAD_CANCELED, "Upload canceled");
             }
-            File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
-            if (!file_authors.exists()) {
-                if (D) Log.e(TAG, "file_authors not found");
-                return Result.BackupError(TYPE_BACKUP, Result.ERROR_FILE_NOT_FOUND, "file_authors not found");
-            }
-
-            sendProgressMessage(PROGRESS_TYPE_UPLOAD_BOOKS, "0");
+            String message = mContext.getString(R.string.progress_message_upload_books);
+            sendProgressMessage(message, "");
             InputStream input_books = new FileInputStream(file_books);
-            mClient.files().uploadBuilder(DROPBOX_APP_DIRECTORY_PATH + FILE_NAME_BOOKS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_books, new IOUtil.ProgressListener() {
-                @Override
-                public void onProgress(long bytesWritten) {
-                    sendProgressMessage(PROGRESS_TYPE_UPLOAD_BOOKS, String.valueOf(bytesWritten));
-                }
-            });
+            mClient.files().uploadBuilder(DROPBOX_APP_DIRECTORY_PATH + FILE_NAME_BOOKS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_books);
 
-            sendProgressMessage(PROGRESS_TYPE_UPLOAD_AUTHORS, "0");
+            // Upload authors
+            if(isCanceled){
+                return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_UPLOAD_CANCELED, "Upload canceled");
+            }
+            message = mContext.getString(R.string.progress_message_upload_authors);
+            sendProgressMessage(message, "");
             InputStream input_authors = new FileInputStream(file_authors);
-            mClient.files().uploadBuilder(DROPBOX_APP_DIRECTORY_PATH + FILE_NAME_AUTHORS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_authors, new IOUtil.ProgressListener() {
-                @Override
-                public void onProgress(long bytesWritten) {
-                    sendProgressMessage(PROGRESS_TYPE_UPLOAD_AUTHORS, String.valueOf(bytesWritten));
-                }
-            });
-
+            mClient.files().uploadBuilder(DROPBOX_APP_DIRECTORY_PATH + FILE_NAME_AUTHORS).withMode(WriteMode.OVERWRITE).uploadAndFinish(input_authors);
             return Result.BackupSuccess(TYPE_BACKUP);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_BACKUP, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.BackupError(TYPE_BACKUP, Result.ERROR_IO_EXCEPTION, "IOException");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_IO_EXCEPTION, "IOException");
         } catch (DbxException e) {
             e.printStackTrace();
-            return Result.BackupError(TYPE_BACKUP, Result.ERROR_DBX_EXCEPTION, "DbxException");
+            return Result.BackupError(TYPE_BACKUP, Result.ERROR_CODE_DBX_EXCEPTION, "DbxException");
         }
     }
 
     private Result restoreFile() {
+        String state = Environment.getExternalStorageState();
+        if (!state.equals(Environment.MEDIA_MOUNTED)) {
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_EXPORT_DIR_NOT_FOUND, "MEDIA NOT MOUNTED");
+        }
+        File exportDir = mContext.getExternalFilesDir(null);
+        if (exportDir == null) {
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_EXPORT_DIR_NOT_FOUND, "getExternalFilesDir == null");
+        }
+        if (!exportDir.exists()) {
+            boolean isSuccess = exportDir.mkdirs();
+            if (D) Log.d(TAG, "mkdirs(): " + isSuccess);
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_EXPORT_DIR_NOT_FOUND, "mkdirs() failed");
+        }
+        File file_books = new File(exportDir, FILE_NAME_BOOKS);
+        File file_authors = new File(exportDir, FILE_NAME_AUTHORS);
+
         String token = mPreferences.getAccessToken();
         if (token == null) {
-            return Result.BackupError(TYPE_BACKUP, Result.ERROR_DBX_EXCEPTION, "No token");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_DBX_EXCEPTION, "No token");
         }
         DbxRequestConfig config = new DbxRequestConfig(CLIENT_IDENTIFIER);
         DbxClientV2 mClient = new DbxClientV2(config, token);
-        File extDir = Environment.getExternalStorageDirectory();
-        String dirPath = extDir.getPath() + APPLICATION_DIRECTORY_PATH;
-        File dir = new File(dirPath);
-        if (!dir.exists()) {
-            boolean isSuccess = dir.mkdirs();
-            if (D) Log.d(TAG, "mkdirs(): " + isSuccess);
-            return Result.BackupError(TYPE_IMPORT, Result.ERROR_IO_EXCEPTION, "dir.mkdirs() failed");
-        }
 
         try {
+            // Download books
             Metadata metadata_books = getMetadata(mClient, FILE_NAME_BOOKS);
-            if(metadata_books == null){
-                return Result.BackupError(TYPE_RESTORE, Result.ERROR_FILE_NOT_FOUND, "metadata_books not found");
+            if (metadata_books == null) {
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_FILE_NOT_FOUND, "metadata_books not found");
             }
-            Metadata metadata_authors = getMetadata(mClient, FILE_NAME_AUTHORS);
-            if(metadata_authors == null){
-                return Result.BackupError(TYPE_RESTORE, Result.ERROR_FILE_NOT_FOUND, "metadata_authors not found");
+            if (isCanceled) {
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_DOWNLOAD_CANCELED, "Download canceled");
             }
-
-            sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_BOOKS, "0");
-            File file_books = new File(dirPath + FILE_NAME_BOOKS);
+            String message = mContext.getString(R.string.progress_message_download_books);
+            sendProgressMessage(message, "");
             OutputStream output_books = new FileOutputStream(file_books);
-            mClient.files().download(metadata_books.getPathLower()).download(output_books, new IOUtil.ProgressListener() {
-                @Override
-                public void onProgress(long bytesWritten) {
-                    sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_BOOKS, String.valueOf(bytesWritten));
-                }
-            });
+            mClient.files().download(metadata_books.getPathLower()).download(output_books);
 
-            sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_AUTHORS, "0");
-            File file_authors = new File(dirPath + FILE_NAME_AUTHORS);
+            // Download authors
+            Metadata metadata_authors = getMetadata(mClient, FILE_NAME_AUTHORS);
+            if (metadata_authors == null) {
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_FILE_NOT_FOUND, "metadata_authors not found");
+            }
+            if (isCanceled) {
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_DOWNLOAD_CANCELED, "Download canceled");
+            }
+            message = mContext.getString(R.string.progress_message_download_authors);
+            sendProgressMessage(message, "");
             OutputStream output_authors = new FileOutputStream(file_authors);
-            mClient.files().download(metadata_authors.getPathLower()).download(output_authors, new IOUtil.ProgressListener() {
-                @Override
-                public void onProgress(long bytesWritten) {
-                    sendProgressMessage(PROGRESS_TYPE_DOWNLOAD_AUTHORS, String.valueOf(bytesWritten));
-                }
-            });
-
+            mClient.files().download(metadata_authors.getPathLower()).download(output_authors);
+            if (isCanceled) {
+                return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_DOWNLOAD_CANCELED, "Download canceled");
+            }
             return Result.BackupSuccess(TYPE_RESTORE);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_RESTORE, Result.ERROR_FILE_NOT_FOUND, "FileNotFoundException");
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.BackupError(TYPE_RESTORE, Result.ERROR_IO_EXCEPTION, "IOException");
-        } catch (DownloadErrorException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_RESTORE, Result.ERROR_DBX_EXCEPTION, "DownloadErrorException");
-        } catch (SearchErrorException e) {
-            e.printStackTrace();
-            return Result.BackupError(TYPE_RESTORE, Result.ERROR_DBX_EXCEPTION, "SearchErrorException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_IO_EXCEPTION, "IOException");
         } catch (DbxException e) {
             e.printStackTrace();
-            return Result.BackupError(TYPE_RESTORE, Result.ERROR_DBX_EXCEPTION, "DbxException");
+            return Result.BackupError(TYPE_RESTORE, Result.ERROR_CODE_DBX_EXCEPTION, "DbxException");
         }
     }
 
-
-
-    private void sendProgressMessage(int progress_type, String progress) {
+    private void sendProgressMessage(String message, String progress) {
         Intent intent = new Intent();
-        intent.putExtra(BaseFragment.KEY_PROGRESS_TYPE, progress_type);
+        intent.putExtra(BaseFragment.KEY_PROGRESS_MESSAGE, message);
         intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
         intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
         mLocalBroadcastManager.sendBroadcast(intent);
-    }
-
-    private int getLineCount(InputStream is, Charset charSet) throws IOException{
-        int count = 0;
-        BufferedReader br = BaseUtils.getBufferedReaderSkipBOM(is, charSet);
-        while(br.readLine() != null) {
-            count++;
-        }
-        br.close();
-        return count;
     }
 
     private Metadata getMetadata(DbxClientV2 client, final String file_name) throws DbxException {
@@ -424,6 +412,61 @@ public class FileBackupThread extends Thread {
         }
         return null;
     }
+
+    private int getLineCount(InputStream is, Charset charSet) throws IOException {
+        int count = 0;
+        BufferedReader br = getBufferedReaderSkipBOM(is, charSet);
+        while (br.readLine() != null) {
+            count++;
+        }
+        br.close();
+        return count;
+    }
+
+    private BufferedReader getBufferedReaderSkipBOM(InputStream is, Charset charSet) throws IOException {
+        InputStreamReader isr;
+        BufferedReader br;
+
+        if (!(charSet == Charset.forName("UTF-8"))) {
+            isr = new InputStreamReader(is);
+            br = new BufferedReader(isr);
+            return br;
+        }
+
+        if (!is.markSupported()) {
+            is = new BufferedInputStream(is);
+        }
+        is.mark(3);
+        if (is.available() >= 3) {
+            byte[] b = {0, 0, 0};
+            int bytes = is.read(b, 0, 3);
+            if (bytes == 3 && b[0] != (byte) 0xEF || b[1] != (byte) 0xBB || b[2] != (byte) 0xBF) {
+                is.reset();
+            }
+        }
+        isr = new InputStreamReader(is, charSet);
+        br = new BufferedReader(isr);
+        return br;
+    }
+
+    private BufferedWriter getBufferedWriter(OutputStream os, Charset charSet) {
+        OutputStreamWriter osr = new OutputStreamWriter(os, charSet);
+        return new BufferedWriter(osr);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

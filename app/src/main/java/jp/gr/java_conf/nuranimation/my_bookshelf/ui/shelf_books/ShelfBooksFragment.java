@@ -56,7 +56,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
         mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
     }
 

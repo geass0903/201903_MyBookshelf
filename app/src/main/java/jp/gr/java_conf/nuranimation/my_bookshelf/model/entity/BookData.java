@@ -4,31 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
-import java.util.Locale;
-
 public class BookData implements Parcelable {
 
     public static final int TYPE_EMPTY             = 0;
     public static final int TYPE_BOOK              = 1;
     public static final int TYPE_BUTTON_LOAD       = 2;
     public static final int TYPE_VIEW_LOADING      = 3;
-
-    public static final String JSON_KEY_ITEMS               = "Items";
-    public static final String JSON_KEY_COUNT               = "count";
-    public static final String JSON_KEY_LAST                = "last";
-    public static final String JSON_KEY_ERROR               = "error";
-    public static final String JSON_KEY_ERROR_DESCRIPTION   = "error_description";
-    public static final String JSON_KEY_TITLE               = "title";
-    public static final String JSON_KEY_AUTHOR              = "author";
-    public static final String JSON_KEY_PUBLISHER_NAME      = "publisherName";
-    public static final String JSON_KEY_ISBN                = "isbn";
-    public static final String JSON_KEY_SALES_DATE          = "salesDate";
-    public static final String JSON_KEY_ITEM_PRICE          = "itemPrice";
-    public static final String JSON_KEY_ITEM_URL            = "itemUrl";
-    public static final String JSON_KEY_IMAGE_URL           = "largeImageUrl";
-    public static final String JSON_KEY_REVIEW_AVERAGE      = "reviewAverage";
-
-    public static final String STATUS_UNREGISTERED  = "0";
+    
     public static final String STATUS_INTERESTED    = "1";
     public static final String STATUS_UNREAD        = "2";
     public static final String STATUS_READING       = "3";
@@ -181,22 +163,8 @@ public class BookData implements Parcelable {
         this.rating = rating;
     }
 
-    public void setRating(float value){
-        this.rating = String.format(Locale.JAPAN,"%.1f",value);
-    }
-
     public String getRating() {
         return rating;
-    }
-
-    public float getFloatRating() {
-        float value;
-        try{
-            value = Float.parseFloat(this.rating);
-        }  catch (NumberFormatException e){
-            value = 0.0f;
-        }
-        return value;
     }
 
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -100,8 +101,20 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     private static final String DROP_TABLE_SEARCH_BOOKS = "drop table " + TABLE_SEARCH_BOOKS+ ";";
     private static final String DROP_TABLE_NEW_BOOKS    = "drop table " + TABLE_NEW_BOOKS + ";";
 
+    private static final Object mLock = new Object();
+    private static MyBookshelfDBOpenHelper mInstance;
 
-    public MyBookshelfDBOpenHelper(Context context){
+    @NonNull
+    public static MyBookshelfDBOpenHelper getInstance(@NonNull Context context) {
+        synchronized(mLock) {
+            if (mInstance == null) {
+                mInstance = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+            }
+            return mInstance;
+        }
+    }
+
+    private MyBookshelfDBOpenHelper(Context context){
         super(context,DB_NAME,null,DB_VERSION);
     }
 

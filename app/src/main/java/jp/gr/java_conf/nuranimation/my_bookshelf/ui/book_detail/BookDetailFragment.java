@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Locale;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.MyBookshelfUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ReadStatusSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
@@ -84,7 +84,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     public void onAttach (Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(context.getApplicationContext());
+        mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
     }
 
 
@@ -237,7 +237,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         mRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                detailBook.setRating(rating);
+                detailBook.setRating(BookDataUtils.convertRating(rating));
             }
         });
         setBookData(book);
@@ -247,7 +247,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     private void setBookData(BookData book){
 
         if(book != null) {
-            mBookImageView.setImageURI(Uri.parse(MyBookshelfUtils.parseUrlString(book.getImage(),MyBookshelfUtils.IMAGE_TYPE_LARGE)));
+            mBookImageView.setImageURI(Uri.parse(BookDataUtils.parseUrlString(book.getImage(),BookDataUtils.IMAGE_TYPE_LARGE)));
 
             mBookImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -282,7 +282,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
                 readDateView.setText(book.getFinishReadDate());
             }
             mSpinnerReadStatus.setSelection(mArrayAdapter.getPosition(book.getReadStatus()));
-            mRatingBar.setRating(book.getFloatRating());
+            mRatingBar.setRating(BookDataUtils.convertRating(book.getRating()));
         }
     }
 
@@ -299,7 +299,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         book.setFinishReadDate(readDateView.getText().toString());
         SpinnerItem item = (SpinnerItem)mSpinnerReadStatus.getSelectedItem();
         book.setReadStatus(item.getCode());
-        book.setRating(mRatingBar.getRating());
+        book.setRating(BookDataUtils.convertRating(mRatingBar.getRating()));
         return book;
     }
 

@@ -102,7 +102,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     public void onCreate() {
         if (D) Log.d(TAG, "onCreate");
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-        mDBOpenHelper = new MyBookshelfDBOpenHelper(this.getApplicationContext());
+        mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(this);
         mPreferences = new MyBookshelfPreferences(this.getApplicationContext());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
@@ -292,7 +292,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
     public Result getSearchBooksResult(){
         if(mSearchBooksResult == null){
-            return Result.SearchError(Result.ERROR_UNKNOWN, "get result failed");
+            return Result.SearchError(Result.ERROR_CODE_UNKNOWN, "get result failed");
         }
         return mSearchBooksResult;
     }
@@ -305,7 +305,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
     public Result getNewBooksResult(){
         if(mNewBooksResult == null){
-            return Result.ReloadError(Result.ERROR_UNKNOWN, "get result failed");
+            return Result.ReloadError(Result.ERROR_CODE_UNKNOWN, "get result failed");
         }
         return mNewBooksResult;
     }
@@ -339,7 +339,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
     public Result getFileBackupResult(){
         if(mFileBackupResult == null){
-            return Result.BackupError(FileBackupThread.TYPE_UNKNOWN,Result.ERROR_UNKNOWN,"get result failed");
+            return Result.BackupError(FileBackupThread.TYPE_UNKNOWN,Result.ERROR_CODE_UNKNOWN,"get result failed");
         }
         return mFileBackupResult;
     }
