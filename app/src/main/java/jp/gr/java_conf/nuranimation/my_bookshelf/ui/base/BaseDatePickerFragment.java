@@ -7,17 +7,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 public class BaseDatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
     public static final String TAG = BaseDatePickerFragment.class.getSimpleName();
     private static final boolean D = false;
-    public static final String KEY_DATE = "KEY_DATE";
+    public static final String KEY_YEAR         = "KEY_YEAR";
+    public static final String KEY_MONTH        = "KEY_MONTH";
+    public static final String KEY_DAY_OF_MONTH = "KEY_DAY_OF_MONTH";
     public static final String KEY_REQUEST_CODE = "KEY_REQUEST_CODE";
 
 
@@ -80,10 +79,11 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         }
         Bundle bundle = this.getArguments();
 
-        String date = bundle.getString(KEY_DATE);
-        Calendar calendar = getCalendar(date);
-        if(calendar == null){
-            calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
+        if(bundle.containsKey(KEY_YEAR) && bundle.containsKey(KEY_MONTH) && bundle.containsKey(KEY_DAY_OF_MONTH)){
+            calendar.set(bundle.getInt(KEY_YEAR), bundle.getInt(KEY_MONTH), bundle.getInt(KEY_DAY_OF_MONTH));
+        }else{
+            if(D) Log.d(TAG,"illegal parameter");
         }
 
         int year = calendar.get(Calendar.YEAR);
@@ -99,7 +99,7 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         if(mListener != null){
             Calendar calendar = Calendar.getInstance();
             calendar.set(year,monthOfYear,dayOfMonth);
-            mListener.onDataSet(getRequestCode(),calendar);
+            mListener.onDataSet(getRequestCode(), calendar);
         }
     }
 
@@ -116,38 +116,5 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         return -1;
     }
 
-    private Calendar getCalendar(String source){
-        String[] formats = {"yyyy/MM/dd","yyyy年MM月dd日","yyyy年MM月","yyyy年"};
-        for(String format : formats){
-            Calendar calendar = parseDate(format, source);
-            if(calendar != null){
-                return calendar;
-            }
-        }
-        return null;
-    }
-
-    private Calendar parseDate(String format, String source) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.JAPAN);
-        sdf.setLenient(false);
-        try {
-            Date date = sdf.parse(source);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            switch (format) {
-                case "yyyy年MM月":
-                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-                    break;
-                case "yyyy年":
-                    calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
-                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-                    break;
-            }
-            return calendar;
-        } catch (ParseException e) {
-            if(D) e.printStackTrace();
-        }
-        return null;
-    }
 
 }

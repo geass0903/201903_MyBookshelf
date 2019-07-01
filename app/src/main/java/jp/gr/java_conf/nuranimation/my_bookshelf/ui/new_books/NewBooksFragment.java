@@ -21,21 +21,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.NewBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
@@ -249,8 +248,8 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     if (book_register != null) {
                         BookData book = new BookData(book_register);
                         Calendar calendar = Calendar.getInstance();
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
-                        String registerDate = sdf.format(calendar.getTime());
+                        String registerDate = CalendarUtils.parseCalendar(calendar);
+
                         book.setRegisterDate(registerDate);
                         book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);
@@ -300,14 +299,19 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                             break;
                     }
                     break;
-                case FILTER_ACTION_UPDATE_PROGRESS:
-                    String progress = intent.getStringExtra(KEY_PROGRESS);
-                    if(progress != null) {
-                        Bundle bundle = new Bundle();
-                        bundle.putString(ProgressDialogFragment.progress, progress);
-
-                        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
+                case BaseThread.FILTER_ACTION_UPDATE_PROGRESS:
+                    String progress = intent.getStringExtra(BaseThread.KEY_PROGRESS_VALUE_TEXT);
+                    if(progress == null){
+                        progress = "";
                     }
+                    String message = intent.getStringExtra(BaseThread.KEY_PROGRESS_MESSAGE_TEXT);
+                    if(message == null){
+                        message = "";
+                    }
+                    Bundle bundle = new Bundle();
+                    bundle.putString(ProgressDialogFragment.message, message);
+                    bundle.putString(ProgressDialogFragment.progress, progress);
+                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
                     break;
             }
         }

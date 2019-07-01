@@ -44,56 +44,56 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_AUTHOR = "create table " + TABLE_AUTHORS + " ("
             + "_id integer primary key" // id
-            + ", " + KEY_AUTHOR + " text"  // 著者
+            + ", " + KEY_AUTHOR + " text"  // author
             + ");";
     private static final String CREATE_TABLE_SHELF_BOOKS = "create table " + TABLE_SHELF_BOOKS + " ("
-            + "_id integer primary key" // id
-            + ", " + KEY_ISBN + " text"  // ISBN
-            + ", " + KEY_TITLE + " text"  // タイトル
-            + ", " + KEY_AUTHOR + " text"  // 著者
-            + ", " + KEY_PUBLISHER + " text"  // 出版社
-            + ", " + KEY_RELEASE_DATE + " text"  // 発売日
-            + ", " + KEY_PRICE + " text"  // 定価
-            + ", " + KEY_RAKUTEN_URL + " text"  // URL
-            + ", " + KEY_IMAGES + " text"  // 商品画像URL
-            + ", " + KEY_RATING + " text"  // レーティング
-            + ", " + KEY_READ_STATUS + " text"  // ステータス
-            + ", " + KEY_TAGS + " text"  // タグ
-            + ", " + KEY_FINISH_READ_DATE + " text"  // 読了日
-            + ", " + KEY_REGISTER_DATE + " text"  // 登録日
+            + "_id integer primary key"               // id
+            + ", " + KEY_ISBN + " text"                 // ISBN
+            + ", " + KEY_TITLE + " text"                // title
+            + ", " + KEY_AUTHOR + " text"               // author
+            + ", " + KEY_PUBLISHER + " text"            // publisher
+            + ", " + KEY_RELEASE_DATE + " text"         // sales date
+            + ", " + KEY_PRICE + " text"                // price
+            + ", " + KEY_RAKUTEN_URL + " text"          // rakuten url
+            + ", " + KEY_IMAGES + " text"               // image url
+            + ", " + KEY_RATING + " text"               // rating
+            + ", " + KEY_READ_STATUS + " text"          // read status
+            + ", " + KEY_TAGS + " text"                 // tag
+            + ", " + KEY_FINISH_READ_DATE + " text"     // finish read date
+            + ", " + KEY_REGISTER_DATE + " text"        // register date
             + ");";
     private static final String CREATE_TABLE_SEARCH_BOOKS = "create table " + TABLE_SEARCH_BOOKS + " ("
-            + "_id integer primary key" // id
-            + ", " + KEY_ISBN + " text"  // ISBN
-            + ", " + KEY_TITLE + " text"  // タイトル
-            + ", " + KEY_AUTHOR + " text"  // 著者
-            + ", " + KEY_PUBLISHER + " text"  // 出版社
-            + ", " + KEY_RELEASE_DATE + " text"  // 発売日
-            + ", " + KEY_PRICE + " text"  // 定価
-            + ", " + KEY_RAKUTEN_URL + " text"  // URL
-            + ", " + KEY_IMAGES + " text"  // 商品画像URL
-            + ", " + KEY_RATING + " text"  // レーティング
-            + ", " + KEY_READ_STATUS + " text"  // ステータス
-            + ", " + KEY_TAGS + " text"  // タグ
-            + ", " + KEY_FINISH_READ_DATE + " text"  // 読了日
-            + ", " + KEY_REGISTER_DATE + " text"  // 登録日
+            + "_id integer primary key"               // id
+            + ", " + KEY_ISBN + " text"                 // ISBN
+            + ", " + KEY_TITLE + " text"                // title
+            + ", " + KEY_AUTHOR + " text"               // author
+            + ", " + KEY_PUBLISHER + " text"            // publisher
+            + ", " + KEY_RELEASE_DATE + " text"         // sales date
+            + ", " + KEY_PRICE + " text"                // price
+            + ", " + KEY_RAKUTEN_URL + " text"          // rakuten url
+            + ", " + KEY_IMAGES + " text"               // image url
+            + ", " + KEY_RATING + " text"               // rating
+            + ", " + KEY_READ_STATUS + " text"          // read status
+            + ", " + KEY_TAGS + " text"                 // tag
+            + ", " + KEY_FINISH_READ_DATE + " text"     // finish read date
+            + ", " + KEY_REGISTER_DATE + " text"        // register date
             + ");";
 
     private static final String CREATE_TABLE_NEW_BOOKS = "create table " + TABLE_NEW_BOOKS + " ("
-            + "_id integer primary key" // id
-            + ", " + KEY_ISBN + " text"  // ISBN
-            + ", " + KEY_TITLE + " text"  // タイトル
-            + ", " + KEY_AUTHOR + " text"  // 著者
-            + ", " + KEY_PUBLISHER + " text"  // 出版社
-            + ", " + KEY_RELEASE_DATE + " text"  // 発売日
-            + ", " + KEY_PRICE + " text"  // 定価
-            + ", " + KEY_RAKUTEN_URL + " text"  // URL
-            + ", " + KEY_IMAGES + " text"  // 商品画像URL
-            + ", " + KEY_RATING + " text"  // レーティング
-            + ", " + KEY_READ_STATUS + " text"  // ステータス
-            + ", " + KEY_TAGS + " text"  // タグ
-            + ", " + KEY_FINISH_READ_DATE + " text"  // 読了日
-            + ", " + KEY_REGISTER_DATE + " text"  // 登録日
+            + "_id integer primary key"               // id
+            + ", " + KEY_ISBN + " text"                 // ISBN
+            + ", " + KEY_TITLE + " text"                // title
+            + ", " + KEY_AUTHOR + " text"               // author
+            + ", " + KEY_PUBLISHER + " text"            // publisher
+            + ", " + KEY_RELEASE_DATE + " text"         // sales date
+            + ", " + KEY_PRICE + " text"                // price
+            + ", " + KEY_RAKUTEN_URL + " text"          // rakuten url
+            + ", " + KEY_IMAGES + " text"               // image url
+            + ", " + KEY_RATING + " text"               // rating
+            + ", " + KEY_READ_STATUS + " text"          // read status
+            + ", " + KEY_TAGS + " text"                 // tag
+            + ", " + KEY_FINISH_READ_DATE + " text"     // finish read date
+            + ", " + KEY_REGISTER_DATE + " text"        // register date
             + ");";
 
     private static final String DROP_TABLE_TABLE_AUTHOR = "drop table " + TABLE_AUTHORS + ";";
@@ -159,19 +159,19 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     private void registerBook(final String table, final BookData book) {
         if (book != null && !TextUtils.isEmpty(book.getISBN())) {
             ContentValues insertValues = new ContentValues();
-            insertValues.put(KEY_ISBN, book.getISBN());// ISBN
-            insertValues.put(KEY_TITLE, book.getTitle());// タイトル
-            insertValues.put(KEY_AUTHOR, book.getAuthor()); // 著者
-            insertValues.put(KEY_PUBLISHER, book.getPublisher());// 出版社
-            insertValues.put(KEY_RELEASE_DATE, book.getSalesDate());// 発売日
-            insertValues.put(KEY_PRICE, book.getItemPrice());// 定価
-            insertValues.put(KEY_RAKUTEN_URL, book.getRakutenUrl());// URL
-            insertValues.put(KEY_IMAGES, book.getImage());// 商品画像URL
-            insertValues.put(KEY_RATING, book.getRating()); // レーティング
-            insertValues.put(KEY_READ_STATUS, book.getReadStatus());// ステータス
-            insertValues.put(KEY_TAGS, book.getTags());// タグ
-            insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate()); // 読了日
-            insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());// 登録日
+            insertValues.put(KEY_ISBN, book.getISBN());                         // ISBN
+            insertValues.put(KEY_TITLE, book.getTitle());                       // title
+            insertValues.put(KEY_AUTHOR, book.getAuthor());                     // author
+            insertValues.put(KEY_PUBLISHER, book.getPublisher());               // publisher
+            insertValues.put(KEY_RELEASE_DATE, book.getSalesDate());            // sales date
+            insertValues.put(KEY_PRICE, book.getItemPrice());                   // price
+            insertValues.put(KEY_RAKUTEN_URL, book.getRakutenUrl());            // rakuten url
+            insertValues.put(KEY_IMAGES, book.getImage());                      // image url
+            insertValues.put(KEY_RATING, book.getRating());                     // rating
+            insertValues.put(KEY_READ_STATUS, book.getReadStatus());            // read status
+            insertValues.put(KEY_TAGS, book.getTags());                         // tag
+            insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate());   // finish read date
+            insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());        // register date
 
             SQLiteDatabase db = this.getWritableDatabase();
             String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
@@ -197,19 +197,19 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         for (BookData book : books) {
             if (book != null && !TextUtils.isEmpty(book.getISBN())) {
                 ContentValues insertValues = new ContentValues();
-                insertValues.put(KEY_ISBN, book.getISBN());// ISBN
-                insertValues.put(KEY_TITLE, book.getTitle());// タイトル
-                insertValues.put(KEY_AUTHOR, book.getAuthor()); // 著者
-                insertValues.put(KEY_PUBLISHER, book.getPublisher());// 出版社
-                insertValues.put(KEY_RELEASE_DATE, book.getSalesDate());// 発売日
-                insertValues.put(KEY_PRICE, book.getItemPrice());// 定価
-                insertValues.put(KEY_RAKUTEN_URL, book.getRakutenUrl());// URL
-                insertValues.put(KEY_IMAGES, book.getImage());// 商品画像URL
-                insertValues.put(KEY_RATING, book.getRating()); // レーティング
-                insertValues.put(KEY_READ_STATUS, book.getReadStatus());// ステータス
-                insertValues.put(KEY_TAGS, book.getTags());// タグ
-                insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate()); // 読了日
-                insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());// 登録日
+                insertValues.put(KEY_ISBN, book.getISBN());                         // ISBN
+                insertValues.put(KEY_TITLE, book.getTitle());                       // title
+                insertValues.put(KEY_AUTHOR, book.getAuthor());                     // author
+                insertValues.put(KEY_PUBLISHER, book.getPublisher());               // publisher
+                insertValues.put(KEY_RELEASE_DATE, book.getSalesDate());            // sales date
+                insertValues.put(KEY_PRICE, book.getItemPrice());                   // price
+                insertValues.put(KEY_RAKUTEN_URL, book.getRakutenUrl());            // rakuten url
+                insertValues.put(KEY_IMAGES, book.getImage());                      // image url
+                insertValues.put(KEY_RATING, book.getRating());                     // rating
+                insertValues.put(KEY_READ_STATUS, book.getReadStatus());            // read status
+                insertValues.put(KEY_TAGS, book.getTags());                         // tag
+                insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate());   // finish read date
+                insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());        // register date
 
                 String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
                 Cursor c = db.rawQuery(sql, new String[]{book.getISBN()});

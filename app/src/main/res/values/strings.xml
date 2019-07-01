@@ -57,6 +57,7 @@
     <string name="progress_message_export_authors">著者データを書き出しています</string>
     <string name="progress_message_import_authors">著者データを読み込んでいます</string>
     <string name="progress_message_register">データを登録しています</string>
+    <string name="progress_message_author">著者：</string>
     <string name="progress_unit_book">冊</string>
     <string name="progress_unit_byte">Byte</string>
 

@@ -18,7 +18,7 @@ public class ProgressDialogFragment extends DialogFragment{
 
     public static final String title = "KEY_TITLE";
     public static final String message = "KEY_MESSAGE";
-    public static final String progress = "KEY_PROGRESS";
+    public static final String progress = "KEY_PROGRESS_VALUE_TEXT";
 
     private TextView mTextView_Title;
     private TextView mTextView_Message;

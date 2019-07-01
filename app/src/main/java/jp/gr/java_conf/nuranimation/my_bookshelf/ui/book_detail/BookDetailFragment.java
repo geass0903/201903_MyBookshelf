@@ -24,14 +24,17 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ReadStatusSpinnerArrayAdapter;
@@ -177,16 +180,15 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     @Override
     public void onDataSet(int requestCode, Calendar calendar) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
         switch (requestCode) {
             case REQUEST_CODE_SALES_DATE:
-                String sales_date = sdf.format(calendar.getTime());
+                String sales_date = CalendarUtils.parseCalendar(calendar);
                 if (D) Log.d(TAG, "sales_date: " + sales_date);
                 detailBook.setSalesDate(sales_date);
                 salesDateView.setText(sales_date);
                 break;
             case REQUEST_CODE_READ_DATE:
-                String read_date = sdf.format(calendar.getTime());
+                String read_date = CalendarUtils.parseCalendar(calendar);
                 if (D) Log.d(TAG, "read_date: " + read_date);
                 detailBook.setFinishReadDate(read_date);
                 readDateView.setText(read_date);
@@ -248,11 +250,14 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
         if(book != null) {
             mBookImageView.setImageURI(Uri.parse(BookDataUtils.parseUrlString(book.getImage(),BookDataUtils.IMAGE_TYPE_LARGE)));
-
+            BookDataUtils.parseUrlString(book.getImage());
             mBookImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(D) Log.d(TAG,"onClick");
+
+
+
                 }
             });
 
@@ -361,8 +366,15 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
 
     private void showDatePicker(int requestCode,String date){
         if(getActivity() != null){
+            Calendar calendar = CalendarUtils.parseDateString(date);
+            if(calendar == null){
+                calendar = Calendar.getInstance();
+            }
+
             Bundle mBundle_DatePicker = new Bundle();
-            mBundle_DatePicker.putString(BaseDatePickerFragment.KEY_DATE, date);
+            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_YEAR, calendar.get(Calendar.YEAR));
+            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_MONTH, calendar.get(Calendar.MONTH));
+            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
             mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_REQUEST_CODE, requestCode);
 
 
@@ -400,5 +412,7 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
         list.add(new SpinnerItem(BookData.STATUS_NONE,          getString(R.string.read_status_label_5)));
         return list;
     }
+
+
 
 }

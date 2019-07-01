@@ -18,6 +18,7 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
@@ -27,7 +28,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.SearchBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 
 
-public class BookService extends Service implements SearchBooksThread.ThreadFinishListener, NewBooksThread.ThreadFinishListener, FileBackupThread.ThreadFinishListener {
+public class BookService extends Service implements BaseThread.ThreadFinishListener{
     public static final String TAG = BookService.class.getSimpleName();
     private static final boolean D = true;
 
@@ -68,6 +69,7 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
     private int mParamSEARCH_PAGE;
     private int mState;
     private boolean isForeground;
+
 
 
     public class MBinder extends Binder {
@@ -139,7 +141,9 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
 
 
     @Override
-    public void deliverSearchBooksResult(Result result) {
+    public void deliverResult(Result result) {
+
+        // Search Books
         if(mState == STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE){
             mSearchBooksResult = result;
             if (result.isSuccess()) {
@@ -147,13 +151,12 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
             }
             setServiceState(STATE_SEARCH_BOOKS_SEARCH_COMPLETE);
         }else{
-            if (D) Log.d(TAG, "Illegal State");
-            setServiceState(STATE_NONE);
+ //           if (D) Log.d(TAG, "Illegal State");
+ //           setServiceState(STATE_NONE);
         }
-    }
 
-    @Override
-    public void deliverNewBooksResult(Result result) {
+
+        // New Books
         if(mState == STATE_NEW_BOOKS_RELOAD_INCOMPLETE) {
             mNewBooksResult = result;
             if (result.isSuccess()) {
@@ -162,13 +165,11 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
             }
             setServiceState(STATE_NEW_BOOKS_RELOAD_COMPLETE);
         }else{
-            if (D) Log.d(TAG, "Illegal State");
-            setServiceState(STATE_NONE);
+ //           if (D) Log.d(TAG, "Illegal State");
+ //           setServiceState(STATE_NONE);
         }
-    }
 
-    @Override
-    public void deliverBackupResult(Result result) {
+        // File backup
         switch (mState) {
             case STATE_EXPORT_INCOMPLETE:
                 mFileBackupResult = result;
@@ -213,11 +214,14 @@ public class BookService extends Service implements SearchBooksThread.ThreadFini
                 }
                 break;
             default:
-                if (D) Log.d(TAG, "Illegal State");
-                setServiceState(STATE_NONE);
+ //               if (D) Log.d(TAG, "Illegal State");
+ //               setServiceState(STATE_NONE);
                 break;
         }
+
+
     }
+
 
     public void startAuthenticate(){
         Auth.startOAuth2Authentication(this,DROP_BOX_KEY);

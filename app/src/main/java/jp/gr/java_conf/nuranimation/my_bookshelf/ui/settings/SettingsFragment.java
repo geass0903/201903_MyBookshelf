@@ -25,10 +25,11 @@ import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.OrderSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
@@ -206,11 +207,11 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                     }
                     break;
                 case FILTER_ACTION_UPDATE_PROGRESS:
-                    String progress = intent.getStringExtra(KEY_PROGRESS);
+                    String progress = intent.getStringExtra(BaseThread.KEY_PROGRESS_VALUE_TEXT);
                     if(progress == null){
                         progress = "";
                     }
-                    String message = intent.getStringExtra(KEY_PROGRESS_MESSAGE);
+                    String message = intent.getStringExtra(BaseThread.KEY_PROGRESS_MESSAGE_TEXT);
                     if(message == null){
                         message = "";
                     }

@@ -16,10 +16,10 @@ public class Result{
     public static final int ERROR_CODE_EXPORT_CANCELED          =  10;
     public static final int ERROR_CODE_IMPORT_DIR_NOT_FOUND     =  11;
     public static final int ERROR_CODE_IMPORT_CANCELED          =  12;
-    public static final int ERROR_CODE_UPLOAD_DIR_NOT_FOUND     =  13;
-    public static final int ERROR_CODE_UPLOAD_CANCELED          =  14;
-    public static final int ERROR_CODE_DOWNLOAD_DIR_NOT_FOUND   =  15;
-    public static final int ERROR_CODE_DOWNLOAD_CANCELED        =  16;
+    public static final int ERROR_CODE_UPLOAD_CANCELED          =  13;
+    public static final int ERROR_CODE_DOWNLOAD_CANCELED        =  14;
+    public static final int ERROR_CODE_SEARCH_CANCELED          =  15;
+    public static final int ERROR_CODE_RELOAD_CANCELED          =  16;
 
     public static final int ERROR_CODE_UNKNOWN                  = 100;
 

@@ -1,8 +1,6 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.model.net;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -22,13 +20,15 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
-@SuppressWarnings({"unused"})
-public class NewBooksThread extends Thread {
+
+public class NewBooksThread extends BaseThread{
     private static final String TAG = NewBooksThread.class.getSimpleName();
     private static final boolean D = false;
 
@@ -41,105 +41,101 @@ public class NewBooksThread extends Thread {
     private static final String urlField = "&field=" + "0";
     private static final String urlSort = "&sort=" + "-releaseDate";
 
+    private final Context mContext;
     private final List<String> authors;
-    private boolean isCanceled;
-    private ThreadFinishListener mListener;
-    private LocalBroadcastManager mLocalBroadcastManager;
-
-
-    public interface ThreadFinishListener {
-        void deliverNewBooksResult(Result result);
-    }
 
     public NewBooksThread(Context context, List<String> authors) {
+        super(context);
+        this.mContext = context;
         this.authors = authors;
-        this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
-        isCanceled = false;
-        if (context instanceof ThreadFinishListener) {
-            mListener = (ThreadFinishListener) context;
-        } else {
-            throw new UnsupportedOperationException("Listener is not Implementation.");
-        }
     }
 
 
     @Override
     public void run() {
-        List<String> authorsList = new ArrayList<>(authors);
-        List<BookData> books = new ArrayList<>();
         Result mResult;
-        String progress;
-        int count;
-        int size  = authorsList.size();
 
-        if (authorsList.size() == 0) {
+        if(authors.size() == 0){
             mResult = Result.ReloadError(Result.ERROR_CODE_EMPTY_AUTHORS_LIST, "empty authors");
-        } else {
-            count = 0;
-            progress = count + "/" + size;
-            sendProgressMessage(progress);
-            for (String author : authorsList) {
-                if (isCanceled) {
-                    break;
-                }
-                if (!TextUtils.isEmpty(author)) {
-                    int page = 1;
-                    boolean hasNext = true;
-                    while (hasNext) {
-                        Result result = search(author, page);
-                        if (result.isSuccess()) {
-                            hasNext = result.hasNext();
-                            List<BookData> check = result.getBooks();
-                            for (BookData book : check) {
-                                if (isNewBook(book)) {
-                                    String book_author = book.getAuthor();
-                                    book_author = book_author.replaceAll("[\\x20\\u3000]", "");
-                                    if (book_author.contains(author)) {
-                                        if (D) Log.d(TAG, "author: " + author + " add: " + book.getTitle());
-                                        books.add(book);
-                                    }
-                                } else {
-                                    hasNext = false;
-                                    break;
-                                }
-                            }
-                            page++;
-                        } else {
-                            hasNext = false;
-                        }
-
-                    }
-                    count++;
-                    progress = count + "/" + size;
-                    sendProgressMessage(progress);
-                }
-            }
-            if(books.size() > 0) {
-                mResult = Result.ReloadSuccess(books);
-            }else{
-                mResult = Result.ReloadError(Result.ERROR_CODE_IO_EXCEPTION, "no books");
-            }
+        }else{
+            mResult = reloadNewBooks(authors);
         }
-        if (mListener != null && !isCanceled) {
-            mListener.deliverNewBooksResult(mResult);
+        if (getThreadFinishListener() != null) {
+            getThreadFinishListener().deliverResult(mResult);
         }
     }
 
 
+    @Override
     public void cancel() {
+        super.cancel();
         if (D) Log.d(TAG, "thread cancel");
-        isCanceled = true;
     }
 
 
+    private Result reloadNewBooks(List<String> authors){
+        int size = authors.size();
+        int count = 0;
+        String message;
+        String progress;
 
-    private Result search(String keyword, int page) {
+        List<BookData> books = new ArrayList<>();
+        for (String author : authors) {
+            if (isCanceled()) {
+                return Result.ReloadError(Result.ERROR_CODE_RELOAD_CANCELED, "reload canceled");
+            }
+            count++;
+            message = mContext.getString(R.string.progress_message_author) + author;
+            progress = count + "/" + size;
+            updateProgress(message, progress);
+            List<BookData> newBooks = getNewBooks(author);
+            books.addAll(newBooks);
+        }
+        if(books.size() > 0) {
+            return Result.ReloadSuccess(books);
+        }else{
+            return Result.ReloadError(Result.ERROR_CODE_IO_EXCEPTION, "no books");
+        }
+    }
+
+    private List<BookData> getNewBooks(String author) {
+        List<BookData> books = new ArrayList<>();
+        int page = 1;
+        boolean hasNext = true;
+        while (hasNext) {
+            Result result = search(author, page);
+            if (result.isSuccess()) {
+                hasNext = result.hasNext();
+                List<BookData> check = result.getBooks();
+                for (BookData book : check) {
+                    if (isNewBook(book)) {
+                        String book_author = book.getAuthor();
+                        book_author = book_author.replaceAll("[\\x20\\u3000]", "");
+                        if (book_author.contains(author)) {
+                            if (D) Log.d(TAG, "author: " + author + " add: " + book.getTitle());
+                            books.add(book);
+                        }
+                    } else {
+                        hasNext = false;
+                        break;
+                    }
+                }
+                page++;
+            } else {
+                hasNext = false;
+            }
+        }
+        return books;
+    }
+
+    private Result search(final String keyword, final int page) {
+        Result mResult = Result.SearchError(Result.ERROR_CODE_UNKNOWN, "search failed");
         int count = 0;
         int last = 0;
 
         int retried = 0;
         while (retried < 3) {
-            if (isCanceled) {
+            if (isCanceled()) {
                 return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search canceled");
             }
 
@@ -157,7 +153,7 @@ public class NewBooksThread extends Thread {
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits + urlStockFlag + urlField + urlSort
                         + urlPage + urlKeyword;
                 URL url = new URL(urlString);
-                if (isCanceled) {
+                if (isCanceled()) {
                     return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search canceled");
                 }
                 connection = (HttpsURLConnection) url.openConnection();
@@ -210,14 +206,17 @@ public class NewBooksThread extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "InterruptedException");
+                mResult = Result.SearchError(Result.ERROR_CODE_INTERRUPTED_EXCEPTION, "InterruptedException");
                 // retry
             } catch (IOException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "IOException");
+                mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "IOException");
                 // retry
             } catch (JSONException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "JSONException");
+                mResult = Result.SearchError(Result.ERROR_CODE_JSON_EXCEPTION, "JSONException");
                 // retry
             } finally {
                 if (connection != null) {
@@ -226,15 +225,14 @@ public class NewBooksThread extends Thread {
             }
             retried++;
         }
-        return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search failed");
+        return mResult;
     }
 
 
     private boolean isNewBook(BookData book){
         Calendar baseDate = Calendar.getInstance();
         baseDate.add(Calendar.DAY_OF_MONTH, -14);
-        Calendar salesDate = BookDataUtils.getCalendar(book.getSalesDate());
-//        Calendar salesDate = MyBookshelfUtils.parseDate(book.getSalesDate());
+        Calendar salesDate = CalendarUtils.parseDateString(book.getSalesDate());
         if(salesDate != null){
             return salesDate.compareTo(baseDate) >= 0;
         }else{
@@ -242,10 +240,4 @@ public class NewBooksThread extends Thread {
         }
     }
 
-    private void sendProgressMessage(String progress) {
-        Intent intent = new Intent();
-        intent.putExtra(BaseFragment.KEY_PROGRESS, progress);
-        intent.setAction(BaseFragment.FILTER_ACTION_UPDATE_PROGRESS);
-        mLocalBroadcastManager.sendBroadcast(intent);
-    }
 }

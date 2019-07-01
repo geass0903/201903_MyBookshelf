@@ -28,8 +28,9 @@ import java.util.Locale;
 import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
@@ -229,8 +230,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     if (book_register != null) {
                         BookData book = new BookData(book_register);
                         Calendar calendar = Calendar.getInstance();
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
-                        String registerDate = sdf.format(calendar.getTime());
+                        String registerDate = CalendarUtils.parseCalendar(calendar);
                         book.setRegisterDate(registerDate);
                         book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);

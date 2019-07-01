@@ -1,28 +1,19 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.model.entity;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.utils;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.res.ResourcesCompat;
 import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 
 public class BookDataUtils {
     public static final String JSON_KEY_ITEMS               = "Items";
@@ -30,6 +21,7 @@ public class BookDataUtils {
     public static final String JSON_KEY_LAST                = "last";
     public static final String JSON_KEY_ERROR               = "error";
     public static final String JSON_KEY_ERROR_DESCRIPTION   = "error_description";
+
     private static final String JSON_KEY_TITLE               = "title";
     private static final String JSON_KEY_AUTHOR              = "author";
     private static final String JSON_KEY_PUBLISHER_NAME      = "publisherName";
@@ -54,9 +46,9 @@ public class BookDataUtils {
     private static final String INDEX_READ_DATE = "finishReadDate";
     private static final String INDEX_REGISTER_DATE = "registerDate";
 
-    public static final int IMAGE_TYPE_ORIGINAL = 0;
-    public static final int IMAGE_TYPE_LARGE = 1;
-    public static final int IMAGE_TYPE_SMALL = 2;
+    private static final int IMAGE_TYPE_ORIGINAL    = 0;
+    public static final int IMAGE_TYPE_LARGE        = 1;
+    public static final int IMAGE_TYPE_SMALL        = 2;
 
 
 
@@ -120,7 +112,7 @@ public class BookDataUtils {
                     book.setPublisher(split[i]);
                     break;
                 case INDEX_RELEASE_DATE:
-                    book.setSalesDate(BookDataUtils.getDateString(split[i]));
+                    book.setSalesDate(getDateString(split[i]));
                     break;
                 case INDEX_PRICE:
                     book.setItemPrice(split[i]);
@@ -138,13 +130,13 @@ public class BookDataUtils {
                     book.setTags(split[i]);
                     break;
                 case INDEX_READ_DATE:
-                    book.setFinishReadDate(BookDataUtils.getDateString(split[i]));
+                    book.setFinishReadDate(getDateString(split[i]));
                     break;
                 case INDEX_REGISTER_DATE:
-                    book.setRegisterDate(BookDataUtils.getDateString(split[i]));
+                    book.setRegisterDate(getDateString(split[i]));
                     break;
                 case INDEX_IMAGE:
-                    book.setImage(BookDataUtils.parseUrlString(split[i], BookDataUtils.IMAGE_TYPE_ORIGINAL));
+                    book.setImage(BookDataUtils.parseUrlString(split[i]));
                     break;
             }
         }
@@ -246,6 +238,11 @@ public class BookDataUtils {
         return arr;
     }
 
+    public static String parseUrlString(String url){
+        return parseUrlString(url, IMAGE_TYPE_ORIGINAL);
+    }
+
+
     public static String parseUrlString(String url, int type) {
         if (TextUtils.isEmpty(url)) {
             return "";
@@ -286,90 +283,6 @@ public class BookDataUtils {
         return url;
     }
 
-    public static Calendar getCalendar(String source) {
-        String[] formats = {"yyyy/MM/dd", "yyyy年MM月dd日", "yyyy年MM月", "yyyy年"};
-        for (String format : formats) {
-            Calendar calendar = parseDate(format, source);
-            if (calendar != null) {
-                return calendar;
-            }
-        }
-        return null;
-    }
-
-    public static Drawable getReadStatusImage(Context context, String status) {
-        Resources res = context.getResources();
-        Drawable read_status_image;
-        if (status == null) {
-            read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
-            if (read_status_image != null) {
-                read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.CLEAR);
-            }
-        } else switch (status) {
-            case BookData.STATUS_INTERESTED:
-                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_favorites, null);
-                if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FFDD0000"), PorterDuff.Mode.SRC_ATOP);
-                }
-                break;
-            case BookData.STATUS_UNREAD:
-                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
-                if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FFDDDD00"), PorterDuff.Mode.SRC_ATOP);
-                }
-                break;
-            case BookData.STATUS_READING:
-                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
-                if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FF00DD00"), PorterDuff.Mode.SRC_ATOP);
-                }
-                break;
-            case BookData.STATUS_ALREADY_READ:
-                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
-                if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FF0000DD"), PorterDuff.Mode.SRC_ATOP);
-                }
-                break;
-            case BookData.STATUS_NONE:
-                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
-                if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FF808080"), PorterDuff.Mode.SRC_ATOP);
-                }
-                break;
-            default:
-                read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
-                if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
-                }
-        }
-        return read_status_image;
-    }
-
-    public static String getReadStatusText(Context context, String status) {
-        String read_status_text;
-        if (status == null) {
-            read_status_text = context.getString(R.string.read_status_label_0);
-        } else switch (status) {
-            case BookData.STATUS_INTERESTED:
-                read_status_text = context.getString(R.string.read_status_label_1);
-                break;
-            case BookData.STATUS_UNREAD:
-                read_status_text = context.getString(R.string.read_status_label_2);
-                break;
-            case BookData.STATUS_READING:
-                read_status_text = context.getString(R.string.read_status_label_3);
-                break;
-            case BookData.STATUS_ALREADY_READ:
-                read_status_text = context.getString(R.string.read_status_label_4);
-                break;
-            case BookData.STATUS_NONE:
-                read_status_text = context.getString(R.string.read_status_label_5);
-                break;
-            default:
-                read_status_text = context.getString(R.string.read_status_label_0);
-        }
-        return read_status_text;
-    }
 
     private static String getStringParam(JSONObject json, String keyword) throws JSONException {
         if (json.has(keyword)) {
@@ -378,47 +291,11 @@ public class BookDataUtils {
         return "";
     }
 
+
     private static String getDateString(String date) {
-        if (TextUtils.isEmpty(date)) {
-            return "";
-        }
-        Calendar calendar = getCalendar(date);
-        if (calendar == null) {
-            return "";
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN);
-        return sdf.format(calendar.getTime());
+        Calendar calendar = CalendarUtils.parseDateString(date);
+        return CalendarUtils.parseCalendar(calendar);
     }
-
-    private static Calendar parseDate(String format, String source) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.JAPAN);
-        sdf.setLenient(false);
-        try {
-            Date date = sdf.parse(source);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            switch (format) {
-                case "yyyy年MM月":
-                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-                    break;
-                case "yyyy年":
-                    calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
-                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-                    break;
-            }
-            return calendar;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-
-
-
-
-
 
 
 }

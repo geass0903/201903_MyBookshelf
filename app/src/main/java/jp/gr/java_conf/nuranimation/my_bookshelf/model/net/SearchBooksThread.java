@@ -19,12 +19,13 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookDataUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
-@SuppressWarnings({"unused"})
-public class SearchBooksThread extends Thread {
+
+public class SearchBooksThread extends BaseThread {
     private static final String TAG = SearchBooksThread.class.getSimpleName();
     private static final boolean D = false;
 
@@ -38,38 +39,41 @@ public class SearchBooksThread extends Thread {
     private final String sort;
     private final String keyword;
     private final int page;
-    private boolean isCanceled;
-    private Result mResult;
-    private ThreadFinishListener mListener;
 
-    public interface ThreadFinishListener {
-        void deliverSearchBooksResult(Result result);
-    }
 
 
     public SearchBooksThread(Context context, String keyword, int page, String sort) {
+        super(context);
         this.sort = sort;
         this.keyword = keyword;
         this.page = page;
-        isCanceled = false;
-        if (context instanceof ThreadFinishListener) {
-            mListener = (ThreadFinishListener) context;
-        } else {
-            throw new UnsupportedOperationException("Listener is not Implementation.");
-        }
     }
 
 
     @Override
     public void run() {
-        if (D) Log.d(TAG, "thread start");
+        Result mResult = search(keyword, page, sort);
+        if(getThreadFinishListener() != null){
+            getThreadFinishListener().deliverResult(mResult);
+        }
+    }
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        if (D) Log.d(TAG, "thread cancel");
+    }
+
+
+    private Result search(final String keyword, final int page, final String sort) {
+        Result mResult = Result.SearchError(Result.ERROR_CODE_UNKNOWN, "search failed");
         int count = 0;
         int last = 0;
 
         int retried = 0;
         while (retried < 3) {
-            if (isCanceled) {
-                break;
+            if (isCanceled()) {
+                return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search canceled");
             }
 
             HttpsURLConnection connection = null;
@@ -79,18 +83,16 @@ public class SearchBooksThread extends Thread {
                 }
                 Thread.sleep(1000);
                 if (TextUtils.isEmpty(keyword)) {
-                    mResult = Result.SearchError(Result.ERROR_CODE_EMPTY_KEYWORD, "empty keyword");
-                    break;
+                    return Result.SearchError(Result.ERROR_CODE_EMPTY_KEYWORD, "empty keyword");
                 }
-
                 String urlSort = "&sort=" + URLEncoder.encode(sort, "UTF-8");
                 String urlPage = "&page=" + page;
                 String urlKeyword = "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits + urlStockFlag + urlField
                         + urlSort + urlPage + urlKeyword;
                 URL url = new URL(urlString);
-                if (isCanceled) {
-                    break;
+                if (isCanceled()) {
+                    return Result.SearchError(Result.ERROR_CODE_SEARCH_CANCELED, "search canceled");
                 }
                 connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -126,12 +128,12 @@ public class SearchBooksThread extends Thread {
                             }
                             boolean hasNext = count - last > 0;
                             List<BookData> books = new ArrayList<>(tmp);
-                            mResult = Result.SearchSuccess(books, hasNext);
-                        }else{
-                            mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "JSONException");
+                            return Result.SearchSuccess(books, hasNext);
+                        } else {
+                            return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "No json item");
                         }
-                        break;
                     case HttpURLConnection.HTTP_BAD_REQUEST:    // 400 wrong parameter
+                        return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "wrong parameter");
                     case HttpURLConnection.HTTP_NOT_FOUND:      // 404 not success
                     case 429:                                   // 429 too many requests
                     case HttpURLConnection.HTTP_INTERNAL_ERROR: // 500 system error
@@ -142,11 +144,13 @@ public class SearchBooksThread extends Thread {
                         }
                         reader.close();
                         JSONObject errorJSON = new JSONObject(sb.toString());
-                        if(errorJSON.has(BookDataUtils.JSON_KEY_ERROR) && errorJSON.has(BookDataUtils.JSON_KEY_ERROR_DESCRIPTION)){
+                        if (errorJSON.has(BookDataUtils.JSON_KEY_ERROR) && errorJSON.has(BookDataUtils.JSON_KEY_ERROR_DESCRIPTION)) {
                             String errorMessage = errorJSON.getString(BookDataUtils.JSON_KEY_ERROR_DESCRIPTION);
                             mResult = Result.SearchError(Result.ERROR_CODE_HTTP_ERROR, errorMessage);
-                        }else {
+                            // retry
+                        } else {
                             mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "JSONException");
+                            // retry
                         }
                         break;
                 }
@@ -154,33 +158,27 @@ public class SearchBooksThread extends Thread {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "InterruptedException");
                 mResult = Result.SearchError(Result.ERROR_CODE_INTERRUPTED_EXCEPTION, "InterruptedException");
+                // retry
             } catch (IOException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "IOException");
                 mResult = Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "IOException");
+                // retry
             } catch (JSONException e) {
                 e.printStackTrace();
                 if (D) Log.d(TAG, "JSONException");
                 mResult = Result.SearchError(Result.ERROR_CODE_JSON_EXCEPTION, "JSONException");
+                // retry
             } finally {
                 if (connection != null) {
                     connection.disconnect();
                 }
             }
-            if (mResult != null && mResult.isSuccess()) {
-                break;
-            }
             retried++;
         }
-        if (D) Log.d(TAG, "thread finish");
-        if (mListener != null && !isCanceled && mResult != null) {
-            mListener.deliverSearchBooksResult(mResult);
-        }
+        return mResult;
     }
 
-    public void cancel() {
-        if (D) Log.d(TAG, "thread cancel");
-        isCanceled = true;
-    }
+
 
 }

@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
@@ -51,8 +52,8 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public static final String FILTER_ACTION_UPDATE_SERVICE_STATE = "FILTER_ACTION_UPDATE_SERVICE_STATE";
     public static final String KEY_UPDATE_SERVICE_STATE = "KEY_UPDATE_SERVICE_STATE";
     public static final String FILTER_ACTION_UPDATE_PROGRESS = "FILTER_ACTION_UPDATE_PROGRESS";
-    public static final String KEY_PROGRESS_MESSAGE = "KEY_PROGRESS_MESSAGE";
-    public static final String KEY_PROGRESS = "KEY_PROGRESS";
+    public static final String KEY_PROGRESS_MESSAGE = "KEY_PROGRESS_MESSAGE_TEXT";
+    public static final String KEY_PROGRESS = "KEY_PROGRESS_VALUE_TEXT";
 
     private static final String KEY_SAVED_REQUEST_PERMISSIONS   = "KEY_SAVED_REQUEST_PERMISSIONS";
     private static final String KEY_IS_SHOW_PROGRESS_DIALOG     = "KEY_IS_SHOW_PROGRESS_DIALOG";
@@ -98,7 +99,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         mReceiver = new LocalReceiver();
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(FILTER_ACTION_UPDATE_SERVICE_STATE);
-        mIntentFilter.addAction(FILTER_ACTION_UPDATE_PROGRESS);
+        mIntentFilter.addAction(BaseThread.FILTER_ACTION_UPDATE_PROGRESS);
         if (context instanceof FragmentListener) {
             mFragmentListener = (FragmentListener) context;
         } else {
