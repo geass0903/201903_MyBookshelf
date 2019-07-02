@@ -26,8 +26,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.base.BaseService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
@@ -48,12 +49,6 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
     public static final int REQUEST_CODE_DROPBOX_LOGOUT         =   2;
     public static final int REQUEST_CODE_REGISTER_BOOK          =   3;
     public static final int REQUEST_CODE_UNREGISTER_BOOK        =   4;
-
-    public static final String FILTER_ACTION_UPDATE_SERVICE_STATE = "FILTER_ACTION_UPDATE_SERVICE_STATE";
-    public static final String KEY_UPDATE_SERVICE_STATE = "KEY_UPDATE_SERVICE_STATE";
-    public static final String FILTER_ACTION_UPDATE_PROGRESS = "FILTER_ACTION_UPDATE_PROGRESS";
-    public static final String KEY_PROGRESS_MESSAGE = "KEY_PROGRESS_MESSAGE_TEXT";
-    public static final String KEY_PROGRESS = "KEY_PROGRESS_VALUE_TEXT";
 
     private static final String KEY_SAVED_REQUEST_PERMISSIONS   = "KEY_SAVED_REQUEST_PERMISSIONS";
     private static final String KEY_IS_SHOW_PROGRESS_DIALOG     = "KEY_IS_SHOW_PROGRESS_DIALOG";
@@ -98,7 +93,7 @@ public class BaseFragment extends Fragment implements BaseDialogFragment.OnBaseD
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
         mReceiver = new LocalReceiver();
         mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(FILTER_ACTION_UPDATE_SERVICE_STATE);
+        mIntentFilter.addAction(BaseService.FILTER_ACTION_UPDATE_SERVICE_STATE);
         mIntentFilter.addAction(BaseThread.FILTER_ACTION_UPDATE_PROGRESS);
         if (context instanceof FragmentListener) {
             mFragmentListener = (FragmentListener) context;

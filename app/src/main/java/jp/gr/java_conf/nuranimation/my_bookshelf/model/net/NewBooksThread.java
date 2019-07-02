@@ -21,14 +21,15 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
 
-public class NewBooksThread extends BaseThread{
+public class NewBooksThread extends BaseThread {
     private static final String TAG = NewBooksThread.class.getSimpleName();
     private static final boolean D = false;
 
@@ -103,7 +104,8 @@ public class NewBooksThread extends BaseThread{
         int page = 1;
         boolean hasNext = true;
         while (hasNext) {
-            Result result = search(author, page);
+            SearchParam searchParam = SearchParam.setSearchParam(author, page);
+            Result result = search(searchParam);
             if (result.isSuccess()) {
                 hasNext = result.hasNext();
                 List<BookData> check = result.getBooks();
@@ -128,7 +130,7 @@ public class NewBooksThread extends BaseThread{
         return books;
     }
 
-    private Result search(final String keyword, final int page) {
+    private Result search(final SearchParam searchParam) {
         Result mResult = Result.SearchError(Result.ERROR_CODE_UNKNOWN, "search failed");
         int count = 0;
         int last = 0;
@@ -145,13 +147,13 @@ public class NewBooksThread extends BaseThread{
                     Thread.sleep(retried * 200);
                 }
                 Thread.sleep(1000);
-                if (TextUtils.isEmpty(keyword)) {
+                if (TextUtils.isEmpty(searchParam.getKeyword())) {
                     return Result.SearchError(Result.ERROR_CODE_EMPTY_KEYWORD, "empty keyword");
                 }
-                String urlPage = "&page=" + page;
-                String urlKeyword = "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+                String urlKeyword = "&keyword=" + URLEncoder.encode(searchParam.getKeyword(), "UTF-8");
+                String urlPage = "&page=" + searchParam.getPage();
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits + urlStockFlag + urlField + urlSort
-                        + urlPage + urlKeyword;
+                        + urlKeyword + urlPage;
                 URL url = new URL(urlString);
                 if (isCanceled()) {
                     return Result.SearchError(Result.ERROR_CODE_IO_EXCEPTION, "search canceled");

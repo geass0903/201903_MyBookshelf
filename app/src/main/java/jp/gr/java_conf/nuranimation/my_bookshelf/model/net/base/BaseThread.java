@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.model.base;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base;
 
 import android.content.Context;
 import android.content.Intent;

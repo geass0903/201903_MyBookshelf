@@ -3,16 +3,13 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
-
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 
 public class MyBookshelfPreferences {
 
-    private static final String KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN";
-    private static final String KEY_SHELF_BOOKS_ORDER_CODE = "KEY_SHELF_BOOKS_ORDER_CODE";
-    private static final String KEY_SEARCH_BOOKS_ORDER_CODE = "KEY_SEARCH_BOOKS_ORDER_CODE";
-    private static final String KEY_IS_REQUEST_PERMISSION = "KEY_IS_REQUEST_PERMISSION";
+    private static final String KEY_ACCESS_TOKEN = "MyBookshelfPreferences.KEY_ACCESS_TOKEN";
+    private static final String KEY_SHELF_BOOKS_ORDER_CODE = "MyBookshelfPreferences.KEY_SHELF_BOOKS_ORDER_CODE";
+    private static final String KEY_SEARCH_BOOKS_ORDER_CODE = "MyBookshelfPreferences.KEY_SEARCH_BOOKS_ORDER_CODE";
+    private static final String KEY_IS_REQUEST_PERMISSION = "MyBookshelfPreferences.KEY_IS_REQUEST_PERMISSION";
 
     private static SharedPreferences mPreferences;
 
@@ -23,12 +20,7 @@ public class MyBookshelfPreferences {
     }
 
     public String getShelfBooksOrderCode(){
-        String code = mPreferences.getString(KEY_SHELF_BOOKS_ORDER_CODE,null);
-        if(TextUtils.isEmpty(code)){
-            code = BooksOrder.SHELF_BOOKS_ORDER_CODE_REGISTERED_ASC;
-            setShelfBooksOrderCode(code);
-        }
-        return code;
+        return mPreferences.getString(KEY_SHELF_BOOKS_ORDER_CODE,null);
     }
 
     public void setShelfBooksOrderCode(String code){
@@ -36,12 +28,7 @@ public class MyBookshelfPreferences {
     }
 
     public String getSearchBooksOrderCode(){
-        String code = mPreferences.getString(KEY_SEARCH_BOOKS_ORDER_CODE,null);
-        if(TextUtils.isEmpty(code)){
-            code = BooksOrder.SEARCH_BOOKS_ORDER_CODE_SALES_DATE_DESC;
-            setSearchBooksOrderCode(code);
-        }
-        return code;
+        return mPreferences.getString(KEY_SEARCH_BOOKS_ORDER_CODE,null);
     }
 
     public void setSearchBooksOrderCode(String code){

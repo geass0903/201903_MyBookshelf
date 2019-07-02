@@ -25,7 +25,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
@@ -44,6 +44,8 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
 public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
     public static final String TAG = NewBooksFragment.class.getSimpleName();
     private static final boolean D = true;
+
+    public static final String KEY_SERVICE_STATE = "NewBooksFragment.KEY_SERVICE_STATE";
 
     private static final String KEY_LAYOUT_MANAGER = "KEY_LAYOUT_MANAGER";
     private static final String KEY_RELOAD_STATE = "KEY_RELOAD_STATE";
@@ -84,12 +86,12 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
             if(mNewBooks == null) {
                 mNewBooks = mDBOpenHelper.loadNewBooks();
                 if (getArguments() != null) {
-                    mReloadState = getArguments().getInt(BookService.KEY_SERVICE_STATE, 0);
+                    mReloadState = getArguments().getInt(KEY_SERVICE_STATE, BookService.STATE_NONE);
                 }
             }
         }else {
             if (D) Log.d(TAG, "savedInstanceState != null");
-            mReloadState = savedInstanceState.getInt(KEY_RELOAD_STATE, 0);
+            mReloadState = savedInstanceState.getInt(KEY_RELOAD_STATE, BookService.STATE_NONE);
             mNewBooks = mDBOpenHelper.loadNewBooks();
             Parcelable mListState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER);
             if (mListState != null) {
@@ -282,8 +284,8 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         String action = intent.getAction();
         if(action != null){
             switch (action){
-                case FILTER_ACTION_UPDATE_SERVICE_STATE:
-                    int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
+                case BookService.FILTER_ACTION_UPDATE_SERVICE_STATE:
+                    int state = intent.getIntExtra(BookService.KEY_SERVICE_STATE, 0);
                     switch (state) {
                         case BookService.STATE_NONE:
                             if (D) Log.d(TAG, "STATE_NONE");
@@ -336,7 +338,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service != null) {
-                Result result = service.getNewBooksResult();
+                Result result = service.getResult();
                 if (result.isSuccess()) {
                     scrollToTop();
                     mNewBooksViewAdapter.replaceBooksData(mDBOpenHelper.loadNewBooks());

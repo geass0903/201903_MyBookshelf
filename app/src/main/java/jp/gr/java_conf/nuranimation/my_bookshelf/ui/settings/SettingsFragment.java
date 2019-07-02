@@ -20,12 +20,14 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.dropbox.core.android.Auth;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
@@ -42,6 +44,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     public static final String TAG = SettingsFragment.class.getSimpleName();
     private static final boolean D = true;
 
+    private static final String DROP_BOX_KEY = "fh2si4dchz272b1";
+
+    public static final String KEY_SERVICE_STATE = "SettingsFragment.KEY_SERVICE_STATE";
     private static final String KEY_CURRENT_STATE = "KEY_CURRENT_STATE";
     private static final String KEY_IS_ALLOWED_PERMISSIONS = "KEY_IS_ALLOWED_PERMISSIONS";
     private static final String KEY_IS_LOGGED_IN = "KEY_IS_LOGGED_IN";
@@ -59,10 +64,13 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     private boolean isLogged_in;
     private int mSettingsState = BookService.STATE_NONE;
 
+    private Context mContext;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
+        mContext = context;
     }
 
 
@@ -85,6 +93,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             isLogged_in = savedInstanceState.getBoolean(KEY_IS_LOGGED_IN, false);
             mSettingsState = savedInstanceState.getInt(KEY_CURRENT_STATE, BookService.STATE_NONE);
         } else {
+            if (getArguments() != null){
+                mSettingsState = getArguments().getInt(KEY_SERVICE_STATE, BookService.STATE_NONE);
+            }
             if (isAllowedAllPermissions(USE_PERMISSIONS)) {
                 isAllowedPermissions = true;
             }
@@ -190,8 +201,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         String action = intent.getAction();
         if(action != null){
             switch (action){
-                case FILTER_ACTION_UPDATE_SERVICE_STATE:
-                    int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, 0);
+                case BookService.FILTER_ACTION_UPDATE_SERVICE_STATE:
+                    int state = intent.getIntExtra(BookService.KEY_SERVICE_STATE, 0);
                     switch (state) {
                         case BookService.STATE_NONE:
                             if (D) Log.d(TAG, "STATE_NONE");
@@ -206,7 +217,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                             break;
                     }
                     break;
-                case FILTER_ACTION_UPDATE_PROGRESS:
+                case BaseThread.FILTER_ACTION_UPDATE_PROGRESS:
                     String progress = intent.getStringExtra(BaseThread.KEY_PROGRESS_VALUE_TEXT);
                     if(progress == null){
                         progress = "";
@@ -234,6 +245,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         OrderSpinnerArrayAdapter mShelfBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getShelfBooksOrderSpinnerList());
         mShelfBooksOrderSpinner.setAdapter(mShelfBooksOrderAdapter);
         String code = mPreferences.getShelfBooksOrderCode();
+        if(code == null){
+            code = BooksOrder.SHELF_BOOKS_ORDER_CODE_REGISTERED_ASC;
+        }
         mShelfBooksOrderSpinner.setSelection(mShelfBooksOrderAdapter.getPosition(code));
         mShelfBooksOrderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -253,6 +267,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         OrderSpinnerArrayAdapter mSearchBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getSearchBooksOrderSpinnerList());
         mSearchBooksOrderSpinner.setAdapter(mSearchBooksOrderAdapter);
         code = mPreferences.getSearchBooksOrderCode();
+        if(code == null){
+            code = BooksOrder.SEARCH_BOOKS_ORDER_CODE_SALES_DATE_DESC;
+        }
         mSearchBooksOrderSpinner.setSelection(mSearchBooksOrderAdapter.getPosition(code));
         mSearchBooksOrderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -391,7 +408,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (service != null) {
                 mSettingsState = BookService.STATE_DROPBOX_LOGIN;
                 service.setServiceState(BookService.STATE_DROPBOX_LOGIN);
-                service.startAuthenticate();
+                startAuthenticate();
             }
         }
     }
@@ -425,7 +442,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                         loadFileBackupResult();
                         break;
                     case BookService.STATE_DROPBOX_LOGIN:
-                        String token = service.getAccessToken();
+                        String token = getAccessToken();
                         if (token != null) {
                             // Log-in Success
                             if(D) Log.d(TAG,"Log-in Success");
@@ -450,7 +467,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service != null) {
-                Result result = service.getFileBackupResult();
+                Result result = service.getResult();
                 if(result.isSuccess()) {
                     switch (service.getServiceState()){
                         case BookService.STATE_EXPORT_COMPLETE:
@@ -480,6 +497,18 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         mSettingsState = BookService.STATE_NONE;
         getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
     }
+
+
+
+
+    public void startAuthenticate(){
+        Auth.startOAuth2Authentication(mContext,DROP_BOX_KEY);
+    }
+
+    public String getAccessToken(){
+        return Auth.getOAuth2Token();
+    }
+
 
 
 }

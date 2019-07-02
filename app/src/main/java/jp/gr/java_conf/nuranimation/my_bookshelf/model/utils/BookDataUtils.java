@@ -90,9 +90,8 @@ public class BookDataUtils {
         return new BookData(temp);
     }
 
-    public static BookData convertToBookData(final String[] index, final String line) throws IOException {
+    public static BookData convertToBookData(final String[] index, final String[] split) throws IOException {
         BookData book = new BookData();
-        String[] split = splitLineWithComma(line);
         if (split.length != index.length) {
             throw new IOException("can not convertToBookData");
         }
@@ -215,27 +214,6 @@ public class BookDataUtils {
         list.add(INDEX_TAGS);
         list.add(INDEX_REGISTER_DATE);
         return list.toArray(new String[0]);
-    }
-
-    public static String[] splitLineWithComma(String line) {
-        String REGEX_CSV_COMMA = ",(?=(([^\"]*\"){2})*[^\"]*$)";
-        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
-        String REGEX_DOUBLE_DOUBLE_QUOTATION = "\"\"";
-
-        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
-        String[] cols = cPattern.split(line, -1);
-        String[] arr = new String[cols.length];
-        for (int i = 0, len = cols.length; i < len; i++) {
-            String col = cols[i].trim();
-            Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
-            Matcher matcher = sdqPattern.matcher(col);
-            col = matcher.replaceAll("");
-            Pattern dqPattern = Pattern.compile(REGEX_DOUBLE_DOUBLE_QUOTATION);
-            matcher = dqPattern.matcher(col);
-            col = matcher.replaceAll("\"");
-            arr[i] = col;
-        }
-        return arr;
     }
 
     public static String parseUrlString(String url){

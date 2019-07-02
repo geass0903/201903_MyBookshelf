@@ -20,14 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.PatternSyntaxException;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
@@ -44,6 +43,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
 public class SearchBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
     public static final String TAG = SearchBooksFragment.class.getSimpleName();
     private static final boolean D = true;
+
+    public static final String KEY_SERVICE_STATE = "SearchBooksFragment.KEY_SERVICE_STATE";
+    public static final String KEY_PARAM_SEARCH_KEYWORD = "SearchBooksFragment.KEY_PARAM_SEARCH_KEYWORD";
+    public static final String KEY_PARAM_SEARCH_PAGE    = "SearchBooksFragment.KEY_PARAM_SEARCH_PAGE";
 
     private static final String KEY_LAYOUT_MANAGER = "KEY_LAYOUT_MANAGER";
     private static final String KEY_SEARCH_STATE = "KEY_SEARCH_STATE";
@@ -262,8 +265,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         if (D) Log.d(TAG, "onReceive");
         String action = intent.getAction();
 
-        if (action != null && action.equals(FILTER_ACTION_UPDATE_SERVICE_STATE)) {
-            int state = intent.getIntExtra(KEY_UPDATE_SERVICE_STATE, BookService.STATE_NONE);
+        if (action != null && action.equals(BookService.FILTER_ACTION_UPDATE_SERVICE_STATE)) {
+            int state = intent.getIntExtra(BookService.KEY_SERVICE_STATE, BookService.STATE_NONE);
             switch (state) {
                 case BookService.STATE_NONE:
                     if (D) Log.d(TAG, "STATE_NONE");
@@ -329,9 +332,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         List<BookData> books = new ArrayList<>();
         if (savedInstanceState == null) {
             if (getArguments() != null) {
-                mSearchState = getArguments().getInt(BookService.KEY_SERVICE_STATE, BookService.STATE_NONE);
-                mSearchPage = getArguments().getInt(BookService.KEY_PARAM_SEARCH_PAGE, 1);
-                mTempKeyword = getArguments().getString(BookService.KEY_PARAM_SEARCH_KEYWORD, null);
+                mSearchState = getArguments().getInt(KEY_SERVICE_STATE, BookService.STATE_NONE);
+                mSearchPage = getArguments().getInt(KEY_PARAM_SEARCH_PAGE, 1);
+                mTempKeyword = getArguments().getString(KEY_PARAM_SEARCH_KEYWORD, null);
                 mKeyword = mTempKeyword;
             }
             switch (mSearchState) {
@@ -415,7 +418,8 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchBooksViewAdapter.setFooter(footer);
             }
             mSearchState = BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE;
-            service.searchBooks(keyword, page);
+            SearchParam searchParam = SearchParam.setSearchParam(keyword, page);
+            service.searchBooks(searchParam);
         }
     }
 
@@ -425,7 +429,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         if (getActivity() instanceof MainActivity) {
             BookService service = ((MainActivity) getActivity()).getService();
             if (service != null) {
-                Result result = service.getSearchBooksResult();
+                Result result = service.getResult();
                 if (result.isSuccess()) {
                     hasButtonLoadNext = result.hasNext();
                     List<BookData> books = result.getBooks();

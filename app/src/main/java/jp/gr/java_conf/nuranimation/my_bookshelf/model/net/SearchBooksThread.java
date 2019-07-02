@@ -19,9 +19,10 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
 
@@ -36,23 +37,20 @@ public class SearchBooksThread extends BaseThread {
     private static final String urlHits = "&hits=20";
     private static final String urlStockFlag = "&outOfStockFlag=" + "1";
     private static final String urlField = "&field=" + "0";
+    private final SearchParam searchParam;
     private final String sort;
-    private final String keyword;
-    private final int page;
 
 
-
-    public SearchBooksThread(Context context, String keyword, int page, String sort) {
+    public SearchBooksThread(Context context, SearchParam searchParam, String sort) {
         super(context);
+        this.searchParam = searchParam;
         this.sort = sort;
-        this.keyword = keyword;
-        this.page = page;
     }
 
 
     @Override
     public void run() {
-        Result mResult = search(keyword, page, sort);
+        Result mResult = search(searchParam, sort);
         if(getThreadFinishListener() != null){
             getThreadFinishListener().deliverResult(mResult);
         }
@@ -65,7 +63,7 @@ public class SearchBooksThread extends BaseThread {
     }
 
 
-    private Result search(final String keyword, final int page, final String sort) {
+    private Result search(final SearchParam searchParam, final String sort) {
         Result mResult = Result.SearchError(Result.ERROR_CODE_UNKNOWN, "search failed");
         int count = 0;
         int last = 0;
@@ -82,14 +80,14 @@ public class SearchBooksThread extends BaseThread {
                     Thread.sleep(retried * 200);
                 }
                 Thread.sleep(1000);
-                if (TextUtils.isEmpty(keyword)) {
+                if (TextUtils.isEmpty(searchParam.getKeyword())) {
                     return Result.SearchError(Result.ERROR_CODE_EMPTY_KEYWORD, "empty keyword");
                 }
+                String urlKeyword = "&keyword=" + URLEncoder.encode(searchParam.getKeyword(), "UTF-8");
+                String urlPage = "&page=" + searchParam.getPage();
                 String urlSort = "&sort=" + URLEncoder.encode(sort, "UTF-8");
-                String urlPage = "&page=" + page;
-                String urlKeyword = "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
                 String urlString = urlBase + urlFormat + urlFormatVersion + urlGenre + urlHits + urlStockFlag + urlField
-                        + urlSort + urlPage + urlKeyword;
+                        + urlKeyword + urlPage + urlSort;
                 URL url = new URL(urlString);
                 if (isCanceled()) {
                     return Result.SearchError(Result.ERROR_CODE_SEARCH_CANCELED, "search canceled");

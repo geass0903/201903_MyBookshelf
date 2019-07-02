@@ -28,13 +28,15 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
@@ -207,13 +209,16 @@ public class FileBackupThread extends BaseThread {
             List<BookData> books = new ArrayList<>(1000);
             BufferedReader br_books = getBufferedReaderSkipBOM(new FileInputStream(file_books), Charset.forName("UTF-8"));
             String line = br_books.readLine();
-            String[] index = BookDataUtils.splitLineWithComma(line);
+
+
+            String[] index = splitLineWithComma(line);
             while ((line = br_books.readLine()) != null) {
                 if (isCanceled()) {
                     br_books.close();
                     return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_CANCELED, "import canceled");
                 }
-                BookData book = BookDataUtils.convertToBookData(index, line);
+                String[] split = splitLineWithComma(line);
+                BookData book = BookDataUtils.convertToBookData(index, split);
                 books.add(book);
                 importCount++;
                 progress = importCount + "/" + recodeCount + unit;
@@ -378,7 +383,7 @@ public class FileBackupThread extends BaseThread {
     }
 
 
-    private Metadata getMetadata(DbxClientV2 client, final String file_name) throws DbxException {
+    private static Metadata getMetadata(DbxClientV2 client, final String file_name) throws DbxException {
         SearchResult searchResult = client.files().search(DROPBOX_APP_DIRECTORY_PATH, file_name);
         List<SearchMatch> matches = searchResult.getMatches();
         for (SearchMatch match : matches) {
@@ -391,7 +396,28 @@ public class FileBackupThread extends BaseThread {
         return null;
     }
 
-    private int getLineCount(InputStream is, Charset charSet) throws IOException {
+    private static String[] splitLineWithComma(String line) {
+        String REGEX_CSV_COMMA = ",(?=(([^\"]*\"){2})*[^\"]*$)";
+        String REGEX_SURROUND_DOUBLE_QUOTATION = "^\"|\"$";
+        String REGEX_DOUBLE_DOUBLE_QUOTATION = "\"\"";
+
+        Pattern cPattern = Pattern.compile(REGEX_CSV_COMMA);
+        String[] cols = cPattern.split(line, -1);
+        String[] arr = new String[cols.length];
+        for (int i = 0, len = cols.length; i < len; i++) {
+            String col = cols[i].trim();
+            Pattern sdqPattern = Pattern.compile(REGEX_SURROUND_DOUBLE_QUOTATION);
+            Matcher matcher = sdqPattern.matcher(col);
+            col = matcher.replaceAll("");
+            Pattern dqPattern = Pattern.compile(REGEX_DOUBLE_DOUBLE_QUOTATION);
+            matcher = dqPattern.matcher(col);
+            col = matcher.replaceAll("\"");
+            arr[i] = col;
+        }
+        return arr;
+    }
+
+    private static int getLineCount(InputStream is, Charset charSet) throws IOException {
         int count = 0;
         BufferedReader br = getBufferedReaderSkipBOM(is, charSet);
         while (br.readLine() != null) {
@@ -401,7 +427,7 @@ public class FileBackupThread extends BaseThread {
         return count;
     }
 
-    private BufferedReader getBufferedReaderSkipBOM(InputStream is, Charset charSet) throws IOException {
+    private static BufferedReader getBufferedReaderSkipBOM(InputStream is, Charset charSet) throws IOException {
         InputStreamReader isr;
         BufferedReader br;
 
@@ -427,9 +453,10 @@ public class FileBackupThread extends BaseThread {
         return br;
     }
 
-    private BufferedWriter getBufferedWriter(OutputStream os, Charset charSet) {
+    private static BufferedWriter getBufferedWriter(OutputStream os, Charset charSet) {
         OutputStreamWriter osr = new OutputStreamWriter(os, charSet);
         return new BufferedWriter(osr);
     }
+
 
 }

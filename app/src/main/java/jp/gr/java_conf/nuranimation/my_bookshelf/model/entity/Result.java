@@ -94,4 +94,8 @@ public class Result{
         return new Result(false, errorCode, errorMessage, 0, null, false);
     }
 
+    /*--- Something error ---*/
+    public static Result Error(String errorMessage) {
+        return new Result(false, ERROR_CODE_UNKNOWN, errorMessage, 0, null, false);
+    }
 }

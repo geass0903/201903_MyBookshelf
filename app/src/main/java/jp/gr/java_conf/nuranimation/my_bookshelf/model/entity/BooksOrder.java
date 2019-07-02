@@ -64,5 +64,4 @@ public class BooksOrder {
                 return SEARCH_BOOKS_ORDER_SALES_DATE_ASC;
         }
     }
-
 }
