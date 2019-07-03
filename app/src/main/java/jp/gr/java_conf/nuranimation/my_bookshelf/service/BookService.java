@@ -187,8 +187,6 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
     public void cancelSearch() {
         if (searchBooksThread != null) {
             searchBooksThread.cancel();
-            setServiceState(STATE_NONE);
-            searchBooksThread = null;
         }
     }
 
@@ -202,8 +200,6 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
     public void cancelReload() {
         if (newBooksThread != null) {
             newBooksThread.cancel();
-            setServiceState(STATE_NONE);
-            newBooksThread = null;
         }
     }
 
@@ -237,8 +233,6 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
     public void cancelBackup() {
         if (fileBackupThread != null) {
             fileBackupThread.cancel();
-            setServiceState(STATE_NONE);
-            fileBackupThread = null;
         }
     }
 
