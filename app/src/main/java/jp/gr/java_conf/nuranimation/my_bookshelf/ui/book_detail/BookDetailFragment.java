@@ -24,11 +24,9 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,12 +38,12 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ReadStatusSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDatePickerFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDatePicker;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 
 
-public class BookDetailFragment extends BaseFragment implements BaseDatePickerFragment.OnBaseDateSetListener, BaseDialogFragment.OnBaseDialogListener{
+public class BookDetailFragment extends BaseFragment implements NormalDatePicker.OnBaseDateSetListener, NormalDialogFragment.OnNormalDialogListener {
     public static final String TAG = BookDetailFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -197,8 +195,8 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     }
 
     @Override
-    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+    public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if(resultCode == DialogInterface.BUTTON_POSITIVE){
             switch (requestCode){
                 case REQUEST_CODE_SALES_DATE:
@@ -212,8 +210,8 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
     }
 
     @Override
-    public void onBaseDialogCancelled(int requestCode, Bundle params) {
-        super.onBaseDialogCancelled(requestCode,params);
+    public void onNormalDialogCancelled(int requestCode, Bundle params) {
+        super.onNormalDialogCancelled(requestCode,params);
     }
 
 
@@ -372,30 +370,31 @@ public class BookDetailFragment extends BaseFragment implements BaseDatePickerFr
             }
 
             Bundle mBundle_DatePicker = new Bundle();
-            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_YEAR, calendar.get(Calendar.YEAR));
-            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_MONTH, calendar.get(Calendar.MONTH));
-            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
-            mBundle_DatePicker.putInt(BaseDatePickerFragment.KEY_REQUEST_CODE, requestCode);
+            mBundle_DatePicker.putInt(NormalDatePicker.KEY_YEAR, calendar.get(Calendar.YEAR));
+            mBundle_DatePicker.putInt(NormalDatePicker.KEY_MONTH, calendar.get(Calendar.MONTH));
+            mBundle_DatePicker.putInt(NormalDatePicker.KEY_DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
+            mBundle_DatePicker.putInt(NormalDatePicker.KEY_REQUEST_CODE, requestCode);
 
 
             FragmentManager manager = getActivity().getSupportFragmentManager();
-            BaseDatePickerFragment mDatePicker = BaseDatePickerFragment.newInstance(this,mBundle_DatePicker);
-            mDatePicker.show(manager, BaseDatePickerFragment.TAG);
+
+            NormalDatePicker mDatePicker = NormalDatePicker.newInstance(this, mBundle_DatePicker);
+            mDatePicker.show(manager, NormalDatePicker.TAG);
         }
     }
 
     private void showDeleteDateDialog(int requestCode) {
         if (getActivity() != null) {
             Bundle bundle = new Bundle();
-            bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date));
-            bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date));
-            bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-            bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-            bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, requestCode);
-            bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
+            bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date));
+            bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date));
+            bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+            bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+            bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, requestCode);
+            bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
             FragmentManager manager = getActivity().getSupportFragmentManager();
-            BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
-            fragment.show(manager, BaseDialogFragment.TAG);
+            NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
+            fragment.show(manager, NormalDialogFragment.TAG);
         }
     }
 

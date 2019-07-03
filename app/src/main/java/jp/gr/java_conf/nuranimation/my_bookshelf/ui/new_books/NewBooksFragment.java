@@ -35,10 +35,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragme
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
 public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
@@ -213,35 +213,35 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 BookData registered = mDBOpenHelper.loadBookDataFromShelfBooks(data);
                 if(registered.getView_type() == BookData.TYPE_BOOK){
                     // registered. delete Dialog
-                    bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book));
-                    bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
-                    bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-                    bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
-                    bundle.putBundle(BaseDialogFragment.KEY_PARAMS, bundle_book);
-                    bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
+                    bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book));
+                    bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
+                    bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                    bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
+                    bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
+                    bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 }else {
                     // unregistered. register Dialog
-                    bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_register_book));
-                    bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_register_book));
-                    bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-                    bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK);
-                    bundle.putBundle(BaseDialogFragment.KEY_PARAMS, bundle_book);
-                    bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
+                    bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_register_book));
+                    bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_register_book));
+                    bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                    bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK);
+                    bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
+                    bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 }
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
-                    BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, BaseDialogFragment.TAG);
+                    NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
+                    fragment.show(manager, NormalDialogFragment.TAG);
                 }
             }
         }
     }
 
     @Override
-    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+    public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if (resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             switch (requestCode) {
                 case REQUEST_CODE_REGISTER_BOOK:
@@ -274,8 +274,8 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     }
 
     @Override
-    public void onBaseDialogCancelled(int requestCode, Bundle params) {
-        super.onBaseDialogCancelled(requestCode,params);
+    public void onNormalDialogCancelled(int requestCode, Bundle params) {
+        super.onNormalDialogCancelled(requestCode,params);
     }
 
 

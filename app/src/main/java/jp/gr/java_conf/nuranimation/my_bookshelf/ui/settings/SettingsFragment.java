@@ -33,11 +33,11 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferen
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.OrderSpinnerArrayAdapter;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ProgressDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
 public class SettingsFragment extends BaseFragment implements View.OnClickListener {
@@ -133,8 +133,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
     @Override
-    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+    public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if (requestCode == REQUEST_CODE_DROPBOX_LOGOUT) {
             switch (resultCode) {
                 case DialogInterface.BUTTON_POSITIVE:
@@ -151,8 +151,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     }
 
     @Override
-    public void onBaseDialogCancelled(int requestCode, Bundle params) {
-        super.onBaseDialogCancelled(requestCode, params);
+    public void onNormalDialogCancelled(int requestCode, Bundle params) {
+        super.onNormalDialogCancelled(requestCode, params);
     }
 
     @Override
@@ -415,14 +415,14 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     private void onClickLogout(){
         Bundle bundle = new Bundle();
-        bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_logout_dropbox));
-        bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_logout_dropbox));
-        bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-        bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-        bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
+        bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_logout_dropbox));
+        bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_logout_dropbox));
+        bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+        bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+        bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
         if (getActivity() != null) {
             FragmentManager manager = getActivity().getSupportFragmentManager();
-            BaseDialogFragment dialog = BaseDialogFragment.newInstance(this, bundle);
+            NormalDialogFragment dialog = NormalDialogFragment.newInstance(this, bundle);
             dialog.show(manager, SettingsFragment.TAG);
         }
     }

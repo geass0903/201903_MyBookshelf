@@ -30,7 +30,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragme
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
 public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
@@ -159,25 +159,25 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
                 Bundle bundle = new Bundle();
-                bundle.putString(BaseDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book));
-                bundle.putString(BaseDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
-                bundle.putString(BaseDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-                bundle.putString(BaseDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                bundle.putInt(BaseDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
-                bundle.putBundle(BaseDialogFragment.KEY_PARAMS, bundle_book);
-                bundle.putBoolean(BaseDialogFragment.KEY_CANCELABLE, true);
+                bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book));
+                bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
+                bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
+                bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
+                bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
-                    BaseDialogFragment fragment = BaseDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, BaseDialogFragment.TAG);
+                    NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
+                    fragment.show(manager, NormalDialogFragment.TAG);
                 }
             }
         }
     }
 
     @Override
-    public void onBaseDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onBaseDialogSucceeded(requestCode, resultCode, params);
+    public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
+        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if (requestCode == REQUEST_CODE_UNREGISTER_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
@@ -190,8 +190,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     }
 
     @Override
-    public void onBaseDialogCancelled(int requestCode, Bundle params) {
-        super.onBaseDialogCancelled(requestCode,params);
+    public void onNormalDialogCancelled(int requestCode, Bundle params) {
+        super.onNormalDialogCancelled(requestCode,params);
     }
 
     private void initSearchView(Menu menu){

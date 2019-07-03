@@ -42,4 +42,15 @@
         android:layout_gravity="center"
         android:indeterminate="true"
         style="?android:attr/progressBarStyle" />
+    <Button
+        android:id="@+id/fragment_progress_dialog_button_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="@dimen/text_size_normal"
+        android:textColor="#FF000000"
+        android:text="@string/label_cancel" />
+
 </LinearLayout>

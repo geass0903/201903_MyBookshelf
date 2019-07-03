@@ -120,6 +120,7 @@
     <string name="label_log_out_dropbox">ログアウト</string>
     <string name="label_backup">バックアップ</string>
     <string name="label_restore">リストア</string>
+    <string name="label_cancel">キャンセル</string>
     <string name="label_load_next_page">次の20件を表示</string>
     <string name="label_tax_included">(税込)</string>
     <string name="label_price_yen_mark">￥</string>
@@ -127,6 +128,7 @@
     <string name="input_hint_title">タイトル</string>
     <string name="input_hint_author">著者・作者</string>
     <string name="input_hint_publisher">出版社</string>
+
 
 
     <!-- ReadStatus -->

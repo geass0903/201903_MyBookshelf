@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.ui.base;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -7,33 +7,32 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import java.util.Calendar;
 
-public class BaseDatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-    public static final String TAG = BaseDatePickerFragment.class.getSimpleName();
-    private static final boolean D = false;
-    public static final String KEY_YEAR         = "KEY_YEAR";
-    public static final String KEY_MONTH        = "KEY_MONTH";
-    public static final String KEY_DAY_OF_MONTH = "KEY_DAY_OF_MONTH";
-    public static final String KEY_REQUEST_CODE = "KEY_REQUEST_CODE";
+public class NormalDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+    public static final String TAG = NormalDatePicker.class.getSimpleName();
 
+    public static final String KEY_REQUEST_CODE     = "NormalDatePicker.KEY_REQUEST_CODE";
+    public static final String KEY_YEAR             = "NormalDatePicker.KEY_YEAR";
+    public static final String KEY_MONTH            = "NormalDatePicker.KEY_MONTH";
+    public static final String KEY_DAY_OF_MONTH     = "NormalDatePicker.KEY_DAY_OF_MONTH";
 
     public interface OnBaseDateSetListener {
         void onDataSet(int requestCode, Calendar calendar);
     }
     private OnBaseDateSetListener mListener;
 
+
     @SuppressWarnings("unused")
-    public static BaseDatePickerFragment newInstance(Bundle bundle){
-        BaseDatePickerFragment instance = new BaseDatePickerFragment();
+    public static NormalDatePicker newInstance(Bundle bundle){
+        NormalDatePicker instance = new NormalDatePicker();
         instance.setArguments(bundle);
         return instance;
     }
 
-    public static BaseDatePickerFragment newInstance(Fragment fragment, Bundle bundle){
-        BaseDatePickerFragment instance = new BaseDatePickerFragment();
+    public static NormalDatePicker newInstance(Fragment fragment, Bundle bundle){
+        NormalDatePicker instance = new NormalDatePicker();
         instance.setArguments(bundle);
         int request_code = bundle.getInt(KEY_REQUEST_CODE);
         instance.setTargetFragment(fragment,request_code);
@@ -47,13 +46,13 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         Fragment targetFragment = this.getTargetFragment();
         try{
             if(targetFragment != null){
-                mListener = (BaseDatePickerFragment.OnBaseDateSetListener) targetFragment;
+                mListener = (OnBaseDateSetListener) targetFragment;
             }else{
                 Fragment parent = this.getParentFragment();
                 if(parent != null){
-                    mListener = (BaseDatePickerFragment.OnBaseDateSetListener) parent;
+                    mListener = (OnBaseDateSetListener) parent;
                 }else {
-                    mListener = (BaseDatePickerFragment.OnBaseDateSetListener) context;
+                    mListener = (OnBaseDateSetListener) context;
                 }
             }
         } catch (UnsupportedOperationException e){
@@ -66,7 +65,6 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         super.onDetach();
         mListener = null;
     }
-
 
     @NonNull
     @Override
@@ -82,8 +80,6 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         Calendar calendar = Calendar.getInstance();
         if(bundle.containsKey(KEY_YEAR) && bundle.containsKey(KEY_MONTH) && bundle.containsKey(KEY_DAY_OF_MONTH)){
             calendar.set(bundle.getInt(KEY_YEAR), bundle.getInt(KEY_MONTH), bundle.getInt(KEY_DAY_OF_MONTH));
-        }else{
-            if(D) Log.d(TAG,"illegal parameter");
         }
 
         int year = calendar.get(Calendar.YEAR);
@@ -103,7 +99,6 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         }
     }
 
-
     private int getRequestCode() {
         Bundle bundle = getArguments();
         if(bundle != null) {
@@ -115,6 +110,5 @@ public class BaseDatePickerFragment extends DialogFragment implements DatePicker
         }
         return -1;
     }
-
 
 }
