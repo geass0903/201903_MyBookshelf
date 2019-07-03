@@ -51,7 +51,7 @@ public class FileBackupThread extends BaseThread {
     private static final String FILE_NAME_BOOKS = "backup_books.csv";
     private static final String FILE_NAME_AUTHORS = "backup_authors.csv";
 
-    public static final int TYPE_UNKNOWN = 0;
+    private static final int TYPE_UNKNOWN = 0;
     public static final int TYPE_EXPORT = 1;
     public static final int TYPE_IMPORT = 2;
     public static final int TYPE_BACKUP = 3;
