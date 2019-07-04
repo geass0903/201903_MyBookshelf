@@ -10,14 +10,14 @@ import android.util.Log;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.NewBooksThread;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.SearchBooksThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.FileBackupThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.NewBooksThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.SearchBooksThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.base.BaseService;
 
 

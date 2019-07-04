@@ -25,7 +25,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
@@ -41,7 +41,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
-public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
+public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener {
     public static final String TAG = NewBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -108,7 +108,6 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 break;
             case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
             case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
-                setProgress(BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
                 break;
         }
     }
@@ -166,8 +165,17 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 BookService service = ((MainActivity) getActivity()).getService();
                 if (service != null) {
                     mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE;
-                    setProgress(BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
-                    showProgressDialog();
+
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_ASK_FOR_PERMISSIONS);
+                    bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_reload_new_books));
+                    ProgressDialogFragment.showProgressDialog(this, bundle);
+
+//                    Message msg = getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_SHOW);
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_reload_new_books));
+//                    msg.setData(bundle);
+//                    getPausedHandler().sendMessage(msg);
                     service.reloadNewBooks(mDBOpenHelper.loadAuthorsList());
                 }
             }
@@ -180,7 +188,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
         if(isClickable()) {
-            setClickDisable();
+            waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
                 if (getFragmentListener() != null) {
@@ -202,7 +210,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     @Override
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
-            setClickDisable();
+            waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
                 Bundle bundle = new Bundle();
@@ -217,7 +225,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
                     bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
                     bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK);
                     bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                     bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 }else {
@@ -226,14 +234,14 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_register_book));
                     bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
                     bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK);
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_REGISTER_BOOK);
                     bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                     bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 }
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, NormalDialogFragment.TAG);
+                    fragment.show(manager, NormalDialogFragment.TEMP_TAG);
                 }
             }
         }
@@ -241,10 +249,9 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if (resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             switch (requestCode) {
-                case REQUEST_CODE_REGISTER_BOOK:
+                case ProgressDialogFragment.REQUEST_CODE_REGISTER_BOOK:
                     int position_register = params.getInt(KEY_POSITION, -1);
                     BookData book_register = params.getParcelable(KEY_BOOK_DATA);
                     if (book_register != null) {
@@ -260,7 +267,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case REQUEST_CODE_UNREGISTER_BOOK:
+                case ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK:
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
@@ -275,7 +282,18 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
 
     @Override
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
-        super.onNormalDialogCancelled(requestCode,params);
+    }
+
+    @Override
+    public void onProgressDialogCancelled(int requestCode, Bundle params) {
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                if (D) Log.d(TAG, "cancelReload");
+                service.cancelReload();
+
+            }
+        }
     }
 
 
@@ -290,7 +308,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         case BookService.STATE_NONE:
                             if (D) Log.d(TAG, "STATE_NONE");
                             mReloadState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            ProgressDialogFragment.dismissProgressDialog(this);
                             break;
                         case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
                             if (D) Log.d(TAG, "STATE_NEW_BOOKS_RELOAD_INCOMPLETE");
@@ -311,9 +329,17 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         message = "";
                     }
                     Bundle bundle = new Bundle();
-                    bundle.putString(ProgressDialogFragment.message, message);
-                    bundle.putString(ProgressDialogFragment.progress, progress);
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
+//                    bundle.putString(ProgressDialogFragment.message, message);
+//                    bundle.putString(ProgressDialogFragment.progress, progress);
+                    bundle.putString(ProgressDialogFragment.KEY_MESSAGE, message);
+                    bundle.putString(ProgressDialogFragment.KEY_PROGRESS, progress);
+
+                    ProgressDialogFragment.updateProgress(this, bundle);
+
+//                    Message msg = getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE);
+//                    msg.setData(bundle);
+//                    getPausedHandler().sendMessage(msg);
+//                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
                     break;
             }
         }
@@ -352,7 +378,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
             }
         }
         mReloadState = BookService.STATE_NONE;
-        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+        ProgressDialogFragment.dismissProgressDialog(this);
     }
 
 

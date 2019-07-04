@@ -13,6 +13,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.new_books.NewBooksFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.permission.PermissionsFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.search_books.SearchBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.settings.SettingsFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.shelf_books.ShelfBooksFragment;
@@ -35,6 +36,8 @@ public enum MyBookshelfEvent {
             ShelfBooksFragment shelfBooksFragment = new ShelfBooksFragment();
             shelfBooksFragment.setArguments(bundle);
             fragmentTransaction.replace(R.id.contents_container,shelfBooksFragment, ShelfBooksFragment.TAG);
+            PermissionsFragment permissionsFragment = new PermissionsFragment();
+            fragmentTransaction.add(R.id.contents_container, permissionsFragment, PermissionsFragment.TAG);
             fragmentTransaction.commit();
         }
     },
@@ -66,6 +69,8 @@ public enum MyBookshelfEvent {
             SearchBooksFragment searchBooksFragment = new SearchBooksFragment();
             searchBooksFragment.setArguments(bundle);
             fragmentTransaction.replace(R.id.contents_container,searchBooksFragment, SearchBooksFragment.TAG);
+            PermissionsFragment permissionsFragment = new PermissionsFragment();
+            fragmentTransaction.add(R.id.contents_container, permissionsFragment, PermissionsFragment.TAG);
             fragmentTransaction.commit();
         }
     },
@@ -101,6 +106,8 @@ public enum MyBookshelfEvent {
             NewBooksFragment newBooksFragment = new NewBooksFragment();
             newBooksFragment.setArguments(bundle);
             fragmentTransaction.replace(R.id.contents_container,newBooksFragment, NewBooksFragment.TAG);
+            PermissionsFragment permissionsFragment = new PermissionsFragment();
+            fragmentTransaction.add(R.id.contents_container, permissionsFragment, PermissionsFragment.TAG);
             fragmentTransaction.commit();
         }
     },
@@ -138,6 +145,8 @@ public enum MyBookshelfEvent {
             SettingsFragment settingsFragment = new SettingsFragment();
             settingsFragment.setArguments(bundle);
             fragmentTransaction.replace(R.id.contents_container,settingsFragment, SettingsFragment.TAG);
+            PermissionsFragment permissionsFragment = new PermissionsFragment();
+            fragmentTransaction.add(R.id.contents_container, permissionsFragment, PermissionsFragment.TAG);
             fragmentTransaction.commit();
         }
     },
@@ -157,6 +166,11 @@ public enum MyBookshelfEvent {
             slide.setSlideEdge(Gravity.BOTTOM);
             bookDetailFragment.setEnterTransition(slide);
             fragmentTransaction.replace(R.id.contents_container, bookDetailFragment, BookDetailFragment.TAG);
+
+            PermissionsFragment permissionsFragment = new PermissionsFragment();
+            fragmentTransaction.add(R.id.contents_container, permissionsFragment, PermissionsFragment.TAG);
+
+
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
@@ -203,8 +217,26 @@ public enum MyBookshelfEvent {
             }
         }
     },
-
-
+    ALLOWED_ALL_PERMISSIONS {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle){
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(SettingsFragment.TAG);
+            if(fragment instanceof SettingsFragment) {
+                ((SettingsFragment) fragment).onAllowAllPermissions();
+            }
+        }
+    },
+    DENY_PERMISSIONS {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle){
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(SettingsFragment.TAG);
+            if(fragment instanceof SettingsFragment) {
+                ((SettingsFragment) fragment).onDenyPermissions();
+            }
+        }
+    },
 
 
     @SuppressWarnings("unused")

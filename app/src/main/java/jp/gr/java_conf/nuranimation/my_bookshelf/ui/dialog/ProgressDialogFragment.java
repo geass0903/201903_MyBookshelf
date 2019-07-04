@@ -17,8 +17,12 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
 public class ProgressDialogFragment extends DialogFragment{
     public static final String TAG = ProgressDialogFragment.class.getSimpleName();
-
     private static final boolean D = true;
+
+    public static final int REQUEST_CODE_ASK_FOR_PERMISSIONS    =   1;
+    public static final int REQUEST_CODE_DROPBOX_LOGOUT         =   2;
+    public static final int REQUEST_CODE_REGISTER_BOOK          =   3;
+    public static final int REQUEST_CODE_UNREGISTER_BOOK        =   4;
 
     public static final String KEY_REQUEST_CODE     = "ProgressDialogFragment.KEY_REQUEST_CODE";
     public static final String KEY_TITLE            = "ProgressDialogFragment.KEY_TITLE";
@@ -32,16 +36,6 @@ public class ProgressDialogFragment extends DialogFragment{
     private String mTitle;
     private String mMessage;
     private String mProgress;
-
-
-
-
-
-    public static final String title = "KEY_TITLE";
-    public static final String message = "KEY_MESSAGE";
-    public static final String progress = "KEY_PROGRESS_VALUE_TEXT";
-
-
 
 
     public interface OnProgressDialogListener {
@@ -201,7 +195,6 @@ public class ProgressDialogFragment extends DialogFragment{
         }
     }
 
-    @SuppressWarnings("unused")
     public static void dismissProgressDialog(Fragment fragment){
         if(fragment.getActivity() != null){
             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
@@ -212,6 +205,18 @@ public class ProgressDialogFragment extends DialogFragment{
         }
     }
 
+    public static void updateProgress(Fragment fragment, Bundle bundle){
+        if (fragment.getActivity() != null && bundle != null) {
+            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
+            Fragment findFragment = manager.findFragmentByTag(TAG);
+            if(findFragment instanceof ProgressDialogFragment){
+                String message = bundle.getString(KEY_MESSAGE);
+                String progress = bundle.getString(KEY_PROGRESS);
+                ((ProgressDialogFragment) findFragment).setDialogProgress(message, progress);
+            }
+
+        }
+    }
 
 }
 

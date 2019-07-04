@@ -196,7 +196,6 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if(resultCode == DialogInterface.BUTTON_POSITIVE){
             switch (requestCode){
                 case REQUEST_CODE_SALES_DATE:
@@ -211,7 +210,6 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
 
     @Override
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
-        super.onNormalDialogCancelled(requestCode,params);
     }
 
 
@@ -394,7 +392,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
             bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
             FragmentManager manager = getActivity().getSupportFragmentManager();
             NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
-            fragment.show(manager, NormalDialogFragment.TAG);
+            fragment.show(manager, NormalDialogFragment.TEMP_TAG);
         }
     }
 

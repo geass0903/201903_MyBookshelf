@@ -22,18 +22,19 @@ import android.widget.Toast;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
-public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
+public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener{
     public static final String TAG = ShelfBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -131,7 +132,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
         if(isClickable()){
-            setClickDisable();
+            waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
                 if(getFragmentListener() != null){
@@ -151,7 +152,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
-            setClickDisable();
+            waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
                 Bundle bundle_book = new Bundle();
@@ -163,13 +164,13 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
                 bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
                 bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
+                bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK);
                 bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                 bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, NormalDialogFragment.TAG);
+                    fragment.show(manager, NormalDialogFragment.TEMP_TAG);
                 }
             }
         }
@@ -177,8 +178,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onNormalDialogSucceeded(requestCode, resultCode, params);
-        if (requestCode == REQUEST_CODE_UNREGISTER_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
+        if (requestCode == ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
             if (book != null) {
@@ -191,7 +191,6 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
     @Override
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
-        super.onNormalDialogCancelled(requestCode,params);
     }
 
     private void initSearchView(Menu menu){
@@ -232,4 +231,8 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         mShelfBooksViewAdapter.replaceBooksData(books);
     }
 
+    @Override
+    public void onProgressDialogCancelled(int requestCode, Bundle params) {
+
+    }
 }

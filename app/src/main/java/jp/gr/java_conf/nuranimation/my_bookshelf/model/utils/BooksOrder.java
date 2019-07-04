@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.model.entity;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.utils;
 
 public class BooksOrder {
     public static final String SHELF_BOOKS_ORDER_CODE_TITLE_ASC          = "1";

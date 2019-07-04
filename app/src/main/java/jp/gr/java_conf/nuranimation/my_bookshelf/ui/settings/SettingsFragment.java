@@ -25,10 +25,10 @@ import com.dropbox.core.android.Auth;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.FileBackupThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.base.BaseThread;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.FileBackupThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
@@ -38,9 +38,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.permission.PermissionsFragment;
 
 
-public class SettingsFragment extends BaseFragment implements View.OnClickListener {
+public class SettingsFragment extends BaseFragment implements View.OnClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener {
     public static final String TAG = SettingsFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -71,6 +72,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         super.onAttach(context);
         mPreferences = new MyBookshelfPreferences(context.getApplicationContext());
         mContext = context;
+
+        isAllowedPermissions = PermissionsFragment.isAllowedAllPermissions(context,PermissionsFragment.USE_PERMISSIONS);
     }
 
 
@@ -96,16 +99,19 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             if (getArguments() != null){
                 mSettingsState = getArguments().getInt(KEY_SERVICE_STATE, BookService.STATE_NONE);
             }
-            if (isAllowedAllPermissions(USE_PERMISSIONS)) {
-                isAllowedPermissions = true;
-            }
+ //           if (isAllowedAllPermissions(USE_PERMISSIONS)) {
+ //               isAllowedPermissions = true;
+ //           }
             if(mPreferences.containsKeyAccessToken()){
                 isLogged_in = true;
             }
         }
+
+
+
+
         initSpinner(view);
         initButton(view, isAllowedPermissions, isLogged_in);
-        setProgress(mSettingsState);
     }
 
     @Override
@@ -134,8 +140,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onNormalDialogSucceeded(requestCode, resultCode, params);
-        if (requestCode == REQUEST_CODE_DROPBOX_LOGOUT) {
+        if (requestCode == ProgressDialogFragment.REQUEST_CODE_DROPBOX_LOGOUT) {
             switch (resultCode) {
                 case DialogInterface.BUTTON_POSITIVE:
                     if (D) Log.d(TAG, "Log out button pressed");
@@ -152,9 +157,37 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     @Override
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
-        super.onNormalDialogCancelled(requestCode, params);
+
     }
 
+    @Override
+    public void onProgressDialogCancelled(int requestCode, Bundle params) {
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                if (D) Log.d(TAG, "cancelBackup");
+                service.cancelBackup();
+
+            }
+        }
+    }
+
+
+
+    public void onAllowAllPermissions() {
+        isAllowedPermissions = true;
+        enableButton(true);
+    }
+
+
+    public void onDenyPermissions() {
+        if(D) Log.d(TAG, "Denied permission");
+        isAllowedPermissions = false;
+        enableButton(false);
+    }
+
+
+/*
     @Override
     protected void onAllowAllPermissions() {
         super.onAllowAllPermissions();
@@ -165,11 +198,11 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     @Override
     protected void onDenyPermissions() {
         super.onDenyPermissions();
-        if(D) Log.d(TAG, "Denied permission");
+        if(D) Log.d(TEMP_TAG, "Denied permission");
         isAllowedPermissions = false;
         enableButton(false);
     }
-
+*/
 
     @Override
     public void onClick(View v) {
@@ -207,7 +240,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                         case BookService.STATE_NONE:
                             if (D) Log.d(TAG, "STATE_NONE");
                             mSettingsState = BookService.STATE_NONE;
-                            getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                            ProgressDialogFragment.dismissProgressDialog(this);
                             break;
                         case BookService.STATE_EXPORT_COMPLETE:
                         case BookService.STATE_IMPORT_COMPLETE:
@@ -227,9 +260,12 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                         message = "";
                     }
                     Bundle bundle = new Bundle();
-                    bundle.putString(ProgressDialogFragment.message, message);
-                    bundle.putString(ProgressDialogFragment.progress, progress);
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
+//                    bundle.putString(ProgressDialogFragment.message, message);
+//                    bundle.putString(ProgressDialogFragment.progress, progress);
+                    bundle.putString(ProgressDialogFragment.KEY_MESSAGE, message);
+                    bundle.putString(ProgressDialogFragment.KEY_PROGRESS, progress);
+                    ProgressDialogFragment.updateProgress(this,bundle);
+//                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_UPDATE, bundle).sendToTarget();
                     break;
             }
         }
@@ -372,34 +408,40 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
 
     private void onClickBackup(int type){
-        if (isAllowedAllPermissions(USE_PERMISSIONS)) {
+//        if (isAllowedAllPermissions(USE_PERMISSIONS)) {
             if (getActivity() instanceof MainActivity) {
                 BookService service = ((MainActivity) getActivity()).getService();
+                String title = null;
                 if (service != null) {
                     switch(type){
                         case FileBackupThread.TYPE_EXPORT:
                             mSettingsState = BookService.STATE_EXPORT_INCOMPLETE;
+                            title = getString(R.string.progress_title_export);
                             break;
                         case FileBackupThread.TYPE_IMPORT:
                             mSettingsState = BookService.STATE_IMPORT_INCOMPLETE;
+                            title = getString(R.string.progress_title_import);
                             break;
                         case FileBackupThread.TYPE_BACKUP:
                             mSettingsState = BookService.STATE_BACKUP_INCOMPLETE;
+                            title = getString(R.string.progress_title_backup);
                             break;
                         case FileBackupThread.TYPE_RESTORE:
                             mSettingsState = BookService.STATE_RESTORE_INCOMPLETE;
+                            title = getString(R.string.progress_title_restore);
                             break;
                         default:
                             break;
                     }
-                    setProgress(mSettingsState);
-                    showProgressDialog();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(ProgressDialogFragment.KEY_TITLE, title);
+                    ProgressDialogFragment.showProgressDialog(this, bundle);
                     service.fileBackup(type);
                 }
             }
-        } else {
-            requestPermissions(USE_PERMISSIONS);
-        }
+ //       } else {
+ //           requestPermissions(USE_PERMISSIONS);
+ //       }
     }
 
     private void onClickLogin(){
@@ -419,7 +461,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_logout_dropbox));
         bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
         bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-        bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DROPBOX_LOGOUT);
+        bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_DROPBOX_LOGOUT);
         if (getActivity() != null) {
             FragmentManager manager = getActivity().getSupportFragmentManager();
             NormalDialogFragment dialog = NormalDialogFragment.newInstance(this, bundle);
@@ -495,7 +537,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
             }
         }
         mSettingsState = BookService.STATE_NONE;
-        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+        ProgressDialogFragment.dismissProgressDialog(this);
     }
 
 

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.model.net;
+package jp.gr.java_conf.nuranimation.my_bookshelf.model.thread;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -24,9 +24,9 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.net.base.BaseThread;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
 
 
 public class NewBooksThread extends BaseThread {

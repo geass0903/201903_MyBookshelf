@@ -9,7 +9,7 @@ public class PausedHandler extends Handler {
     private Queue<Message> mQueue = new LinkedList<>();
     private boolean isPaused;
 
-    protected PausedHandler(){}
+    public PausedHandler(){}
 
     public void resume() {
         isPaused = false;
@@ -25,8 +25,6 @@ public class PausedHandler extends Handler {
         isPaused = true;
     }
 
-    protected void processMessage(Message msg) {
-    }
 
     @Override
     public void dispatchMessage(Message msg){
@@ -41,7 +39,6 @@ public class PausedHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
-        processMessage(msg);
     }
 }
 

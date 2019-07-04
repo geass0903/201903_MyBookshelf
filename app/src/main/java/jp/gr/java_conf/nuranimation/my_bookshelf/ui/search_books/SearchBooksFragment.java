@@ -34,13 +34,14 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
-public class SearchBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener {
+public class SearchBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener{
     public static final String TAG = SearchBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -158,7 +159,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
         if(isClickable()) {
-            setClickDisable();
+            waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
                 if (getFragmentListener() != null) {
@@ -184,7 +185,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     @Override
     public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
-            setClickDisable();
+            waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
                 Bundle bundle = new Bundle();
@@ -199,7 +200,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_register_book));
                     bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
                     bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK);
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_REGISTER_BOOK);
                     bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                     bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 } else {
@@ -208,14 +209,14 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
                     bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
                     bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK);
                     bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                     bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 }
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, NormalDialogFragment.TAG);
+                    fragment.show(manager, NormalDialogFragment.TEMP_TAG);
                 }
             }
         }
@@ -224,10 +225,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        super.onNormalDialogSucceeded(requestCode, resultCode, params);
         if (resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             switch (requestCode) {
-                case REQUEST_CODE_REGISTER_BOOK:
+                case ProgressDialogFragment.REQUEST_CODE_REGISTER_BOOK:
                     int position_register = params.getInt(KEY_POSITION, -1);
                     BookData book_register = params.getParcelable(KEY_BOOK_DATA);
                     if (book_register != null) {
@@ -242,7 +242,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case REQUEST_CODE_UNREGISTER_BOOK:
+                case ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK:
                     int position_unregister = params.getInt(KEY_POSITION, -1);
                     BookData book_unregister = params.getParcelable(KEY_BOOK_DATA);
                     if (book_unregister != null) {
@@ -257,7 +257,6 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
     @Override
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
-        super.onNormalDialogCancelled(requestCode,params);
     }
 
     @Override
@@ -271,7 +270,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 case BookService.STATE_NONE:
                     if (D) Log.d(TAG, "STATE_NONE");
                     mSearchState = BookService.STATE_NONE;
-                    getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+                    ProgressDialogFragment.dismissProgressDialog(this);
                     break;
                 case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
                     if (D) Log.d(TAG, "STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE");
@@ -348,7 +347,6 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         footer.setView_type(BookData.TYPE_VIEW_LOADING);
                         books.add(footer);
                     } else if (mSearchPage == 1) {
-                        setProgress(BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
                     }
                     break;
             }
@@ -378,7 +376,6 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         footer.setView_type(BookData.TYPE_VIEW_LOADING);
                         books.add(footer);
                     } else if (mSearchPage == 1) {
-                        setProgress(BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
                     }
                     break;
             }
@@ -410,8 +407,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchBooksViewAdapter.clearBooksData();
                 hasResultData = false;
                 hasButtonLoadNext = false;
-                setProgress(BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
-                showProgressDialog();
+                Bundle bundle = new Bundle();
+                bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_search_books));
+                ProgressDialogFragment.showProgressDialog(this, bundle);
             } else {
                 BookData footer = new BookData();
                 footer.setView_type(BookData.TYPE_VIEW_LOADING);
@@ -456,25 +454,25 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             }
         }
         mSearchState = BookService.STATE_NONE;
-        getPausedHandler().obtainMessage(BaseFragment.MESSAGE_PROGRESS_DIALOG_DISMISS).sendToTarget();
+        ProgressDialogFragment.dismissProgressDialog(this);
     }
 
 
 
     public static boolean isSearchable(String word) throws PatternSyntaxException {
         if (TextUtils.isEmpty(word)) {
-//            if (D) Log.d(TAG, "No word");
+//            if (D) Log.d(TEMP_TAG, "No word");
             return false;
         }
         if (word.length() >= 2) {
-//            if (D) Log.d(TAG, "over 2characters. OK");
+//            if (D) Log.d(TEMP_TAG, "over 2characters. OK");
             return true;
         }
 
         int bytes = 0;
         char[] array = word.toCharArray();
         for (char c : array) {
-//            if (D) Log.d(TAG, "Unicode Block: " + Character.UnicodeBlock.of(c));
+//            if (D) Log.d(TEMP_TAG, "Unicode Block: " + Character.UnicodeBlock.of(c));
             if (String.valueOf(c).getBytes().length <= 1) {
                 bytes += 1;
             } else {
@@ -482,7 +480,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             }
         }
         if (bytes <= 1) {
-//            if (D) Log.d(TAG, "1 half width character. NG");
+//            if (D) Log.d(TEMP_TAG, "1 half width character. NG");
             return false;
         }
         String regex_InHIRAGANA = "\\p{InHIRAGANA}";
@@ -492,26 +490,28 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
 
         if (word.matches(regex_InHIRAGANA)) {
-//            if (D) Log.d(TAG, "1 character in HIRAGANA");
+//            if (D) Log.d(TEMP_TAG, "1 character in HIRAGANA");
             return false;
         }
         if (word.matches(regex_InKATAKANA)) {
-//            if (D) Log.d(TAG, "1 character in KATAKANA");
+//            if (D) Log.d(TEMP_TAG, "1 character in KATAKANA");
             return false;
         }
         if (word.matches(regex_InHALFWIDTH_AND_FULLWIDTH_FORMS)) {
-//            if (D) Log.d(TAG, "1 character in HALFWIDTH_AND_FULLWIDTH_FORMS");
+//            if (D) Log.d(TEMP_TAG, "1 character in HALFWIDTH_AND_FULLWIDTH_FORMS");
             return false;
         }
         if (word.matches(regex_InCJK_SYMBOLS_AND_PUNCTUATION)) {
-//            if (D) Log.d(TAG, "1 character in CJK_SYMBOLS_AND_PUNCTUATION");
+//            if (D) Log.d(TEMP_TAG, "1 character in CJK_SYMBOLS_AND_PUNCTUATION");
             return false;
         }
-//        if (D) Log.d(TAG, "OK");
+//        if (D) Log.d(TEMP_TAG, "OK");
         return true;
     }
 
 
+    @Override
+    public void onProgressDialogCancelled(int requestCode, Bundle params) {
 
-
+    }
 }

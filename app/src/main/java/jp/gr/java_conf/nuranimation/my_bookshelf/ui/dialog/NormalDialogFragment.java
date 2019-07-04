@@ -10,9 +10,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 
 public class NormalDialogFragment extends DialogFragment {
-    public static final String TAG = NormalDialogFragment.class.getSimpleName();
+    private static final String TAG = NormalDialogFragment.class.getSimpleName();
+    public static final String TEMP_TAG = NormalDialogFragment.class.getSimpleName();
+    private static final boolean D = true;
+
+    public static final String TAG_RATIONALE_DIALOG = "NormalDialogFragment.TAG_RATIONALE_DIALOG";
 
     public static final String KEY_REQUEST_CODE     = "NormalDialogFragment.KEY_REQUEST_CODE";
     public static final String KEY_TITLE            = "NormalDialogFragment.KEY_TITLE";
@@ -37,7 +42,6 @@ public class NormalDialogFragment extends DialogFragment {
         return instance;
     }
 
-
     public static NormalDialogFragment newInstance(Fragment fragment, Bundle bundle){
         NormalDialogFragment instance = new NormalDialogFragment();
         instance.setArguments(bundle);
@@ -45,7 +49,6 @@ public class NormalDialogFragment extends DialogFragment {
         instance.setTargetFragment(fragment,request_code);
         return instance;
     }
-
 
     @Override
     public void onAttach(Context context){
@@ -144,24 +147,33 @@ public class NormalDialogFragment extends DialogFragment {
 
 
 
-    public static void showNormalDialog(Fragment fragment, Bundle bundle){
+    public static void showNormalDialog(Fragment fragment, Bundle bundle, String tag){
+        if(D) Log.d(TAG, "showNormalDialog TAG: " + tag);
         if (fragment.getActivity() != null && bundle != null) {
             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
             NormalDialogFragment dialog = NormalDialogFragment.newInstance(fragment, bundle);
-            dialog.show(manager, TAG);
+            dialog.show(manager, tag);
         }
     }
 
-    @SuppressWarnings("unused")
-    public static void dismissNormalDialog(Fragment fragment){
+    public static void dismissNormalDialog(Fragment fragment, String tag){
+        if(D) Log.d(TAG, "dismissNormalDialog TAG: " + tag);
         if(fragment.getActivity() != null){
             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-            Fragment findFragment = manager.findFragmentByTag(TAG);
+            Fragment findFragment = manager.findFragmentByTag(tag);
             if(findFragment instanceof NormalDialogFragment){
                 ((NormalDialogFragment) findFragment).dismiss();
             }
         }
     }
 
+    public static boolean isShowingNormalDialog(Fragment fragment, String tag) {
+        if (fragment.getActivity() != null) {
+            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
+            Fragment findFragment = manager.findFragmentByTag(tag);
+            return findFragment instanceof NormalDialogFragment;
+        }
+        return false;
+    }
 
 }
