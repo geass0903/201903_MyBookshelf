@@ -10,7 +10,6 @@ import android.view.Gravity;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MainActivity;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.new_books.NewBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.permission.PermissionsFragment;
@@ -162,9 +161,13 @@ public enum MyBookshelfEvent {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             BookDetailFragment bookDetailFragment = new BookDetailFragment();
             bookDetailFragment.setArguments(bundle);
-            Slide slide = new Slide();
-            slide.setSlideEdge(Gravity.BOTTOM);
-            bookDetailFragment.setEnterTransition(slide);
+//            Slide slide = new Slide();
+//            slide.setSlideEdge(Gravity.BOTTOM);
+//            bookDetailFragment.setEnterTransition(slide);
+
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in_right,R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right);
+
             fragmentTransaction.replace(R.id.contents_container, bookDetailFragment, BookDetailFragment.TAG);
 
             PermissionsFragment permissionsFragment = new PermissionsFragment();
@@ -185,6 +188,16 @@ public enum MyBookshelfEvent {
                 fragmentManager.popBackStack();
             }
         }
+    },
+
+    POP_BACK_STACK {
+      @Override
+      public void apply(MainActivity activity, Bundle bundle){
+          FragmentManager fragmentManager = activity.getSupportFragmentManager();
+          if(fragmentManager.getBackStackEntryCount() > 0){
+              fragmentManager.popBackStack();
+          }
+      }
     },
 
     CHECK_SEARCH_STATE {

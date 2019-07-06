@@ -164,14 +164,13 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             if (view_type == BookData.TYPE_BOOK) {
                 if (getFragmentListener() != null) {
                     Bundle bundle = new Bundle();
-                    bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
                     BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
                     if(book.getView_type() == BookData.TYPE_EMPTY){
                         book = new BookData(data);
                         book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);
                     }
-                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
+                    bundle.putParcelable(BookDetailFragment.KEY_BOOK_DATA, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
                 }
             } else {
@@ -259,8 +258,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
     }
 
+
     @Override
-    public void onReceiveBroadcast(Context context, Intent intent) {
+    public void onReceiveLocalBroadcast(Context context, Intent intent) {
         if (D) Log.d(TAG, "onReceive");
         String action = intent.getAction();
 

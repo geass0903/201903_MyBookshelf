@@ -230,7 +230,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     }
 
     @Override
-    public void onReceiveBroadcast(Context context, Intent intent){
+    protected void onReceiveLocalBroadcast(Context context, Intent intent){
         String action = intent.getAction();
         if(action != null){
             switch (action){

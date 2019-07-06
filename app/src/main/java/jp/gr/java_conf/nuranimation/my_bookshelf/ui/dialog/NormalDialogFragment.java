@@ -17,8 +17,6 @@ public class NormalDialogFragment extends DialogFragment {
     public static final String TEMP_TAG = NormalDialogFragment.class.getSimpleName();
     private static final boolean D = true;
 
-    public static final String TAG_RATIONALE_DIALOG = "NormalDialogFragment.TAG_RATIONALE_DIALOG";
-
     public static final String KEY_REQUEST_CODE     = "NormalDialogFragment.KEY_REQUEST_CODE";
     public static final String KEY_TITLE            = "NormalDialogFragment.KEY_TITLE";
     public static final String KEY_MESSAGE          = "NormalDialogFragment.KEY_MESSAGE";
@@ -156,6 +154,7 @@ public class NormalDialogFragment extends DialogFragment {
         }
     }
 
+    @SuppressWarnings("unused")
     public static void dismissNormalDialog(Fragment fragment, String tag){
         if(D) Log.d(TAG, "dismissNormalDialog TAG: " + tag);
         if(fragment.getActivity() != null){

@@ -249,6 +249,7 @@
             android:autofillHints="@string/input_hint_title"
             android:hint="@string/input_hint_title"
             android:inputType="text"
+            android:imeOptions="actionDone"
             android:textSize="@dimen/text_size_normal"
             android:textColor="#FF000000" />
 
@@ -279,6 +280,7 @@
             android:autofillHints="@string/input_hint_author"
             android:hint="@string/input_hint_author"
             android:inputType="text"
+            android:imeOptions="actionDone"
             android:textSize="@dimen/text_size_normal"
             android:textColor="#FF000000" />
 
@@ -309,6 +311,7 @@
             android:autofillHints="@string/input_hint_publisher"
             android:hint="@string/input_hint_publisher"
             android:inputType="text"
+            android:imeOptions="actionDone"
             android:textSize="@dimen/text_size_normal"
             android:textColor="#FF000000" />
 

@@ -29,8 +29,11 @@ public class PermissionsFragment extends BaseFragment implements NormalDialogFra
 
     public static final String[] USE_PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
+
     private static final String KEY_SAVED_REQUEST_PERMISSIONS = "PermissionsFragment.KEY_SAVED_REQUEST_PERMISSIONS";
+    private static final String TAG_RATIONALE_DIALOG = "PermissionsFragment.TAG_RATIONALE_DIALOG";
     private static final int REQUEST_CODE_ASK_FOR_PERMISSIONS = 1;
+
 
     private String[] mRequestPermissions;
     private MyBookshelfPreferences mPreferences;
@@ -158,8 +161,8 @@ public class PermissionsFragment extends BaseFragment implements NormalDialogFra
         bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
         bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
         bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ASK_FOR_PERMISSIONS);
-        if (!NormalDialogFragment.isShowingNormalDialog(this, NormalDialogFragment.TAG_RATIONALE_DIALOG)) {
-            NormalDialogFragment.showNormalDialog(this, bundle, NormalDialogFragment.TAG_RATIONALE_DIALOG);
+        if (!NormalDialogFragment.isShowingNormalDialog(this, TAG_RATIONALE_DIALOG)) {
+            NormalDialogFragment.showNormalDialog(this, bundle, TAG_RATIONALE_DIALOG);
         }
     }
 

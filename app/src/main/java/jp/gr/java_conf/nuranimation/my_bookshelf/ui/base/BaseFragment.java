@@ -17,8 +17,15 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.handler.PausedHandler;
 public class BaseFragment extends Fragment{
     private PausedHandler handler = new PausedHandler();
     private LocalBroadcastManager mLocalBroadcastManager;
-    private BroadcastReceiver mReceiver;
     private boolean isClickable = true;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onReceiveLocalBroadcast(context, intent);
+        }
+    };
+
 
     public interface FragmentListener {
         void onFragmentEvent(MyBookshelfEvent event, Bundle bundle);
@@ -34,7 +41,6 @@ public class BaseFragment extends Fragment{
     public void onAttach(Context context) {
         super.onAttach(context);
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
-        mReceiver = new LocalReceiver();
         if (context instanceof FragmentListener) {
             mFragmentListener = (FragmentListener) context;
         } else {
@@ -73,10 +79,10 @@ public class BaseFragment extends Fragment{
     }
 
     @SuppressWarnings("SameParameterValue")
-    protected void waitClickable(long delayMillis){
+    protected void waitClickable(long delayMillis) {
         isClickable = false;
         handler.removeCallbacks(setClickable);
-        handler.postDelayed(setClickable,delayMillis);
+        handler.postDelayed(setClickable, delayMillis);
     }
 
     private Runnable setClickable = new Runnable() {
@@ -86,15 +92,10 @@ public class BaseFragment extends Fragment{
         }
     };
 
-    public void onReceiveBroadcast(Context context, Intent intent){
+
+    protected void onReceiveLocalBroadcast(Context context, Intent intent){
 
     }
 
-    private class LocalReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            onReceiveBroadcast(context, intent);
-        }
-    }
 
 }

@@ -66,6 +66,9 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         super.onAttach(context);
         setHasOptionsMenu(true);
         mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
+
+
+
     }
 
     @Override
@@ -193,14 +196,13 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
             if (view_type == BookData.TYPE_BOOK) {
                 if (getFragmentListener() != null) {
                     Bundle bundle = new Bundle();
-                    bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
                     BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
                     if(book.getView_type() == BookData.TYPE_EMPTY){
                         book = new BookData(data);
                         book.setRating(BookDataUtils.convertRating(0.0f));
                         book.setReadStatus(BookData.STATUS_NONE);
                     }
-                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
+                    bundle.putParcelable(BookDetailFragment.KEY_BOOK_DATA, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
                 }
             }
@@ -240,6 +242,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                 }
                 if (getActivity() != null) {
                     FragmentManager manager = getActivity().getSupportFragmentManager();
+ //                   NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
                     NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
                     fragment.show(manager, NormalDialogFragment.TEMP_TAG);
                 }
@@ -297,8 +300,46 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     }
 
 
+    public void scrollToTop(){
+        mRecyclerView.scrollToPosition(0);
+    }
+
+    public void checkReloadState(){
+        if(getActivity() instanceof MainActivity){
+            BookService service = ((MainActivity) getActivity()).getService();
+            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE){
+                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE;
+                loadNewBooksResult();
+            }
+        }
+    }
+
+    private void loadNewBooksResult() {
+        if(D) Log.d(TAG, "loadNewBooksResult()");
+        if (getActivity() instanceof MainActivity) {
+            BookService service = ((MainActivity) getActivity()).getService();
+            if (service != null) {
+                Result result = service.getResult();
+                if (result.isSuccess()) {
+                    scrollToTop();
+                    mNewBooksViewAdapter.replaceBooksData(mDBOpenHelper.loadNewBooks());
+                    Toast.makeText(getContext(), getString(R.string.toast_success_reload), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), result.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                }
+                service.setServiceState(BookService.STATE_NONE);
+                service.stopForeground(false);
+                service.stopSelf();
+            }
+        }
+
+        mReloadState = BookService.STATE_NONE;
+        ProgressDialogFragment.dismissProgressDialog(this);
+    }
+
+
     @Override
-    public void onReceiveBroadcast(Context context, Intent intent){
+    protected void onReceiveLocalBroadcast(Context context, Intent intent){
         String action = intent.getAction();
         if(action != null){
             switch (action){
@@ -343,42 +384,6 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     break;
             }
         }
-    }
-
-    public void scrollToTop(){
-        mRecyclerView.scrollToPosition(0);
-    }
-
-    public void checkReloadState(){
-        if(getActivity() instanceof MainActivity){
-            BookService service = ((MainActivity) getActivity()).getService();
-            if(service != null && service.getServiceState() == BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE){
-                mReloadState = BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE;
-                loadNewBooksResult();
-            }
-        }
-    }
-
-    private void loadNewBooksResult() {
-        if(D) Log.d(TAG, "loadNewBooksResult()");
-        if (getActivity() instanceof MainActivity) {
-            BookService service = ((MainActivity) getActivity()).getService();
-            if (service != null) {
-                Result result = service.getResult();
-                if (result.isSuccess()) {
-                    scrollToTop();
-                    mNewBooksViewAdapter.replaceBooksData(mDBOpenHelper.loadNewBooks());
-                    Toast.makeText(getContext(), getString(R.string.toast_success_reload), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), result.getErrorMessage(), Toast.LENGTH_SHORT).show();
-                }
-                service.setServiceState(BookService.STATE_NONE);
-                service.stopForeground(false);
-                service.stopSelf();
-            }
-        }
-        mReloadState = BookService.STATE_NONE;
-        ProgressDialogFragment.dismissProgressDialog(this);
     }
 
 

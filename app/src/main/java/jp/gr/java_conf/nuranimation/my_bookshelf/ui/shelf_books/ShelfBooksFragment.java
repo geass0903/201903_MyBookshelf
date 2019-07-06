@@ -137,12 +137,11 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             if (view_type == BookData.TYPE_BOOK) {
                 if(getFragmentListener() != null){
                     Bundle bundle = new Bundle();
-                    bundle.putInt(BookDetailFragment.KEY_BUNDLE_POSITION, position);
                     BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
                     if(book.getView_type() == BookData.TYPE_EMPTY){
                         book = new BookData(data);
                     }
-                    bundle.putParcelable(BookDetailFragment.KEY_BUNDLE_BOOK, book);
+                    bundle.putParcelable(BookDetailFragment.KEY_BOOK_DATA, book);
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL,bundle);
                 }
            }
