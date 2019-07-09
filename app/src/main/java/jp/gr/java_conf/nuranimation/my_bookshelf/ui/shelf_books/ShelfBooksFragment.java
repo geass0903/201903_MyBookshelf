@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -21,27 +20,29 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferences;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
 
 
-public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener{
-    public static final String TAG = ShelfBooksFragment.class.getSimpleName();
+public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener {
+    private static final String TAG = ShelfBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
-    private static final String KEY_LAYOUT_MANAGER = "KEY_LAYOUT_MANAGER";
-    private static final String KEY_KEYWORD = "KEY_KEYWORD";
-    private static final String KEY_POSITION = "KEY_POSITION";
-    private static final String KEY_BOOK_DATA = "KEY_BOOK_DATA";
+    private static final String TAG_UNREGISTER_BOOK = "ShelfBooksFragment.TAG_UNREGISTER_BOOKS";
+    private static final int REQUEST_CODE_UNREGISTER_BOOK = 1;
+
+    private static final String KEY_LAYOUT_MANAGER = "ShelfBooksFragment.KEY_LAYOUT_MANAGER";
+    private static final String KEY_KEYWORD = "ShelfBooksFragment.KEY_KEYWORD";
+    private static final String KEY_POSITION = "ShelfBooksFragment.KEY_POSITION";
+    private static final String KEY_BOOK_DATA = "ShelfBooksFragment.KEY_BOOK_DATA";
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
     private MyBookshelfPreferences mPreferences;
@@ -54,7 +55,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
 
     @Override
-    public void onAttach (Context context) {
+    public void onAttach(Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
         mDBOpenHelper = MyBookshelfDBOpenHelper.getInstance(context.getApplicationContext());
@@ -64,7 +65,6 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        if (D) Log.d(TAG, "onCreateView");
         return inflater.inflate(R.layout.fragment_shelf_books, container, false);
     }
 
@@ -84,7 +84,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-        if(mShelfBooks == null) {
+        if (mShelfBooks == null) {
             mShelfBooks = mDBOpenHelper.loadShelfBooks(mKeyword, BooksOrder.getShelfBooksOrder(mPreferences.getShelfBooksOrderCode()));
         }
         mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS);
@@ -109,7 +109,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public void onPause() {
         super.onPause();
-        if(D) Log.d(TAG,"onPause()");
+        if (D) Log.d(TAG, "onPause()");
     }
 
 
@@ -117,34 +117,34 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(KEY_KEYWORD, mKeyword);
-        outState.putParcelable(KEY_LAYOUT_MANAGER,mLayoutManager.onSaveInstanceState());
+        outState.putParcelable(KEY_LAYOUT_MANAGER, mLayoutManager.onSaveInstanceState());
     }
 
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_shelf,menu);
+        inflater.inflate(R.menu.menu_shelf, menu);
         initSearchView(menu);
     }
 
 
     @Override
     public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
-        if(isClickable()){
+        if (isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
             if (view_type == BookData.TYPE_BOOK) {
-                if(getFragmentListener() != null){
+                if (getFragmentListener() != null) {
                     Bundle bundle = new Bundle();
                     BookData book = mDBOpenHelper.loadBookDataFromShelfBooks(data);
-                    if(book.getView_type() == BookData.TYPE_EMPTY){
+                    if (book.getView_type() == BookData.TYPE_EMPTY) {
                         book = new BookData(data);
                     }
                     bundle.putParcelable(BookDetailFragment.KEY_BOOK_DATA, book);
-                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL,bundle);
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_BOOK_DETAIL, bundle);
                 }
-           }
+            }
         }
     }
 
@@ -163,21 +163,17 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
                 bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
                 bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK);
+                bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_BOOK);
                 bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                 bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
-                if (getActivity() != null) {
-                    FragmentManager manager = getActivity().getSupportFragmentManager();
-                    NormalDialogFragment fragment = NormalDialogFragment.newInstance(this, bundle);
-                    fragment.show(manager, NormalDialogFragment.TEMP_TAG);
-                }
+                NormalDialogFragment.showNormalDialog(this, bundle, TAG_UNREGISTER_BOOK);
             }
         }
     }
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        if (requestCode == ProgressDialogFragment.REQUEST_CODE_UNREGISTER_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
+        if (requestCode == REQUEST_CODE_UNREGISTER_BOOK && resultCode == DialogInterface.BUTTON_POSITIVE && params != null) {
             int position = params.getInt(KEY_POSITION, -1);
             BookData book = params.getParcelable(KEY_BOOK_DATA);
             if (book != null) {
@@ -192,14 +188,14 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
     }
 
-    private void initSearchView(Menu menu){
-        mSearchView = (SearchView)menu.findItem(R.id.menu_shelf_search_view).getActionView();
+    private void initSearchView(Menu menu) {
+        mSearchView = (SearchView) menu.findItem(R.id.menu_shelf_search_view).getActionView();
         mSearchView.setMaxWidth(Integer.MAX_VALUE);
         mSearchView.setIconifiedByDefault(true);
         mSearchView.setSubmitButtonEnabled(false);
         mSearchView.setQueryHint(getString(R.string.input_hint_search_books));
-        mSearchView.setQuery(mKeyword,false);
-        if(!TextUtils.isEmpty(mKeyword)){
+        mSearchView.setQuery(mKeyword, false);
+        if (!TextUtils.isEmpty(mKeyword)) {
             mSearchView.setIconified(false);
             mSearchView.clearFocus();
         }
@@ -210,9 +206,10 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
                 searchBooksInShelf(searchWord);
                 return false;
             }
+
             @Override
             public boolean onQueryTextChange(String word) {
-                if(D) Log.d(TAG,"QueryTextChange: " + word);
+                if (D) Log.d(TAG, "QueryTextChange: " + word);
                 mKeyword = word;
                 searchBooksInShelf(word);
                 return false;
@@ -220,18 +217,14 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         });
     }
 
-    public void scrollToTop(){
+    public void scrollToTop() {
         mRecyclerView.scrollToPosition(0);
     }
 
-    private void searchBooksInShelf(String keyword){
+    private void searchBooksInShelf(String keyword) {
         scrollToTop();
-        List<BookData> books = mDBOpenHelper.loadShelfBooks(keyword,BooksOrder.getShelfBooksOrder(mPreferences.getShelfBooksOrderCode()));
+        List<BookData> books = mDBOpenHelper.loadShelfBooks(keyword, BooksOrder.getShelfBooksOrder(mPreferences.getShelfBooksOrderCode()));
         mShelfBooksViewAdapter.replaceBooksData(books);
     }
 
-    @Override
-    public void onProgressDialogCancelled(int requestCode, Bundle params) {
-
-    }
 }

@@ -18,13 +18,18 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.new_books.NewBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.search_books.SearchBooksFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.settings.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean D = true;
+
+    public static final String TAG_PERMISSIONS_FRAGMENT = "MainActivity.TAG_PERMISSIONS_FRAGMENT";
+    public static final String TAG_BOOK_DETAIL_FRAGMENT = "MainActivity.TAG_BOOK_DETAIL_FRAGMENT";
+    public static final String TAG_SHELF_BOOKS_FRAGMENT   = "MainActivity.TAG_SHELF_BOOKS_FRAGMENT";
+    public static final String TAG_SEARCH_BOOKS_FRAGMENT   = "MainActivity.TAG_SEARCH_BOOKS_FRAGMENT";
+    public static final String TAG_NEW_BOOKS_FRAGMENT   = "MainActivity.TAG_NEW_BOOKS_FRAGMENT";
+    public static final String TAG_SETTINGS_FRAGMENT   = "MainActivity.TAG_SETTINGS_FRAGMENT";
 
     private BookService mBookService;
     private BottomNavigationView mBottomNavigationView;
@@ -61,7 +66,9 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
         mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         mBottomNavigationView.setOnNavigationItemReselectedListener(mOnNavigationItemReselectedListener);
         if (savedInstanceState == null) {
+            onFragmentEvent(MyBookshelfEvent.ADD_PERMISSIONS_FRAGMENT, null);
             onFragmentEvent(MyBookshelfEvent.SELECT_SHELF_BOOKS, null);
+
         }
     }
 
@@ -142,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 if (navigation_state != R.id.navigation_search_books) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_search_books).setChecked(true);
                     bundle = new Bundle();
-                    bundle.putInt(SearchBooksFragment.KEY_SERVICE_STATE, serviceState);
                     SearchParam param = bookService.getSearchParam();
                     if(param != null) {
                         bundle.putString(SearchBooksFragment.KEY_PARAM_SEARCH_KEYWORD, param.getKeyword());
@@ -157,9 +163,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:
                 if (navigation_state != R.id.navigation_new_books) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_new_books).setChecked(true);
-                    bundle = new Bundle();
-                    bundle.putInt(NewBooksFragment.KEY_SERVICE_STATE, serviceState);
-                    onFragmentEvent(MyBookshelfEvent.SELECT_NEW_BOOKS, bundle);
+                    onFragmentEvent(MyBookshelfEvent.SELECT_NEW_BOOKS, null);
                 }else {
                     onFragmentEvent(MyBookshelfEvent.CHECK_RELOAD_STATE, null);
                 }
@@ -172,12 +176,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             case BookService.STATE_BACKUP_COMPLETE:
             case BookService.STATE_RESTORE_INCOMPLETE:
             case BookService.STATE_RESTORE_COMPLETE:
-            case BookService.STATE_DROPBOX_LOGIN:
+            case BookService.STATE_DROPBOX_AUTH:
                 if (navigation_state != R.id.navigation_settings) {
                     mBottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
-                    bundle = new Bundle();
-                    bundle.putInt(SettingsFragment.KEY_SERVICE_STATE, serviceState);
-                    onFragmentEvent(MyBookshelfEvent.SELECT_SETTINGS, bundle);
+                    onFragmentEvent(MyBookshelfEvent.SELECT_SETTINGS, null);
                 }else {
                     onFragmentEvent(MyBookshelfEvent.CHECK_SETTINGS_STATE, null);
                 }
@@ -226,5 +228,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
             }
         }
     };
+
 
 }

@@ -7,11 +7,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.util.Log;
 
 import java.util.Calendar;
 
+@SuppressWarnings("unused")
 public class NormalDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener{
-    public static final String TAG = NormalDatePicker.class.getSimpleName();
+    private static final String TAG = NormalDatePicker.class.getSimpleName();
+    private static final boolean D = true;
 
     public static final String KEY_REQUEST_CODE     = "NormalDatePicker.KEY_REQUEST_CODE";
     public static final String KEY_YEAR             = "NormalDatePicker.KEY_YEAR";
@@ -24,7 +29,6 @@ public class NormalDatePicker extends DialogFragment implements DatePickerDialog
     private OnBaseDateSetListener mListener;
 
 
-    @SuppressWarnings("unused")
     public static NormalDatePicker newInstance(Bundle bundle){
         NormalDatePicker instance = new NormalDatePicker();
         instance.setArguments(bundle);
@@ -109,6 +113,24 @@ public class NormalDatePicker extends DialogFragment implements DatePickerDialog
             }
         }
         return -1;
+    }
+
+    public static void showNormalDatePicker(FragmentActivity activity, Bundle bundle, String tag) {
+        if (D) Log.d(TAG, "showNormalDatePicker TAG: " + tag);
+        if(activity != null && bundle != null){
+            FragmentManager manager = activity.getSupportFragmentManager();
+            NormalDatePicker datePicker = NormalDatePicker.newInstance(bundle);
+            datePicker.show(manager, tag);
+        }
+    }
+
+    public static void showNormalDatePicker(Fragment fragment, Bundle bundle, String tag) {
+        if (D) Log.d(TAG, "showNormalDatePicker TAG: " + tag);
+        if (fragment != null && fragment.getActivity() != null && bundle != null) {
+            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
+            NormalDatePicker datePicker = NormalDatePicker.newInstance(fragment, bundle);
+            datePicker.show(manager, tag);
+        }
     }
 
 }

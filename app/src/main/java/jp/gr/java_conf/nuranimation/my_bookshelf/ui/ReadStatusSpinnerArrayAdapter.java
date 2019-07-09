@@ -77,6 +77,7 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
 
 
 
+    @SuppressWarnings("WeakerAccess")
     public static Drawable getReadStatusImage(Context context, String status) {
         Resources res = context.getResources();
         Drawable read_status_image;

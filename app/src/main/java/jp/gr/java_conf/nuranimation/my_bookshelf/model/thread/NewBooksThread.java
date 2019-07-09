@@ -56,13 +56,13 @@ public class NewBooksThread extends BaseThread {
     public void run() {
         Result mResult;
 
-        if(authors.size() == 0){
+        if(authors == null || authors.size() == 0){
             mResult = Result.ReloadError(Result.ERROR_CODE_EMPTY_AUTHORS_LIST, "empty authors");
         }else{
             mResult = reloadNewBooks(authors);
         }
-        if (getThreadFinishListener() != null) {
-            getThreadFinishListener().deliverResult(mResult);
+        if (getThreadListener() != null) {
+            getThreadListener().deliverResult(mResult);
         }
     }
 

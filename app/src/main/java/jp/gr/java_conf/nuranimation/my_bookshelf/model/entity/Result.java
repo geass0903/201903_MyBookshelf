@@ -57,11 +57,22 @@ public class Result{
     }
 
     public List<BookData> getBooks() {
-        return new ArrayList<>(this.books);
+        return this.books;
     }
 
     public boolean hasNext() {
         return this.hasNext;
+    }
+
+
+    public static Result DeepCopy(Result result){
+        boolean isSuccess = result.isSuccess();
+        int errorCode = result.getErrorCode();
+        String errorMessage = result.getErrorMessage();
+        int type = result.getType();
+        List<BookData> books = result.getBooks();
+        boolean hasNext = result.hasNext();
+        return new Result(isSuccess, errorCode, errorMessage, type, books, hasNext);
     }
 
 

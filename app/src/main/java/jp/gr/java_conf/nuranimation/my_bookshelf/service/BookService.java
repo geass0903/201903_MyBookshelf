@@ -21,8 +21,8 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.base.BaseService;
 
 
-public class BookService extends BaseService implements BaseThread.ThreadFinishListener {
-    public static final String TAG = BookService.class.getSimpleName();
+public class BookService extends BaseService implements BaseThread.ThreadListener {
+    private static final String TAG = BookService.class.getSimpleName();
     private static final boolean D = true;
 
     public static final int STATE_NONE = 0;
@@ -38,7 +38,7 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
     public static final int STATE_BACKUP_COMPLETE = 10;
     public static final int STATE_RESTORE_INCOMPLETE = 11;
     public static final int STATE_RESTORE_COMPLETE = 12;
-    public static final int STATE_DROPBOX_LOGIN = 13;
+    public static final int STATE_DROPBOX_AUTH = 13;
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
     private MyBookshelfPreferences mPreferences;
@@ -160,7 +160,6 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
         }
     }
 
-
     public SearchParam getSearchParam() {
         return mSearchParam;
     }
@@ -168,17 +167,15 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
     public Result getResult() {
         if (mResult == null) {
             return Result.Error("get result failed");
+        }else{
+            Result result = Result.DeepCopy(mResult);
+            mResult = null;
+            return result;
         }
-        return mResult;
-    }
-
-    private void clearResult(){
-        mResult = null;
     }
 
     public void searchBooks(final SearchParam searchParam) {
         setServiceState(STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
-        clearResult();
         mSearchParam = searchParam;
         searchBooksThread = new SearchBooksThread(this, searchParam, BooksOrder.getSearchBooksOrder(mPreferences.getSearchBooksOrderCode()));
         searchBooksThread.start();
@@ -192,7 +189,6 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
 
     public void reloadNewBooks(final List<String> authors) {
         setServiceState(STATE_NEW_BOOKS_RELOAD_INCOMPLETE);
-        clearResult();
         newBooksThread = new NewBooksThread(this, authors);
         newBooksThread.start();
     }
@@ -204,7 +200,6 @@ public class BookService extends BaseService implements BaseThread.ThreadFinishL
     }
 
     public void fileBackup(int type) {
-        clearResult();
         switch (type) {
             case FileBackupThread.TYPE_EXPORT:
                 setServiceState(STATE_EXPORT_INCOMPLETE);

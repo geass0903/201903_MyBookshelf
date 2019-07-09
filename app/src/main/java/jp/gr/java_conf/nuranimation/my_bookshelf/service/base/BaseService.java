@@ -12,7 +12,7 @@ public abstract class BaseService extends Service {
     private static final boolean D = true;
 
     public static final String FILTER_ACTION_UPDATE_SERVICE_STATE   = "BaseService.FILTER_ACTION_UPDATE_SERVICE_STATE";
-    public static final String KEY_SERVICE_STATE                    = "BaseService.KEY_SERVICE_STATE";
+    public static final String KEY_SERVICE_STATE                    = "BaseService.KEY_SEARCH_STATE";
 
     private static final int notifyId = 1;
     private NotificationManager mNotificationManager;

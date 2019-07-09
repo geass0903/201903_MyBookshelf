@@ -20,15 +20,15 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.prefs.MyBookshelfPreferen
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
 
 
 public class PermissionsFragment extends BaseFragment implements NormalDialogFragment.OnNormalDialogListener {
-    public static final String TAG = PermissionsFragment.class.getSimpleName();
+    private static final String TAG = PermissionsFragment.class.getSimpleName();
     private static final boolean D = true;
 
     public static final String[] USE_PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
+    public static final String KEY_USE_PERMISSIONS = "PermissionsFragment.KEY_USE_PERMISSIONS";
 
     private static final String KEY_SAVED_REQUEST_PERMISSIONS = "PermissionsFragment.KEY_SAVED_REQUEST_PERMISSIONS";
     private static final String TAG_RATIONALE_DIALOG = "PermissionsFragment.TAG_RATIONALE_DIALOG";
@@ -77,7 +77,7 @@ public class PermissionsFragment extends BaseFragment implements NormalDialogFra
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        if (requestCode == ProgressDialogFragment.REQUEST_CODE_ASK_FOR_PERMISSIONS) {
+        if (requestCode == REQUEST_CODE_ASK_FOR_PERMISSIONS) {
             if (resultCode == DialogInterface.BUTTON_POSITIVE) {
                 onNextRequestPermissions(getRequestPermissions());
             } else {
@@ -88,7 +88,7 @@ public class PermissionsFragment extends BaseFragment implements NormalDialogFra
 
     @Override
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
-        if (requestCode == ProgressDialogFragment.REQUEST_CODE_ASK_FOR_PERMISSIONS) {
+        if (requestCode == REQUEST_CODE_ASK_FOR_PERMISSIONS) {
             onSkipRequestPermissions(getRequestPermissions());
         }
     }

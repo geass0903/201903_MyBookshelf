@@ -53,6 +53,8 @@ class NotificationParam {
         int iconId = 0;
         switch (state) {
             case BookService.STATE_NONE:
+                message = context.getString(R.string.notification_channel_description);
+                iconId = R.drawable.ic_book_24dp;
                 break;
             case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
                 message = context.getString(R.string.notification_message_search_incomplete);
@@ -102,7 +104,7 @@ class NotificationParam {
                 message = context.getString(R.string.notification_message_restore_complete);
                 iconId = R.drawable.ic_restore_24dp;
                 break;
-            case BookService.STATE_DROPBOX_LOGIN:
+            case BookService.STATE_DROPBOX_AUTH:
                 message = context.getString(R.string.notification_message_login_dropbox);
                 iconId = R.drawable.ic_link_up_24dp;
                 break;

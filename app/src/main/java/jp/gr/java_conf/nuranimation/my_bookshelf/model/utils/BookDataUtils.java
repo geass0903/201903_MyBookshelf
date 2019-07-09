@@ -135,7 +135,7 @@ public class BookDataUtils {
                     book.setRegisterDate(getDateString(split[i]));
                     break;
                 case INDEX_IMAGE:
-                    book.setImage(BookDataUtils.parseUrlString(split[i]));
+                    book.setImage(BookDataUtils.parseUrlString(split[i], IMAGE_TYPE_ORIGINAL));
                     break;
             }
         }
@@ -215,11 +215,6 @@ public class BookDataUtils {
         list.add(INDEX_REGISTER_DATE);
         return list.toArray(new String[0]);
     }
-
-    public static String parseUrlString(String url){
-        return parseUrlString(url, IMAGE_TYPE_ORIGINAL);
-    }
-
 
     public static String parseUrlString(String url, int type) {
         if (TextUtils.isEmpty(url)) {

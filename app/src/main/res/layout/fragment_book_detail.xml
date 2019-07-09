@@ -139,14 +139,6 @@
                 android:textColor="#FF000000"
                 android:text="@string/label_item_price" />
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|end"
-                android:gravity="center_vertical|end"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000"
-                android:text="@string/label_price_yen_mark" />
-            <TextView
                 android:id="@+id/book_detail_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -51,8 +51,8 @@ public class SearchBooksThread extends BaseThread {
     @Override
     public void run() {
         Result mResult = search(searchParam, sort);
-        if(getThreadFinishListener() != null){
-            getThreadFinishListener().deliverResult(mResult);
+        if(getThreadListener() != null){
+            getThreadListener().deliverResult(mResult);
         }
     }
 

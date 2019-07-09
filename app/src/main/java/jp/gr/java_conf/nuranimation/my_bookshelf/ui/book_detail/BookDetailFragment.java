@@ -45,7 +45,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
 public class BookDetailFragment extends BaseFragment implements NormalDatePicker.OnBaseDateSetListener, NormalDialogFragment.OnNormalDialogListener {
-    public static final String TAG = BookDetailFragment.class.getSimpleName();
+    private static final String TAG = BookDetailFragment.class.getSimpleName();
     private static final boolean D = true;
 
     private static final String TAG_DATE_PICKER = "BookDetailFragment.TAG_DATE_PICKER";
@@ -53,12 +53,9 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
 
     private static final int REQUEST_CODE_FINISH_READ_DATE = 101;
 
-
-
     public static final String KEY_BOOK_DATA = "BookDetailFragment.KEY_BOOK_DATA";
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
-
 
     private BookData bookData;
     private ReadStatusSpinnerArrayAdapter mArrayAdapter;
@@ -360,7 +357,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
         bundle.putInt(NormalDatePicker.KEY_MONTH, calendar.get(Calendar.MONTH));
         bundle.putInt(NormalDatePicker.KEY_DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
         bundle.putInt(NormalDatePicker.KEY_REQUEST_CODE, requestCode);
-        NormalDialogFragment.showNormalDialog(this, bundle, TAG_DATE_PICKER);
+        NormalDatePicker.showNormalDatePicker(this, bundle, TAG_DATE_PICKER);
     }
 
     @SuppressWarnings("SameParameterValue")

@@ -12,19 +12,19 @@ public class BaseThread extends Thread{
     public static final String KEY_PROGRESS_MESSAGE_TEXT     = "BaseThread.KEY_PROGRESS_MESSAGE_TEXT";
     public static final String KEY_PROGRESS_VALUE_TEXT       = "BaseThread.KEY_PROGRESS_VALUE_TEXT";
 
-    private ThreadFinishListener mListener;
+    private ThreadListener mListener;
     private LocalBroadcastManager mLocalBroadcastManager;
     private boolean isCanceled;
 
-    public interface ThreadFinishListener {
+    public interface ThreadListener {
         void deliverResult(Result result);
     }
 
     protected BaseThread(Context context){
         isCanceled = false;
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
-        if (context instanceof ThreadFinishListener) {
-            mListener = (ThreadFinishListener) context;
+        if (context instanceof ThreadListener) {
+            mListener = (ThreadListener) context;
         } else {
             throw new UnsupportedOperationException("Listener is not Implementation.");
         }
@@ -35,7 +35,7 @@ public class BaseThread extends Thread{
     }
 
 
-    protected ThreadFinishListener getThreadFinishListener(){
+    protected ThreadListener getThreadListener(){
         return mListener;
     }
 

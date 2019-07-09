@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -15,20 +16,16 @@ import android.widget.TextView;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 
-public class ProgressDialogFragment extends DialogFragment{
-    public static final String TAG = ProgressDialogFragment.class.getSimpleName();
+@SuppressWarnings("unused")
+public class ProgressDialogFragment extends DialogFragment {
+    private static final String TAG = ProgressDialogFragment.class.getSimpleName();
     private static final boolean D = true;
 
-    public static final int REQUEST_CODE_ASK_FOR_PERMISSIONS    =   1;
-    public static final int REQUEST_CODE_DROPBOX_LOGOUT         =   2;
-    public static final int REQUEST_CODE_REGISTER_BOOK          =   3;
-    public static final int REQUEST_CODE_UNREGISTER_BOOK        =   4;
-
-    public static final String KEY_REQUEST_CODE     = "ProgressDialogFragment.KEY_REQUEST_CODE";
-    public static final String KEY_TITLE            = "ProgressDialogFragment.KEY_TITLE";
-    public static final String KEY_MESSAGE          = "ProgressDialogFragment.KEY_MESSAGE";
-    public static final String KEY_PROGRESS         = "ProgressDialogFragment.KEY_PROGRESS";
-    public static final String KEY_PARAMS           = "ProgressDialogFragment.KEY_PARAMS";
+    public static final String KEY_REQUEST_CODE = "ProgressDialogFragment.KEY_REQUEST_CODE";
+    public static final String KEY_TITLE = "ProgressDialogFragment.KEY_TITLE";
+    public static final String KEY_MESSAGE = "ProgressDialogFragment.KEY_MESSAGE";
+    public static final String KEY_PROGRESS = "ProgressDialogFragment.KEY_PROGRESS";
+    public static final String KEY_PARAMS = "ProgressDialogFragment.KEY_PARAMS";
 
     private TextView mTextView_Title;
     private TextView mTextView_Message;
@@ -41,45 +38,42 @@ public class ProgressDialogFragment extends DialogFragment{
     public interface OnProgressDialogListener {
         void onProgressDialogCancelled(int requestCode, Bundle params);
     }
+
     private OnProgressDialogListener mListener;
 
 
-    @SuppressWarnings("unused")
-    public static ProgressDialogFragment newInstance(Bundle bundle){
+    public static ProgressDialogFragment newInstance(Bundle bundle) {
         ProgressDialogFragment instance = new ProgressDialogFragment();
         instance.setArguments(bundle);
         return instance;
     }
 
 
-    public static ProgressDialogFragment newInstance(Fragment fragment, Bundle bundle){
+    public static ProgressDialogFragment newInstance(Fragment fragment, Bundle bundle) {
         ProgressDialogFragment instance = new ProgressDialogFragment();
         instance.setArguments(bundle);
         int request_code = bundle.getInt(KEY_REQUEST_CODE);
-        instance.setTargetFragment(fragment,request_code);
+        instance.setTargetFragment(fragment, request_code);
         return instance;
     }
 
 
-
-
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context) {
         super.onAttach(context);
-        if(D) Log.d(TAG,"onAttach");
         Fragment targetFragment = this.getTargetFragment();
-        try{
-            if(targetFragment != null){
+        try {
+            if (targetFragment != null) {
                 mListener = (OnProgressDialogListener) targetFragment;
-            }else{
+            } else {
                 Fragment parent = this.getParentFragment();
-                if(parent != null){
+                if (parent != null) {
                     mListener = (OnProgressDialogListener) parent;
-                }else {
+                } else {
                     mListener = (OnProgressDialogListener) context;
                 }
             }
-        } catch (UnsupportedOperationException e){
+        } catch (UnsupportedOperationException e) {
             throw new UnsupportedOperationException("mListener is not Implementation.");
         }
     }
@@ -102,18 +96,18 @@ public class ProgressDialogFragment extends DialogFragment{
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if(getActivity() == null){
+        if (getActivity() == null) {
             throw new IllegalArgumentException("getActivity() == null");
         }
-        if(getArguments() == null){
+        if (getArguments() == null) {
             throw new NullPointerException("getArguments() == null");
         }
 
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             mTitle = savedInstanceState.getString(KEY_TITLE);
             mMessage = savedInstanceState.getString(KEY_MESSAGE);
             mProgress = savedInstanceState.getString(KEY_PROGRESS);
-        }else{
+        } else {
             Bundle bundle = this.getArguments();
             mTitle = bundle.getString(KEY_TITLE);
             mMessage = bundle.getString(KEY_MESSAGE);
@@ -127,7 +121,7 @@ public class ProgressDialogFragment extends DialogFragment{
 
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         mTextView_Title = getDialog().findViewById(R.id.fragment_progress_dialog_title);
         mTextView_Message = getDialog().findViewById(R.id.fragment_progress_dialog_message);
@@ -143,14 +137,14 @@ public class ProgressDialogFragment extends DialogFragment{
             }
         });
         setDialogTitle(mTitle);
-        setDialogProgress(mMessage,mProgress);
+        setDialogProgress(mMessage, mProgress);
     }
 
-    public void setDialogTitle(String title){
-        if(mTextView_Title == null){
+    public void setDialogTitle(String title) {
+        if (mTextView_Title == null) {
             mTextView_Title = getDialog().findViewById(R.id.fragment_progress_dialog_title);
         }
-        if(title != null) {
+        if (title != null) {
             mTextView_Title.setText(title);
             mTitle = title;
         }
@@ -176,45 +170,75 @@ public class ProgressDialogFragment extends DialogFragment{
 
     private int getRequestCode() {
         Bundle bundle = getArguments();
-        if(bundle != null) {
-            if(bundle.containsKey(KEY_REQUEST_CODE)){
+        if (bundle != null) {
+            if (bundle.containsKey(KEY_REQUEST_CODE)) {
                 return bundle.getInt(KEY_REQUEST_CODE);
-            }else{
+            } else {
                 return getTargetRequestCode();
             }
         }
         return -1;
     }
 
-
-    public static void showProgressDialog(Fragment fragment, Bundle bundle){
-        if (fragment.getActivity() != null && bundle != null) {
-            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-            ProgressDialogFragment dialog = ProgressDialogFragment.newInstance(fragment, bundle);
-            dialog.show(manager, TAG);
+    public static void showProgressDialog(FragmentActivity activity, Bundle bundle, String tag) {
+        if (D) Log.d(TAG, "showProgressDialog TAG: " + tag);
+        if (activity != null && bundle != null) {
+            FragmentManager manager = activity.getSupportFragmentManager();
+            ProgressDialogFragment dialog = ProgressDialogFragment.newInstance(bundle);
+            dialog.show(manager, tag);
         }
     }
 
-    public static void dismissProgressDialog(Fragment fragment){
-        if(fragment.getActivity() != null){
+    public static void showProgressDialog(Fragment fragment, Bundle bundle, String tag) {
+        if (D) Log.d(TAG, "showProgressDialog TAG: " + tag);
+        if (fragment != null && fragment.getActivity() != null && bundle != null) {
             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-            Fragment findFragment = manager.findFragmentByTag(TAG);
-            if(findFragment instanceof ProgressDialogFragment){
+            ProgressDialogFragment dialog = ProgressDialogFragment.newInstance(fragment, bundle);
+            dialog.show(manager, tag);
+        }
+    }
+
+    public static void dismissProgressDialog(FragmentActivity activity, String tag) {
+        if (activity != null) {
+            FragmentManager manager = activity.getSupportFragmentManager();
+            Fragment findFragment = manager.findFragmentByTag(tag);
+            if (findFragment instanceof ProgressDialogFragment) {
                 ((ProgressDialogFragment) findFragment).dismiss();
             }
         }
     }
 
-    public static void updateProgress(Fragment fragment, Bundle bundle){
-        if (fragment.getActivity() != null && bundle != null) {
+    public static void dismissProgressDialog(Fragment fragment, String tag) {
+        if (fragment != null && fragment.getActivity() != null) {
             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-            Fragment findFragment = manager.findFragmentByTag(TAG);
-            if(findFragment instanceof ProgressDialogFragment){
+            Fragment findFragment = manager.findFragmentByTag(tag);
+            if (findFragment instanceof ProgressDialogFragment) {
+                ((ProgressDialogFragment) findFragment).dismiss();
+            }
+        }
+    }
+
+    public static void updateProgress(FragmentActivity activity, Bundle bundle, String tag) {
+        if (activity != null && bundle != null) {
+            FragmentManager manager = activity.getSupportFragmentManager();
+            Fragment findFragment = manager.findFragmentByTag(tag);
+            if (findFragment instanceof ProgressDialogFragment) {
                 String message = bundle.getString(KEY_MESSAGE);
                 String progress = bundle.getString(KEY_PROGRESS);
                 ((ProgressDialogFragment) findFragment).setDialogProgress(message, progress);
             }
+        }
+    }
 
+    public static void updateProgress(Fragment fragment, Bundle bundle, String tag) {
+        if (fragment != null && fragment.getActivity() != null && bundle != null) {
+            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
+            Fragment findFragment = manager.findFragmentByTag(tag);
+            if (findFragment instanceof ProgressDialogFragment) {
+                String message = bundle.getString(KEY_MESSAGE);
+                String progress = bundle.getString(KEY_PROGRESS);
+                ((ProgressDialogFragment) findFragment).setDialogProgress(message, progress);
+            }
         }
     }
 
