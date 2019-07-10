@@ -26,6 +26,7 @@ public class ProgressDialogFragment extends DialogFragment {
     public static final String KEY_MESSAGE = "ProgressDialogFragment.KEY_MESSAGE";
     public static final String KEY_PROGRESS = "ProgressDialogFragment.KEY_PROGRESS";
     public static final String KEY_PARAMS = "ProgressDialogFragment.KEY_PARAMS";
+    public static final String KEY_CANCELABLE       = "ProgressDialogFragment.KEY_CANCELABLE";
 
     private TextView mTextView_Title;
     private TextView mTextView_Message;
@@ -33,6 +34,7 @@ public class ProgressDialogFragment extends DialogFragment {
     private String mTitle;
     private String mMessage;
     private String mProgress;
+    private boolean mCancelable;
 
 
     public interface OnProgressDialogListener {
@@ -90,6 +92,7 @@ public class ProgressDialogFragment extends DialogFragment {
         outState.putString(KEY_TITLE, mTitle);
         outState.putString(KEY_MESSAGE, mMessage);
         outState.putString(KEY_PROGRESS, mProgress);
+        outState.putBoolean(KEY_CANCELABLE, mCancelable);
     }
 
 
@@ -107,11 +110,13 @@ public class ProgressDialogFragment extends DialogFragment {
             mTitle = savedInstanceState.getString(KEY_TITLE);
             mMessage = savedInstanceState.getString(KEY_MESSAGE);
             mProgress = savedInstanceState.getString(KEY_PROGRESS);
+            mCancelable = savedInstanceState.getBoolean(KEY_CANCELABLE, true);
         } else {
             Bundle bundle = this.getArguments();
             mTitle = bundle.getString(KEY_TITLE);
             mMessage = bundle.getString(KEY_MESSAGE);
             mProgress = bundle.getString(KEY_PROGRESS);
+            mCancelable = bundle.getBoolean(KEY_CANCELABLE, true);
         }
         setCancelable(false);
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -136,6 +141,9 @@ public class ProgressDialogFragment extends DialogFragment {
                 }
             }
         });
+        if(!mCancelable){
+            mButton_Cancel.setVisibility(View.GONE);
+        }
         setDialogTitle(mTitle);
         setDialogProgress(mMessage, mProgress);
     }

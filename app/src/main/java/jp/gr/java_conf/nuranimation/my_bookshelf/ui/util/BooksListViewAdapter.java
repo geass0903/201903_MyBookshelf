@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,13 +26,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
 
 public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
-    private static final String TAG = BooksListViewAdapter.class.getSimpleName();
-    private static final boolean D = true;
 
     public static final int LIST_TYPE_SHELF_BOOKS   = 1;
     public static final int LIST_TYPE_SEARCH_BOOKS  = 2;
     public static final int LIST_TYPE_NEW_BOOKS     = 3;
-
 
     private List<BookData> list;
 
@@ -108,8 +104,6 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
                 return new LoadViewHolder(inflate);
             case BookData.TYPE_VIEW_LOADING:
                 inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_loading,viewGroup,false);
-                inflate.setOnClickListener(this);
-                inflate.setOnLongClickListener(this);
                 return new LoadingViewHolder(inflate);
         }
         // Error
@@ -210,13 +204,11 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
             int lastPosition = list.size() - 1;
             // delete old footer
             if (list.get(lastPosition).getView_type() != BookData.TYPE_BOOK) {
-                if (D) Log.d(TAG, "remove footer type: " + list.get(lastPosition).getView_type());
                 list.remove(lastPosition);
                 notifyItemRemoved(lastPosition);
             }
             // add new footer
             if (footer != null) {
-                if (D) Log.d(TAG, "add footer type: " + footer.getView_type());
                 list.add(footer);
                 notifyItemInserted(lastPosition);
             }
@@ -247,7 +239,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
 
-    public static Drawable getReadStatusImage(Context context, String status) {
+    private static Drawable getReadStatusImage(Context context, String status) {
         Resources res = context.getResources();
         Drawable read_status_image;
         if (status == null) {
@@ -295,7 +287,7 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         return read_status_image;
     }
 
-    public static String getReadStatusText(Context context, String status) {
+   private static String getReadStatusText(Context context, String status) {
         String read_status_text;
         if (status == null) {
             read_status_text = context.getString(R.string.read_status_label_0);

@@ -24,8 +24,8 @@ public class MyBookshelfApplicationData extends Application {
         super.onCreate();
         if(D) Log.d(TAG,"onCreate");
 
-//        File cacheDir = getCacheDir();
-        File cacheDir = getExternalFilesDir(null);
+        File cacheDir = getCacheDir();
+//        File cacheDir = getExternalFilesDir(null);
 
         DiskCacheConfig largeImageCacheConfig = DiskCacheConfig.newBuilder(this)
                 .setBaseDirectoryName("largeImageCache")

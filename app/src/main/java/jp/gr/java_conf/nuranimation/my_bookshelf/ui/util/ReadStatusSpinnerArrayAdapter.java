@@ -1,4 +1,4 @@
-package jp.gr.java_conf.nuranimation.my_bookshelf.ui;
+package jp.gr.java_conf.nuranimation.my_bookshelf.ui.util;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -77,8 +77,7 @@ public class ReadStatusSpinnerArrayAdapter extends ArrayAdapter<SpinnerItem> {
 
 
 
-    @SuppressWarnings("WeakerAccess")
-    public static Drawable getReadStatusImage(Context context, String status) {
+    private static Drawable getReadStatusImage(Context context, String status) {
         Resources res = context.getResources();
         Drawable read_status_image;
         if (status == null) {

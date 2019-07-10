@@ -14,11 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.search_books.SearchBooksFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
+
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -137,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
 
 
     private void applyFragment(BookService bookService) {
-        Bundle bundle;
         int navigation_state = mBottomNavigationView.getSelectedItemId();
         int serviceState = bookService.getServiceState();
 
@@ -146,18 +144,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
                 break;
             case BookService.STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
             case BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE:
-                if (navigation_state != R.id.navigation_search_books) {
-                    mBottomNavigationView.getMenu().findItem(R.id.navigation_search_books).setChecked(true);
-                    bundle = new Bundle();
-                    SearchParam param = bookService.getSearchParam();
-                    if(param != null) {
-                        bundle.putString(SearchBooksFragment.KEY_PARAM_SEARCH_KEYWORD, param.getKeyword());
-                        bundle.putInt(SearchBooksFragment.KEY_PARAM_SEARCH_PAGE, param.getPage());
-                    }
-                    onFragmentEvent(MyBookshelfEvent.SELECT_SEARCH_BOOKS, bundle);
-                }else {
-                    onFragmentEvent(MyBookshelfEvent.CHECK_SEARCH_STATE, null);
-                }
                 break;
             case BookService.STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
             case BookService.STATE_NEW_BOOKS_RELOAD_COMPLETE:

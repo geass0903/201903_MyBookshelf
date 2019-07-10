@@ -62,6 +62,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + KEY_FINISH_READ_DATE + " text"     // finish read date
             + ", " + KEY_REGISTER_DATE + " text"        // register date
             + ");";
+
     private static final String CREATE_TABLE_SEARCH_BOOKS = "create table " + TABLE_SEARCH_BOOKS + " ("
             + "_id integer primary key"               // id
             + ", " + KEY_ISBN + " text"                 // ISBN

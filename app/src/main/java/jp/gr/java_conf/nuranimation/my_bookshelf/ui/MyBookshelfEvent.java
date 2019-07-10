@@ -24,12 +24,10 @@ public enum MyBookshelfEvent {
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
             if(service != null){
-                service.cancelSearch();
+                service.cancelSearchBooks();
             }
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -42,13 +40,11 @@ public enum MyBookshelfEvent {
     RESELECT_SHELF_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_SHELF_BOOKS_FRAGMENT);
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_SHELF_BOOKS_FRAGMENT);
             if (fragment instanceof ShelfBooksFragment) {
                 ((ShelfBooksFragment) fragment).scrollToTop();
             }
@@ -57,10 +53,8 @@ public enum MyBookshelfEvent {
     SELECT_SEARCH_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -73,13 +67,11 @@ public enum MyBookshelfEvent {
     RESELECT_SEARCH_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_SEARCH_BOOKS_FRAGMENT);
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_SEARCH_BOOKS_FRAGMENT);
             if (fragment instanceof SearchBooksFragment) {
                 ((SearchBooksFragment) fragment).clearSearchView();
             }
@@ -90,12 +82,10 @@ public enum MyBookshelfEvent {
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
             if(service != null){
-                service.cancelSearch();
+                service.cancelSearchBooks();
             }
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -108,18 +98,14 @@ public enum MyBookshelfEvent {
     RESELECT_NEW_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
-
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_NEW_BOOKS_FRAGMENT);
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_NEW_BOOKS_FRAGMENT);
             if (fragment instanceof NewBooksFragment) {
                 ((NewBooksFragment) fragment).scrollToTop();
             }
-
         }
     },
     SELECT_SETTINGS {
@@ -127,12 +113,10 @@ public enum MyBookshelfEvent {
         public void apply(MainActivity activity, Bundle bundle) {
             BookService service = activity.getService();
             if(service != null){
-                service.cancelSearch();
+                service.cancelSearchBooks();
             }
-            Fragment fragment;
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-            if (fragment instanceof BookDetailFragment) {
+            if(fragmentManager.getBackStackEntryCount() > 0){
                 fragmentManager.popBackStack();
             }
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -154,21 +138,12 @@ public enum MyBookshelfEvent {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             BookDetailFragment bookDetailFragment = new BookDetailFragment();
             bookDetailFragment.setArguments(bundle);
-//            Slide slide = new Slide();
-//            slide.setSlideEdge(Gravity.BOTTOM);
-//            bookDetailFragment.setEnterTransition(slide);
-
-            fragmentTransaction.setCustomAnimations(R.anim.slide_in_right,R.anim.slide_out_left,
-                    R.anim.slide_in_left, R.anim.slide_out_right);
-
+            fragmentTransaction.setCustomAnimations(
+                    R.anim.slide_in_bottom,R.anim.fade_out,
+                    R.anim.fade_in, R.anim.slide_out_bottom);
             fragmentTransaction.replace(R.id.contents_container, bookDetailFragment, MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
-
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-
-
-
-
         }
     },
 
@@ -219,23 +194,15 @@ public enum MyBookshelfEvent {
             }
         }
     },
-    SEARCH_CANCEL {
+    CANCEL_SEARCH_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
-            BookService bookService = activity.getService();
-            if(bookService != null){
-                bookService.cancelSearch();
-            }
-        }
-    },
-    CHECK_SEARCH_STATE {
-        @Override
-        public void apply(MainActivity activity, Bundle bundle){
             BookService bookService = activity.getService();
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
             Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_SEARCH_BOOKS_FRAGMENT);
             if (fragment instanceof SearchBooksFragment && bookService != null) {
-                ((SearchBooksFragment) fragment).checkSearchState(bookService.getServiceState());
+                ((SearchBooksFragment) fragment).cancelSearch();
+                bookService.cancelSearchBooks();
             }
         }
     },
@@ -268,12 +235,12 @@ public enum MyBookshelfEvent {
             }
         }
     },
-    RELOAD_CANCEL {
+    CANCEL_RELOAD_NEW_BOOKS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
             BookService bookService = activity.getService();
             if(bookService != null){
-                bookService.cancelReload();
+                bookService.cancelReloadNewBooks();
             }
         }
     },
@@ -285,6 +252,86 @@ public enum MyBookshelfEvent {
             Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_NEW_BOOKS_FRAGMENT);
             if (fragment instanceof NewBooksFragment && bookService != null) {
                 ((NewBooksFragment) fragment).checkReloadState(bookService.getServiceState());
+            }
+        }
+    },
+    START_REFRESH_IMAGE {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            BookService bookService = activity.getService();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
+            if (fragment instanceof BookDetailFragment && bookService != null && bundle != null) {
+                String ISBN = bundle.getString(BookDetailFragment.KEY_PARAM_SEARCH_ISBN);
+                ((BookDetailFragment) fragment).startRefreshImage();
+                SearchParam searchParam = SearchParam.setSearchParam(ISBN, 1);
+                bookService.refreshImage(searchParam);
+            }
+        }
+    },
+    FINISH_REFRESH_IMAGE {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            BookService bookService = activity.getService();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
+            if (fragment instanceof BookDetailFragment && bookService != null) {
+                ((BookDetailFragment) fragment).finishRefreshImage(bookService.getResult());
+                bookService.setServiceState(BookService.STATE_NONE);
+                bookService.stopForeground(false);
+                bookService.stopSelf();
+            }
+        }
+    },
+    CANCEL_REFRESH_IMAGE {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            BookService bookService = activity.getService();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
+            if (fragment instanceof BookDetailFragment && bookService != null) {
+                ((BookDetailFragment) fragment).cancelRefreshImage();
+                bookService.cancelRefreshImage();
+            }
+        }
+    },
+    START_DOWNLOAD_BOOK {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            BookService bookService = activity.getService();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
+            if (fragment instanceof BookDetailFragment && bookService != null && bundle != null) {
+                String ISBN = bundle.getString(BookDetailFragment.KEY_PARAM_SEARCH_ISBN);
+                ((BookDetailFragment) fragment).startDownloadBook();
+                SearchParam searchParam = SearchParam.setSearchParam(ISBN, 1);
+                bookService.downloadBook(searchParam);
+            }
+        }
+    },
+    FINISH_DOWNLOAD_BOOK {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            BookService bookService = activity.getService();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
+            if (fragment instanceof BookDetailFragment && bookService != null) {
+                ((BookDetailFragment) fragment).finishDownloadBook(bookService.getResult());
+                bookService.setServiceState(BookService.STATE_NONE);
+                bookService.stopForeground(false);
+                bookService.stopSelf();
+            }
+        }
+    },
+    CANCEL_DOWNLOAD_BOOK {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            BookService bookService = activity.getService();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(MainActivity.TAG_BOOK_DETAIL_FRAGMENT);
+            if (fragment instanceof BookDetailFragment && bookService != null) {
+                ((BookDetailFragment) fragment).cancelDownloadBook();
+                bookService.cancelDownloadBook();
             }
         }
     },
@@ -307,7 +354,6 @@ public enum MyBookshelfEvent {
             }
         }
     },
-
     FINISH_BACKUP {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
@@ -344,11 +390,6 @@ public enum MyBookshelfEvent {
     },
 
 
-
-
-
-
-
     ALLOWED_ALL_PERMISSIONS {
         @Override
         public void apply(MainActivity activity, Bundle bundle){
@@ -371,8 +412,6 @@ public enum MyBookshelfEvent {
     },
 
 
-
-
     START_DROPBOX_AUTH {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
@@ -385,7 +424,6 @@ public enum MyBookshelfEvent {
             }
         }
     },
-
     FINISH_DROPBOX_AUTH {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
@@ -402,13 +440,6 @@ public enum MyBookshelfEvent {
     },
 
 
-
-
-
-
-
-
-
     ADD_PERMISSIONS_FRAGMENT {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
@@ -420,7 +451,6 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
-
     REQUEST_PERMISSIONS {
         @Override
         public void apply(MainActivity activity, Bundle bundle) {
@@ -432,6 +462,7 @@ public enum MyBookshelfEvent {
             }
         }
     },
+
 
     @SuppressWarnings("unused")
     DEFAULT {

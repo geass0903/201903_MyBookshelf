@@ -46,7 +46,7 @@ public class BookDataUtils {
     private static final String INDEX_READ_DATE = "finishReadDate";
     private static final String INDEX_REGISTER_DATE = "registerDate";
 
-    private static final int IMAGE_TYPE_ORIGINAL    = 0;
+    public static final int IMAGE_TYPE_ORIGINAL     = 0;
     public static final int IMAGE_TYPE_LARGE        = 1;
     public static final int IMAGE_TYPE_SMALL        = 2;
 

@@ -9,10 +9,12 @@
     <string name="dialog_title_unregister_book">削除の確認</string>
     <string name="dialog_title_register_book">登録の確認</string>
     <string name="dialog_title_clear_date">日付のクリア</string>
+    <string name="dialog_title_refresh_book_image">表紙画像の再取得</string>
     <string name="dialog_message_logout_dropbox">Dropboxからログアウトしますか？</string>
     <string name="dialog_message_unregister_book">この本を削除しますか？</string>
     <string name="dialog_message_register_book">この本を登録しますか？</string>
     <string name="dialog_message_clear_date">日付をクリアしますか？</string>
+    <string name="dialog_message_refresh_book_image">表紙画像を再取得しますか？</string>
 
 
     <!-- Permission -->

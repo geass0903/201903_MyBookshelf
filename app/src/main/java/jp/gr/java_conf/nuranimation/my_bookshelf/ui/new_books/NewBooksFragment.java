@@ -245,7 +245,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     @Override
     public void onProgressDialogCancelled(int requestCode, Bundle params) {
         if (requestCode == REQUEST_CODE_RELOAD_PROGRESS_DIALOG) {
-            getFragmentListener().onFragmentEvent(MyBookshelfEvent.RELOAD_CANCEL, null);
+            getFragmentListener().onFragmentEvent(MyBookshelfEvent.CANCEL_RELOAD_NEW_BOOKS, null);
         }
     }
 
@@ -295,6 +295,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         Bundle bundle = new Bundle();
         bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_RELOAD_PROGRESS_DIALOG);
         bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_reload_new_books));
+        bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, true);
         ProgressDialogFragment.showProgressDialog(this, bundle, TAG_RELOAD_PROGRESS_DIALOG);
     }
 

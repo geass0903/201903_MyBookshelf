@@ -25,20 +25,24 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
     private static final String TAG = BookService.class.getSimpleName();
     private static final boolean D = true;
 
-    public static final int STATE_NONE = 0;
-    public static final int STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE = 1;
-    public static final int STATE_SEARCH_BOOKS_SEARCH_COMPLETE = 2;
-    public static final int STATE_NEW_BOOKS_RELOAD_INCOMPLETE = 3;
-    public static final int STATE_NEW_BOOKS_RELOAD_COMPLETE = 4;
-    public static final int STATE_EXPORT_INCOMPLETE = 5;
-    public static final int STATE_EXPORT_COMPLETE = 6;
-    public static final int STATE_IMPORT_INCOMPLETE = 7;
-    public static final int STATE_IMPORT_COMPLETE = 8;
-    public static final int STATE_BACKUP_INCOMPLETE = 9;
-    public static final int STATE_BACKUP_COMPLETE = 10;
-    public static final int STATE_RESTORE_INCOMPLETE = 11;
-    public static final int STATE_RESTORE_COMPLETE = 12;
-    public static final int STATE_DROPBOX_AUTH = 13;
+    public static final int STATE_NONE                                      =  0;
+    public static final int STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE            =  1;
+    public static final int STATE_SEARCH_BOOKS_SEARCH_COMPLETE              =  2;
+    public static final int STATE_NEW_BOOKS_RELOAD_INCOMPLETE               =  3;
+    public static final int STATE_NEW_BOOKS_RELOAD_COMPLETE                 =  4;
+    public static final int STATE_BOOK_DETAIL_REFRESH_IMAGE_INCOMPLETE      =  5;
+    public static final int STATE_BOOK_DETAIL_REFRESH_IMAGE_COMPLETE        =  6;
+    public static final int STATE_BOOK_DETAIL_DOWNLOAD_BOOK_INCOMPLETE      =  7;
+    public static final int STATE_BOOK_DETAIL_DOWNLOAD_BOOK_COMPLETE        =  8;
+    public static final int STATE_EXPORT_INCOMPLETE                         =  9;
+    public static final int STATE_EXPORT_COMPLETE                           = 10;
+    public static final int STATE_IMPORT_INCOMPLETE                         = 11;
+    public static final int STATE_IMPORT_COMPLETE                           = 12;
+    public static final int STATE_BACKUP_INCOMPLETE                         = 13;
+    public static final int STATE_BACKUP_COMPLETE                           = 14;
+    public static final int STATE_RESTORE_INCOMPLETE                        = 15;
+    public static final int STATE_RESTORE_COMPLETE                          = 16;
+    public static final int STATE_DROPBOX_AUTH                              = 17;
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
     private MyBookshelfPreferences mPreferences;
@@ -46,7 +50,6 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
     private NewBooksThread newBooksThread;
     private FileBackupThread fileBackupThread;
 
-    private SearchParam mSearchParam;
     private Result mResult;
 
     public class MBinder extends Binder {
@@ -86,10 +89,12 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
         if (D) Log.d(TAG, "onDestroy");
         switch (getServiceState()) {
             case STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE:
-                cancelSearch();
+            case STATE_BOOK_DETAIL_REFRESH_IMAGE_INCOMPLETE:
+            case STATE_BOOK_DETAIL_DOWNLOAD_BOOK_INCOMPLETE:
+                cancelSearchBooks();
                 break;
             case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
-                cancelReload();
+                cancelReloadNewBooks();
                 break;
             case STATE_EXPORT_INCOMPLETE:
             case STATE_IMPORT_INCOMPLETE:
@@ -116,6 +121,12 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
                     mDBOpenHelper.registerToNewBooks(result.getBooks());
                 }
                 setServiceState(STATE_NEW_BOOKS_RELOAD_COMPLETE);
+                break;
+            case STATE_BOOK_DETAIL_REFRESH_IMAGE_INCOMPLETE:
+                setServiceState(STATE_BOOK_DETAIL_REFRESH_IMAGE_COMPLETE);
+                break;
+            case STATE_BOOK_DETAIL_DOWNLOAD_BOOK_INCOMPLETE:
+                setServiceState(STATE_BOOK_DETAIL_DOWNLOAD_BOOK_COMPLETE);
                 break;
             case STATE_EXPORT_INCOMPLETE:
                 setServiceState(STATE_EXPORT_COMPLETE);
@@ -160,10 +171,6 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
         }
     }
 
-    public SearchParam getSearchParam() {
-        return mSearchParam;
-    }
-
     public Result getResult() {
         if (mResult == null) {
             return Result.Error("get result failed");
@@ -176,15 +183,16 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
 
     public void searchBooks(final SearchParam searchParam) {
         setServiceState(STATE_SEARCH_BOOKS_SEARCH_INCOMPLETE);
-        mSearchParam = searchParam;
         searchBooksThread = new SearchBooksThread(this, searchParam, BooksOrder.getSearchBooksOrder(mPreferences.getSearchBooksOrderCode()));
         searchBooksThread.start();
     }
 
-    public void cancelSearch() {
+    public void cancelSearchBooks() {
         if (searchBooksThread != null) {
             searchBooksThread.cancel();
+            searchBooksThread = null;
         }
+        setServiceState(STATE_NONE);
     }
 
     public void reloadNewBooks(final List<String> authors) {
@@ -193,10 +201,40 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
         newBooksThread.start();
     }
 
-    public void cancelReload() {
+    public void cancelReloadNewBooks() {
         if (newBooksThread != null) {
             newBooksThread.cancel();
+            newBooksThread = null;
         }
+        setServiceState(STATE_NONE);
+    }
+
+    public void refreshImage(final SearchParam searchParam) {
+        setServiceState(STATE_BOOK_DETAIL_REFRESH_IMAGE_INCOMPLETE);
+        searchBooksThread = new SearchBooksThread(this, searchParam, BooksOrder.getSearchBooksOrder(BooksOrder.SEARCH_BOOKS_ORDER_CODE_SALES_DATE_DESC));
+        searchBooksThread.start();
+    }
+
+    public void cancelRefreshImage() {
+        if (searchBooksThread != null) {
+            searchBooksThread.cancel();
+            searchBooksThread = null;
+        }
+        setServiceState(STATE_NONE);
+    }
+
+    public void downloadBook(final SearchParam searchParam) {
+        setServiceState(STATE_BOOK_DETAIL_DOWNLOAD_BOOK_INCOMPLETE);
+        searchBooksThread = new SearchBooksThread(this, searchParam, BooksOrder.getSearchBooksOrder(BooksOrder.SEARCH_BOOKS_ORDER_CODE_SALES_DATE_DESC));
+        searchBooksThread.start();
+    }
+
+    public void cancelDownloadBook() {
+        if (searchBooksThread != null) {
+            searchBooksThread.cancel();
+            searchBooksThread = null;
+        }
+        setServiceState(STATE_NONE);
     }
 
     public void fileBackup(int type) {
@@ -230,6 +268,7 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
             fileBackupThread.cancel();
         }
     }
+
 
     protected Notification createNotification(int state) {
         Notification notification;

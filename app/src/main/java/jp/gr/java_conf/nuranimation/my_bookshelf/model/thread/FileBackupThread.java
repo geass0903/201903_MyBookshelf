@@ -91,7 +91,7 @@ public class FileBackupThread extends BaseThread {
                 mResult = Result.BackupError(TYPE_UNKNOWN, Result.ERROR_CODE_UNKNOWN, "Unknown BackupType");
                 break;
         }
-        if (getThreadListener() != null) {
+        if (getThreadListener() != null && !isCanceled()) {
             getThreadListener().deliverResult(mResult);
         }
     }

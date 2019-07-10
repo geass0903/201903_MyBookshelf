@@ -100,11 +100,15 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             if(mListState != null){
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
-            restoreSearchBooksParam(savedInstanceState);
+
+            mKeyword = savedInstanceState.getString(KEY_PARAM_SEARCH_KEYWORD, null);
+            mSearchPage = savedInstanceState.getInt(KEY_PARAM_SEARCH_PAGE, 1);
+            mTempKeyword = savedInstanceState.getString(KEY_TEMP_KEYWORD, mKeyword);
+            hasResultData = savedInstanceState.getBoolean(KEY_HAS_RESULT_DATA, false);
+            hasButtonLoadNext = savedInstanceState.getBoolean(KEY_HAS_BUTTON_LOAD_NEXT, false);
             mSearchBooks = loadSearchBooks();
         }else{
             if(mSearchBooks == null) {
-                restoreSearchBooksParam(getArguments());
                 mSearchBooks = loadSearchBooks();
             }
         }
@@ -125,13 +129,13 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     public void onResume() {
         super.onResume();
         if(D) Log.d(TAG,"onResume()");
-        getFragmentListener().onFragmentEvent(MyBookshelfEvent.CHECK_SEARCH_STATE, null);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if(D) Log.d(TAG,"onPause()");
+        getFragmentListener().onFragmentEvent(MyBookshelfEvent.CANCEL_SEARCH_BOOKS, null);
     }
 
     @Override
@@ -259,7 +263,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     @Override
     public void onProgressDialogCancelled(int requestCode, Bundle params) {
         if (requestCode == REQUEST_CODE_SEARCH_PROGRESS_DIALOG) {
-            getFragmentListener().onFragmentEvent(MyBookshelfEvent.SEARCH_CANCEL, null);
+            getFragmentListener().onFragmentEvent(MyBookshelfEvent.CANCEL_SEARCH_BOOKS, null);
         }
     }
 
@@ -308,14 +312,16 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
             return false;
         }
 
-        hasResultData = false;
+
         if(page == 1){
             mDBOpenHelper.dropTableSearchBooks();
             mSearchBooksViewAdapter.clearBooksData();
+            hasResultData = false;
             hasButtonLoadNext = false;
             Bundle bundle = new Bundle();
             bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_SEARCH_PROGRESS_DIALOG);
             bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_search_books));
+            bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, false);
             ProgressDialogFragment.showProgressDialog(this, bundle, TAG_SEARCH_PROGRESS_DIALOG);
         }else{ // page > 1
             BookData footer = new BookData();
@@ -325,11 +331,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         return true;
     }
 
-    public void checkSearchState(int state) {
-        if (state == BookService.STATE_SEARCH_BOOKS_SEARCH_COMPLETE) {
-            getFragmentListener().onFragmentEvent(MyBookshelfEvent.FINISH_SEARCH_BOOKS, null);
-        }
-    }
+
 
     public void finishSearch(Result result){
         if (D) Log.d(TAG, "loadSearchResult");
@@ -361,29 +363,18 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
         ProgressDialogFragment.dismissProgressDialog(this, TAG_SEARCH_PROGRESS_DIALOG);
     }
 
-    private void restoreSearchBooksParam(Bundle bundle){
-        if(bundle != null) {
-            mKeyword = bundle.getString(KEY_PARAM_SEARCH_KEYWORD, null);
-            mSearchPage = bundle.getInt(KEY_PARAM_SEARCH_PAGE, 1);
-            mTempKeyword = bundle.getString(KEY_TEMP_KEYWORD, mKeyword);
-            hasResultData = bundle.getBoolean(KEY_HAS_RESULT_DATA, false);
-            hasButtonLoadNext = bundle.getBoolean(KEY_HAS_BUTTON_LOAD_NEXT, false);
-        }
+    public void cancelSearch(){
+        ProgressDialogFragment.dismissProgressDialog(this, TAG_SEARCH_PROGRESS_DIALOG);
     }
 
     private List<BookData> loadSearchBooks(){
         List<BookData> books = new ArrayList<>();
-        if(hasResultData || mSearchPage > 1){
+        if(hasResultData){
             books = mDBOpenHelper.loadSearchBooks();
         }
-        if(hasResultData && hasButtonLoadNext){
+        if(hasButtonLoadNext){
             BookData footer = new BookData();
             footer.setView_type(BookData.TYPE_BUTTON_LOAD);
-            books.add(footer);
-        }
-        if (!hasResultData && mSearchPage > 1) {
-            BookData footer = new BookData();
-            footer.setView_type(BookData.TYPE_VIEW_LOADING);
             books.add(footer);
         }
         return books;

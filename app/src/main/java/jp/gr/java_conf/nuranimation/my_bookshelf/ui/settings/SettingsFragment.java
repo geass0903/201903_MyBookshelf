@@ -32,7 +32,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.thread.base.BaseThread;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BooksOrder;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.OrderSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.OrderSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
@@ -200,6 +200,7 @@ public class SettingsFragment extends BaseFragment implements NormalDialogFragme
         }
         Bundle bundle = new Bundle();
         bundle.putString(ProgressDialogFragment.KEY_TITLE, title);
+        bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, true);
         ProgressDialogFragment.showProgressDialog(this, bundle, TAG_BACKUP_PROGRESS);
     }
 

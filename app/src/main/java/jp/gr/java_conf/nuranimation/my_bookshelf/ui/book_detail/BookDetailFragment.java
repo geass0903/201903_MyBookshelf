@@ -2,6 +2,7 @@ package jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
@@ -26,7 +27,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -34,26 +40,39 @@ import java.util.List;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
+import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.Result;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SpinnerItem;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.CalendarUtils;
+import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.ReadStatusSpinnerArrayAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.BookImageDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.ReadStatusSpinnerArrayAdapter;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDatePicker;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 
 
-public class BookDetailFragment extends BaseFragment implements NormalDatePicker.OnBaseDateSetListener, NormalDialogFragment.OnNormalDialogListener {
+public class BookDetailFragment extends BaseFragment implements NormalDatePicker.OnBaseDateSetListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener{
     private static final String TAG = BookDetailFragment.class.getSimpleName();
     private static final boolean D = true;
 
+    public static final String KEY_PARAM_SEARCH_ISBN     = "BookDetailFragment.KEY_PARAM_SEARCH_ISBN";
+
     private static final String TAG_DATE_PICKER = "BookDetailFragment.TAG_DATE_PICKER";
     private static final String TAG_CLEAR_DATE_DIALOG = "BookDetailFragment.TAG_CLEAR_DATE_DIALOG";
+    private static final String TAG_BOOK_IMAGE = "BookDetailFragment.TAG_BOOK_IMAGE";
+    private static final String TAG_REFRESH_BOOK_IMAGE = "BookDetailFragment.TAG_REFRESH_BOOK_IMAGE";
+    private static final String TAG_DOWNLOAD_BOOK = "BookDetailFragment.TAG_DOWNLOAD_BOOK";
+
 
     private static final int REQUEST_CODE_FINISH_READ_DATE = 101;
+    private static final int REQUEST_CODE_REFRESH_BOOK_IMAGE = 111;
+    private static final int REQUEST_CODE_DOWNLOAD_BOOK = 112;
 
     public static final String KEY_BOOK_DATA = "BookDetailFragment.KEY_BOOK_DATA";
+
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
 
@@ -124,6 +143,8 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
     public void onPause() {
         super.onPause();
         if(D) Log.d(TAG,"onPause()");
+        getFragmentListener().onFragmentEvent(MyBookshelfEvent.CANCEL_REFRESH_IMAGE,null);
+        getFragmentListener().onFragmentEvent(MyBookshelfEvent.CANCEL_DOWNLOAD_BOOK,null);
     }
 
     @Override
@@ -171,11 +192,20 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
 
     @Override
     public void onNormalDialogSucceeded(int requestCode, int resultCode, Bundle params) {
-        if(resultCode == DialogInterface.BUTTON_POSITIVE){
-            if (requestCode == REQUEST_CODE_FINISH_READ_DATE) {
-                bookData.setFinishReadDate("");
-                tv_finishReadDate.setText(getString(R.string.label_no_data));
-            }
+        switch (requestCode) {
+            case REQUEST_CODE_FINISH_READ_DATE:
+                if (resultCode == DialogInterface.BUTTON_POSITIVE) {
+                    bookData.setFinishReadDate("");
+                    tv_finishReadDate.setText(getString(R.string.label_no_data));
+                }
+                break;
+            case REQUEST_CODE_REFRESH_BOOK_IMAGE:
+                if (resultCode == DialogInterface.BUTTON_POSITIVE) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_PARAM_SEARCH_ISBN, bookData.getISBN());
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.START_REFRESH_IMAGE, bundle);
+                }
+                break;
         }
     }
 
@@ -183,9 +213,39 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
     public void onNormalDialogCancelled(int requestCode, Bundle params) {
         // Cancel
     }
+    @Override
+    public void onProgressDialogCancelled(int requestCode, Bundle params) {
+        // Cancel
+    }
 
-
-
+    @Override
+    protected void onReceiveLocalBroadcast(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (action != null) {
+            if (BookService.FILTER_ACTION_UPDATE_SERVICE_STATE.equals(action)) {
+                int state = intent.getIntExtra(BookService.KEY_SERVICE_STATE, BookService.STATE_NONE);
+                switch (state) {
+                    case BookService.STATE_NONE:
+                        if (D) Log.d(TAG, "STATE_NONE");
+                        break;
+                    case BookService.STATE_BOOK_DETAIL_REFRESH_IMAGE_INCOMPLETE:
+                        if (D) Log.d(TAG, "STATE_BOOK_DETAIL_REFRESH_IMAGE_INCOMPLETE");
+                        break;
+                    case BookService.STATE_BOOK_DETAIL_REFRESH_IMAGE_COMPLETE:
+                        if (D) Log.d(TAG, "STATE_BOOK_DETAIL_REFRESH_IMAGE_COMPLETE");
+                        getFragmentListener().onFragmentEvent(MyBookshelfEvent.FINISH_REFRESH_IMAGE, null);
+                        break;
+                    case BookService.STATE_BOOK_DETAIL_DOWNLOAD_BOOK_INCOMPLETE:
+                        if (D) Log.d(TAG, "STATE_BOOK_DETAIL_DOWNLOAD_BOOK_INCOMPLETE");
+                        break;
+                    case BookService.STATE_BOOK_DETAIL_DOWNLOAD_BOOK_COMPLETE:
+                        if (D) Log.d(TAG, "STATE_BOOK_DETAIL_DOWNLOAD_BOOK_COMPLETE");
+                        getFragmentListener().onFragmentEvent(MyBookshelfEvent.FINISH_DOWNLOAD_BOOK, null);
+                        break;
+                }
+            }
+        }
+    }
 
 
     private void initView(View view){
@@ -221,8 +281,15 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
         if (bookData != null) {
             if (sdv_bookImage != null) {
                 String urlString = BookDataUtils.parseUrlString(bookData.getImage(), BookDataUtils.IMAGE_TYPE_LARGE);
-                if (!TextUtils.isEmpty(urlString) && sdv_bookImage != null) {
-                    sdv_bookImage.setImageURI(Uri.parse(urlString));
+                if (!TextUtils.isEmpty(urlString)) {
+                    ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(urlString))
+                            .setCacheChoice(ImageRequest.CacheChoice.DEFAULT)
+                            .build();
+                    sdv_bookImage.setController(Fresco.newDraweeControllerBuilder()
+                                    .setOldController(sdv_bookImage.getController())
+                                    .setImageRequest(request)
+                                    .build());
+//                    sdv_bookImage.setImageURI(Uri.parse(urlString));
                 }
             }
             if (tv_isbn != null) {
@@ -290,6 +357,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
             switch (id){
                 case R.id.book_detail_image:
                     if(D) Log.d(TAG,"onClick");
+                    showBookImage(bookData.getImage());
                     break;
                 case R.id.book_detail_finish_read_date:
                     String readDate = tv_finishReadDate.getText().toString();
@@ -311,7 +379,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
             int id = v.getId();
             switch (id){
                 case R.id.book_detail_image:
-                    if(D) Log.d(TAG,"onLongClick");
+                    showRefreshBookImage();
                     return true;
                 case R.id.book_detail_finish_read_date:
                     showClearDateDialog(REQUEST_CODE_FINISH_READ_DATE);
@@ -372,6 +440,23 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
         NormalDialogFragment.showNormalDialog(this,bundle, TAG_CLEAR_DATE_DIALOG);
     }
 
+    private void showBookImage(String url){
+        Bundle bundle = new Bundle();
+        bundle.putString(BookImageDialogFragment.KEY_IMAGE_URL, url);
+        BookImageDialogFragment.showBookImageDialog(this, bundle, TAG_BOOK_IMAGE);
+    }
+
+    private void showRefreshBookImage(){
+        Bundle bundle = new Bundle();
+        bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_refresh_book_image));
+        bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_refresh_book_image));
+        bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+        bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+        bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REFRESH_BOOK_IMAGE);
+        bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+        NormalDialogFragment.showNormalDialog(this,bundle, TAG_REFRESH_BOOK_IMAGE);
+    }
+
     private List<SpinnerItem> getSpinnerItem_ReadStatus() {
         List<SpinnerItem> list = new ArrayList<>();
         list.add(new SpinnerItem(BookData.STATUS_INTERESTED,    getString(R.string.read_status_label_1)));
@@ -381,6 +466,62 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
         list.add(new SpinnerItem(BookData.STATUS_NONE,          getString(R.string.read_status_label_5)));
         return list;
     }
+
+    public void startRefreshImage(){
+        Bundle bundle = new Bundle();
+        bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REFRESH_BOOK_IMAGE);
+        bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_search_books));
+        bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, false);
+        ProgressDialogFragment.showProgressDialog(this, bundle, TAG_REFRESH_BOOK_IMAGE);
+    }
+
+    public void finishRefreshImage(Result result) {
+        if (D) Log.d(TAG, "loadSearchResult" + result);
+        if (result.isSuccess()) {
+            List<BookData> books = result.getBooks();
+            if(books != null){
+                BookData book = books.get(0);
+                if (D) Log.d(TAG, "refresh book image: " + book.getImage());
+                String urlString = BookDataUtils.parseUrlString(book.getImage(), BookDataUtils.IMAGE_TYPE_LARGE);
+                if (!TextUtils.isEmpty(urlString)) {
+                    bookData.setImage(book.getImage());
+                    ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(urlString))
+                            .setCacheChoice(ImageRequest.CacheChoice.DEFAULT)
+                            .build();
+                    ImagePipeline imagePipeline = Fresco.getImagePipeline();
+                    imagePipeline.evictFromDiskCache(request);
+                    sdv_bookImage.setController(Fresco.newDraweeControllerBuilder()
+                            .setOldController(sdv_bookImage.getController())
+                            .setImageRequest(request)
+                            .build());
+                }
+            }
+        }else{
+            if(D) Log.d(TAG,"ErrorCode: " + result.getErrorCode());
+        }
+        ProgressDialogFragment.dismissProgressDialog(this, TAG_REFRESH_BOOK_IMAGE);
+    }
+
+    public void cancelRefreshImage(){
+        ProgressDialogFragment.dismissProgressDialog(this, TAG_REFRESH_BOOK_IMAGE);
+    }
+
+    public void startDownloadBook(){
+        Bundle bundle = new Bundle();
+        bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DOWNLOAD_BOOK);
+        bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_search_books));
+        bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, false);
+        ProgressDialogFragment.showProgressDialog(this, bundle, TAG_DOWNLOAD_BOOK);
+    }
+
+    public void finishDownloadBook(Result result){
+
+    }
+
+    public void cancelDownloadBook(){
+        ProgressDialogFragment.dismissProgressDialog(this, TAG_DOWNLOAD_BOOK);
+    }
+
 
     private class GenericTextWatcher implements TextWatcher {
         private View view;
