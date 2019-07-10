@@ -206,6 +206,13 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.START_REFRESH_IMAGE, bundle);
                 }
                 break;
+            case REQUEST_CODE_DOWNLOAD_BOOK:
+                if (resultCode == DialogInterface.BUTTON_POSITIVE) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_PARAM_SEARCH_ISBN, bookData.getISBN());
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.START_DOWNLOAD_BOOK, bundle);
+                }
+                break;
         }
     }
 
@@ -279,72 +286,52 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
 
     private void setBookDataToView(BookData bookData) {
         if (bookData != null) {
-            if (sdv_bookImage != null) {
-                String urlString = BookDataUtils.parseUrlString(bookData.getImage(), BookDataUtils.IMAGE_TYPE_LARGE);
-                if (!TextUtils.isEmpty(urlString)) {
-                    ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(urlString))
-                            .setCacheChoice(ImageRequest.CacheChoice.DEFAULT)
-                            .build();
-                    sdv_bookImage.setController(Fresco.newDraweeControllerBuilder()
-                                    .setOldController(sdv_bookImage.getController())
-                                    .setImageRequest(request)
-                                    .build());
+            String urlString = BookDataUtils.parseUrlString(bookData.getImage(), BookDataUtils.IMAGE_TYPE_LARGE);
+            if (!TextUtils.isEmpty(urlString)) {
+                ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(urlString))
+                        .setCacheChoice(ImageRequest.CacheChoice.DEFAULT)
+                        .build();
+                sdv_bookImage.setController(Fresco.newDraweeControllerBuilder()
+                        .setOldController(sdv_bookImage.getController())
+                        .setImageRequest(request)
+                        .build());
 //                    sdv_bookImage.setImageURI(Uri.parse(urlString));
-                }
             }
-            if (tv_isbn != null) {
-                if (!TextUtils.isEmpty(bookData.getISBN())) {
-                    tv_isbn.setText(bookData.getISBN());
-                }
+            if (!TextUtils.isEmpty(bookData.getISBN())) {
+                tv_isbn.setText(bookData.getISBN());
             }
-            if (tv_salesDate != null) {
-                if (!TextUtils.isEmpty(bookData.getSalesDate())) {
-                    tv_salesDate.setText(bookData.getSalesDate());
-                } else {
-                    tv_salesDate.setText(R.string.label_unknown);
-                }
+            if (!TextUtils.isEmpty(bookData.getSalesDate())) {
+                tv_salesDate.setText(bookData.getSalesDate());
+            } else {
+                tv_salesDate.setText(R.string.label_unknown);
             }
-            if (tv_itemPrice != null) {
-                if (!TextUtils.isEmpty(bookData.getItemPrice())) {
-                    String itemPrice = getString(R.string.label_price_yen_mark) + bookData.getItemPrice();
-                    tv_itemPrice.setText(itemPrice);
-                } else {
-                    tv_itemPrice.setText(R.string.label_unknown);
-                }
+            if (!TextUtils.isEmpty(bookData.getItemPrice())) {
+                String itemPrice = getString(R.string.label_price_yen_mark) + bookData.getItemPrice();
+                tv_itemPrice.setText(itemPrice);
+            } else {
+                tv_itemPrice.setText(R.string.label_unknown);
             }
-            if (et_title != null) {
-                if (!TextUtils.isEmpty(bookData.getTitle())) {
-                    et_title.setText(bookData.getTitle());
-                }
+            if (!TextUtils.isEmpty(bookData.getTitle())) {
+                et_title.setText(bookData.getTitle());
             }
-            if (et_author != null) {
-                if (!TextUtils.isEmpty(bookData.getAuthor())) {
-                    et_author.setText(bookData.getAuthor());
-                }
+            if (!TextUtils.isEmpty(bookData.getAuthor())) {
+                et_author.setText(bookData.getAuthor());
             }
-            if (et_publisher != null) {
-                if (!TextUtils.isEmpty(bookData.getPublisher())) {
-                    et_publisher.setText(bookData.getPublisher());
-                }
+            if (!TextUtils.isEmpty(bookData.getPublisher())) {
+                et_publisher.setText(bookData.getPublisher());
             }
-            if (tv_finishReadDate != null) {
-                if (!TextUtils.isEmpty(bookData.getFinishReadDate())) {
-                    tv_finishReadDate.setText(bookData.getFinishReadDate());
-                } else {
-                    tv_finishReadDate.setText(R.string.label_no_data);
-                }
+            if (!TextUtils.isEmpty(bookData.getFinishReadDate())) {
+                tv_finishReadDate.setText(bookData.getFinishReadDate());
+            } else {
+                tv_finishReadDate.setText(R.string.label_no_data);
             }
-            if (sp_readStatus != null && mArrayAdapter != null) {
-                if (!TextUtils.isEmpty(bookData.getReadStatus())) {
-                    int position = mArrayAdapter.getPosition(bookData.getReadStatus());
-                    sp_readStatus.setSelection(position);
-                }
+            if (!TextUtils.isEmpty(bookData.getReadStatus())) {
+                int position = mArrayAdapter.getPosition(bookData.getReadStatus());
+                sp_readStatus.setSelection(position);
             }
-            if (rb_rating != null) {
-                if (!TextUtils.isEmpty(bookData.getRating())) {
-                    float rating = BookDataUtils.convertRating(bookData.getRating());
-                    rb_rating.setRating(rating);
-                }
+            if (!TextUtils.isEmpty(bookData.getRating())) {
+                float rating = BookDataUtils.convertRating(bookData.getRating());
+                rb_rating.setRating(rating);
             }
         }
     }
@@ -357,14 +344,14 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
             switch (id){
                 case R.id.book_detail_image:
                     if(D) Log.d(TAG,"onClick");
-                    showBookImage(bookData.getImage());
+                    showBookImageDialog(bookData.getImage());
                     break;
                 case R.id.book_detail_finish_read_date:
                     String readDate = tv_finishReadDate.getText().toString();
                     showDatePicker(REQUEST_CODE_FINISH_READ_DATE, readDate);
                     break;
                 case R.id.book_detail_button_download_book_data:
-                    if(D) Log.d(TAG,"onClick");
+                    showNormalDialog(REQUEST_CODE_DOWNLOAD_BOOK);
                     break;
                 case R.id.book_detail_button_rakutenUrl:
                     if(D) Log.d(TAG,"onClick");
@@ -379,10 +366,10 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
             int id = v.getId();
             switch (id){
                 case R.id.book_detail_image:
-                    showRefreshBookImage();
+                    showNormalDialog(REQUEST_CODE_REFRESH_BOOK_IMAGE);
                     return true;
                 case R.id.book_detail_finish_read_date:
-                    showClearDateDialog(REQUEST_CODE_FINISH_READ_DATE);
+                    showNormalDialog(REQUEST_CODE_FINISH_READ_DATE);
                     return true;
             }
             return false;
@@ -428,34 +415,46 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
         NormalDatePicker.showNormalDatePicker(this, bundle, TAG_DATE_PICKER);
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private void showClearDateDialog(int requestCode) {
+    private void showNormalDialog(int requestCode){
+        String tag = "";
         Bundle bundle = new Bundle();
-        bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date));
-        bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date));
-        bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-        bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
         bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, requestCode);
-        bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
-        NormalDialogFragment.showNormalDialog(this,bundle, TAG_CLEAR_DATE_DIALOG);
+
+        switch (requestCode){
+            case REQUEST_CODE_FINISH_READ_DATE:
+                bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_clear_date));
+                bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_clear_date));
+                bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+                tag = TAG_CLEAR_DATE_DIALOG;
+                break;
+            case REQUEST_CODE_REFRESH_BOOK_IMAGE:
+                bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_refresh_book_image));
+                bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_refresh_book_image));
+                bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+                tag = TAG_REFRESH_BOOK_IMAGE;
+                break;
+            case REQUEST_CODE_DOWNLOAD_BOOK:
+                bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_download_book));
+                bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_download_book));
+                bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+                tag = TAG_DOWNLOAD_BOOK;
+        }
+        NormalDialogFragment.showNormalDialog(this, bundle, tag);
     }
 
-    private void showBookImage(String url){
+
+    private void showBookImageDialog(String url){
         Bundle bundle = new Bundle();
         bundle.putString(BookImageDialogFragment.KEY_IMAGE_URL, url);
         BookImageDialogFragment.showBookImageDialog(this, bundle, TAG_BOOK_IMAGE);
     }
 
-    private void showRefreshBookImage(){
-        Bundle bundle = new Bundle();
-        bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_refresh_book_image));
-        bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_refresh_book_image));
-        bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-        bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-        bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REFRESH_BOOK_IMAGE);
-        bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
-        NormalDialogFragment.showNormalDialog(this,bundle, TAG_REFRESH_BOOK_IMAGE);
-    }
 
     private List<SpinnerItem> getSpinnerItem_ReadStatus() {
         List<SpinnerItem> list = new ArrayList<>();
@@ -470,7 +469,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
     public void startRefreshImage(){
         Bundle bundle = new Bundle();
         bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REFRESH_BOOK_IMAGE);
-        bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_search_books));
+        bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_download_book_info));
         bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, false);
         ProgressDialogFragment.showProgressDialog(this, bundle, TAG_REFRESH_BOOK_IMAGE);
     }
@@ -509,13 +508,61 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
     public void startDownloadBook(){
         Bundle bundle = new Bundle();
         bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_DOWNLOAD_BOOK);
-        bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_search_books));
+        bundle.putString(ProgressDialogFragment.KEY_TITLE, getString(R.string.progress_title_download_book_info));
         bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, false);
         ProgressDialogFragment.showProgressDialog(this, bundle, TAG_DOWNLOAD_BOOK);
     }
 
     public void finishDownloadBook(Result result){
+        if (result.isSuccess()) {
+            List<BookData> books = result.getBooks();
+            if(books != null) {
+                BookData book = books.get(0);
+                if (D) Log.d(TAG, "download book: " + book.getISBN());
+                String urlString = BookDataUtils.parseUrlString(book.getImage(), BookDataUtils.IMAGE_TYPE_LARGE);
+                if (!TextUtils.isEmpty(urlString)) {
+                    bookData.setImage(book.getImage());
+                    ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(urlString))
+                            .setCacheChoice(ImageRequest.CacheChoice.DEFAULT)
+                            .build();
+                    ImagePipeline imagePipeline = Fresco.getImagePipeline();
+                    imagePipeline.evictFromDiskCache(request);
+                    sdv_bookImage.setController(Fresco.newDraweeControllerBuilder()
+                            .setOldController(sdv_bookImage.getController())
+                            .setImageRequest(request)
+                            .build());
+                }
 
+
+                if (!TextUtils.isEmpty(book.getSalesDate())) {
+                    tv_salesDate.setText(book.getSalesDate());
+                    bookData.setSalesDate(book.getSalesDate());
+                } else {
+                    tv_salesDate.setText(R.string.label_unknown);
+                }
+
+                if (!TextUtils.isEmpty(book.getItemPrice())) {
+                    String itemPrice = getString(R.string.label_price_yen_mark) + book.getItemPrice();
+                    tv_itemPrice.setText(itemPrice);
+                    bookData.setItemPrice(book.getItemPrice());
+                } else {
+                    tv_itemPrice.setText(R.string.label_unknown);
+                }
+
+                et_title.setText(book.getTitle());
+                bookData.setTitle(book.getTitle());
+
+                et_author.setText(book.getAuthor());
+                bookData.setAuthor(book.getAuthor());
+
+                et_publisher.setText(book.getPublisher());
+                bookData.setPublisher(book.getPublisher());
+
+            }
+        }else{
+            if(D) Log.d(TAG,"ErrorCode: " + result.getErrorCode());
+        }
+        ProgressDialogFragment.dismissProgressDialog(this, TAG_DOWNLOAD_BOOK);
     }
 
     public void cancelDownloadBook(){
