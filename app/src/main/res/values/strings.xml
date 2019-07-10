@@ -10,12 +10,13 @@
     <string name="dialog_title_register_book">登録の確認</string>
     <string name="dialog_title_clear_date">日付のクリア</string>
     <string name="dialog_title_refresh_book_image">表紙画像の再取得</string>
+    <string name="dialog_title_download_book">書籍情報の再取得</string>
     <string name="dialog_message_logout_dropbox">Dropboxからログアウトしますか？</string>
     <string name="dialog_message_unregister_book">この本を削除しますか？</string>
     <string name="dialog_message_register_book">この本を登録しますか？</string>
     <string name="dialog_message_clear_date">日付をクリアしますか？</string>
     <string name="dialog_message_refresh_book_image">表紙画像を再取得しますか？</string>
-
+    <string name="dialog_message_download_book">書籍情報を再取得しますか？</string>
 
     <!-- Permission -->
     <string name="permission_dialog_title">ストレージの書き込み権限取得許可</string>
@@ -46,6 +47,7 @@
     <!-- Progress -->
     <string name="progress_title_search_books">検索中</string>
     <string name="progress_title_reload_new_books">更新中</string>
+    <string name="progress_title_download_book_info">取得中</string>
     <string name="progress_title_backup">バックアップ中</string>
     <string name="progress_title_restore">リストア中</string>
     <string name="progress_title_export">エクスポート中</string>
