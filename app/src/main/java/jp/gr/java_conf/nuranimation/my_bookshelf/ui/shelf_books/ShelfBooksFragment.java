@@ -29,10 +29,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksRecyclerViewAdapter;
 
 
-public class ShelfBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener {
+public class ShelfBooksFragment extends BaseFragment implements BooksRecyclerViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener {
     private static final String TAG = ShelfBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -46,7 +46,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
     private MyBookshelfPreferences mPreferences;
-    private BooksListViewAdapter mShelfBooksViewAdapter;
+    private BooksRecyclerViewAdapter mShelfBooksViewAdapter;
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
@@ -65,7 +65,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_shelf_books, container, false);
+        return inflater.inflate(R.layout.view_recyclerview, container, false);
     }
 
     @Override
@@ -87,9 +87,9 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
         if (mShelfBooks == null) {
             mShelfBooks = mDBOpenHelper.loadShelfBooks(mKeyword, BooksOrder.getShelfBooksOrder(mPreferences.getShelfBooksOrderCode()));
         }
-        mShelfBooksViewAdapter = new BooksListViewAdapter(getContext(), mShelfBooks, BooksListViewAdapter.LIST_TYPE_SHELF_BOOKS);
+        mShelfBooksViewAdapter = new BooksRecyclerViewAdapter(getContext(), mShelfBooks, BooksRecyclerViewAdapter.LIST_TYPE_SHELF_BOOKS);
         mShelfBooksViewAdapter.setClickListener(this);
-        mRecyclerView = view.findViewById(R.id.fragment_shelf_books_recyclerview);
+        mRecyclerView = view.findViewById(R.id.view_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mShelfBooksViewAdapter);
     }
@@ -130,7 +130,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
 
 
     @Override
-    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(BooksRecyclerViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
@@ -149,7 +149,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
     }
 
     @Override
-    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(BooksRecyclerViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
@@ -179,7 +179,7 @@ public class ShelfBooksFragment extends BaseFragment implements BooksListViewAda
             if (book != null) {
                 mDBOpenHelper.unregisterFromShelfBooks(book);
                 mShelfBooksViewAdapter.deleteBook(position);
-                Toast.makeText(getContext(), getString(R.string.toast_success_unregister_book), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.toast_success_unregister), Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Frag
 
     public static final String TAG_PERMISSIONS_FRAGMENT = "MainActivity.TAG_PERMISSIONS_FRAGMENT";
     public static final String TAG_BOOK_DETAIL_FRAGMENT = "MainActivity.TAG_BOOK_DETAIL_FRAGMENT";
+    public static final String TAG_AUTHOR_LIST_FRAGMENT = "MainActivity.TAG_AUTHOR_LIST_FRAGMENT";
     public static final String TAG_SHELF_BOOKS_FRAGMENT   = "MainActivity.TAG_SHELF_BOOKS_FRAGMENT";
     public static final String TAG_SEARCH_BOOKS_FRAGMENT   = "MainActivity.TAG_SEARCH_BOOKS_FRAGMENT";
     public static final String TAG_NEW_BOOKS_FRAGMENT   = "MainActivity.TAG_NEW_BOOKS_FRAGMENT";

@@ -26,176 +26,83 @@
 
         <!-- Download BookData -->
         <Button
+            style="@style/book_detail_button"
             android:id="@+id/book_detail_button_download_book_data"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@id/book_detail_image"
             android:layout_toEndOf="@id/book_detail_image"
             android:layout_marginTop="@dimen/margin_large"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:paddingStart="@dimen/padding_normal"
-            android:paddingLeft="@dimen/padding_normal"
-            android:paddingRight="@dimen/padding_normal"
-            android:paddingEnd="@dimen/padding_normal"
-            android:layout_gravity="center_vertical|start"
-            android:gravity="center_vertical|start"
             android:background="@drawable/selector_rounded_rectangle_transparent"
             android:drawableLeft="@drawable/ic_book_24dp"
             android:drawableStart="@drawable/ic_book_24dp"
-            android:drawablePadding="@dimen/padding_small"
-            android:textSize="@dimen/text_size_small"
-            android:textColor="#FF000000"
             android:text="@string/label_download_book_data" />
 
         <!-- ISBN -->
         <LinearLayout
+            style="@style/book_detail_ll_book_data_uneditable"
             android:id="@+id/book_detail_isbn_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_below="@id/book_detail_button_download_book_data"
             android:layout_toRightOf="@id/book_detail_image"
-            android:layout_toEndOf="@id/book_detail_image"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal" >
+            android:layout_toEndOf="@id/book_detail_image" >
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000"
+                style="@style/book_detail_book_data_text_label"
                 android:text="@string/label_isbn" />
             <TextView
-                android:id="@+id/book_detail_isbn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000" />
+                style="@style/book_detail_book_data_text_data"
+                android:id="@+id/book_detail_isbn" />
         </LinearLayout>
 
         <!-- Book SalesDate -->
         <LinearLayout
+            style="@style/book_detail_ll_book_data_uneditable"
             android:id="@+id/book_detail_sales_date_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_below="@id/book_detail_isbn_view"
             android:layout_toRightOf="@id/book_detail_image"
-            android:layout_toEndOf="@id/book_detail_image"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal" >
+            android:layout_toEndOf="@id/book_detail_image" >
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000"
+                style="@style/book_detail_book_data_text_label"
                 android:text="@string/label_sales_date" />
             <TextView
+                style="@style/book_detail_book_data_text_data"
                 android:id="@+id/book_detail_sales_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000"
                 android:text="@string/label_unknown" />
         </LinearLayout>
 
         <!-- Book Price -->
         <LinearLayout
+            style="@style/book_detail_ll_book_data_uneditable"
             android:id="@+id/book_detail_price_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_below="@id/book_detail_sales_date_view"
             android:layout_toRightOf="@id/book_detail_image"
-            android:layout_toEndOf="@id/book_detail_image"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal" >
+            android:layout_toEndOf="@id/book_detail_image" >
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000"
+                style="@style/book_detail_book_data_text_label"
                 android:text="@string/label_item_price" />
             <TextView
+                style="@style/book_detail_book_data_text_data"
                 android:id="@+id/book_detail_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="#FF000000"
                 android:text="@string/label_unknown" />
         </LinearLayout>
 
         <!-- Link RakutenBooks  -->
         <Button
+            style="@style/book_detail_button"
             android:id="@+id/book_detail_button_rakutenUrl"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignBottom="@id/book_detail_image"
             android:layout_toRightOf="@id/book_detail_image"
             android:layout_toEndOf="@id/book_detail_image"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:paddingStart="@dimen/padding_normal"
-            android:paddingLeft="@dimen/padding_normal"
-            android:paddingRight="@dimen/padding_normal"
-            android:paddingEnd="@dimen/padding_normal"
-            android:layout_gravity="center_vertical|start"
-            android:gravity="center"
             android:background="@drawable/selector_rounded_rectangle_transparent"
             android:drawableLeft="@drawable/ic_web_page_24dp"
             android:drawableStart="@drawable/ic_web_page_24dp"
-            android:drawablePadding="@dimen/padding_small"
-            android:textSize="@dimen/text_size_small"
-            android:textColor="#FF000000"
             android:text="@string/label_rakuten_url" />
 
         <!-- Book Rating  -->
         <LinearLayout
+            style="@style/book_detail_ll_book_data_editable"
             android:id="@+id/book_detail_rating_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/book_detail_image"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_large"
-            android:layout_marginStart="@dimen/margin_large" >
+            android:layout_below="@id/book_detail_image" >
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FF000000"
+                style="@style/book_detail_book_data_editable_label"
                 android:text="@string/label_review" />
             <RatingBar
                 android:id="@+id/book_detail_rating_bar"
@@ -216,118 +123,44 @@
 
         <!-- Book Title  -->
         <EditText
+            style="@style/book_detail_edit_text"
             tools:targetApi="o"
             android:id="@+id/book_detail_title"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
             android:layout_below="@id/book_detail_rating_view"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
-            android:layout_marginEnd="@dimen/margin_normal"
-            android:layout_gravity="center_vertical|start"
-            android:gravity="center_vertical|start"
-            android:background="@drawable/selector_rectangle_transparent"
-            android:drawablePadding="@dimen/padding_small"
             android:drawableRight="@drawable/ic_edit_24dp"
             android:drawableEnd="@drawable/ic_edit_24dp"
-            android:paddingLeft="@dimen/padding_small"
-            android:paddingStart="@dimen/padding_small"
-            android:paddingRight="@dimen/padding_small"
-            android:paddingEnd="@dimen/padding_small"
             android:autofillHints="@string/input_hint_title"
-            android:hint="@string/input_hint_title"
-            android:inputType="text"
-            android:imeOptions="actionDone"
-            android:textSize="@dimen/text_size_normal"
-            android:textColor="#FF000000" />
+            android:hint="@string/input_hint_title" />
 
         <!-- Book Author  -->
         <EditText
+            style="@style/book_detail_edit_text"
             tools:targetApi="o"
             android:id="@+id/book_detail_author"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
             android:layout_below="@id/book_detail_title"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
-            android:layout_marginEnd="@dimen/margin_normal"
-            android:layout_gravity="center_vertical|start"
-            android:gravity="center_vertical|start"
-            android:background="@drawable/selector_rectangle_transparent"
-            android:drawablePadding="@dimen/padding_small"
             android:drawableRight="@drawable/ic_edit_24dp"
             android:drawableEnd="@drawable/ic_edit_24dp"
-            android:paddingLeft="@dimen/padding_small"
-            android:paddingStart="@dimen/padding_small"
-            android:paddingRight="@dimen/padding_small"
-            android:paddingEnd="@dimen/padding_small"
             android:autofillHints="@string/input_hint_author"
-            android:hint="@string/input_hint_author"
-            android:inputType="text"
-            android:imeOptions="actionDone"
-            android:textSize="@dimen/text_size_normal"
-            android:textColor="#FF000000" />
+            android:hint="@string/input_hint_author" />
 
         <!-- Book Publisher  -->
         <EditText
+            style="@style/book_detail_edit_text"
             tools:targetApi="o"
             android:id="@+id/book_detail_publisher"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
             android:layout_below="@id/book_detail_author"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
-            android:layout_marginEnd="@dimen/margin_normal"
-            android:layout_gravity="center_vertical|start"
-            android:gravity="center_vertical|start"
-            android:background="@drawable/selector_rectangle_transparent"
-            android:drawablePadding="@dimen/padding_small"
             android:drawableRight="@drawable/ic_edit_24dp"
             android:drawableEnd="@drawable/ic_edit_24dp"
-            android:paddingLeft="@dimen/padding_small"
-            android:paddingStart="@dimen/padding_small"
-            android:paddingRight="@dimen/padding_small"
-            android:paddingEnd="@dimen/padding_small"
             android:autofillHints="@string/input_hint_publisher"
-            android:hint="@string/input_hint_publisher"
-            android:inputType="text"
-            android:imeOptions="actionDone"
-            android:textSize="@dimen/text_size_normal"
-            android:textColor="#FF000000" />
+            android:hint="@string/input_hint_publisher" />
 
         <!-- Book ReadStatus  -->
         <LinearLayout
+            style="@style/book_detail_ll_book_data_editable"
             android:id="@+id/book_detail_read_status_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/book_detail_publisher"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_large"
-            android:layout_marginStart="@dimen/margin_large" >
+            android:layout_below="@id/book_detail_publisher" >
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FF000000"
+                style="@style/book_detail_book_data_editable_label"
                 android:text="@string/label_read_status" />
             <Spinner
                 android:id="@+id/book_detail_spinner_read_status"
@@ -341,29 +174,12 @@
 
         <!-- Book FinishReadDate  -->
         <LinearLayout
+            style="@style/book_detail_ll_book_data_editable"
             android:id="@+id/book_detail_finish_read_date_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/book_detail_read_status_view"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_large"
-            android:layout_marginStart="@dimen/margin_large" >
+            android:layout_below="@id/book_detail_read_status_view" >
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_small"
-                android:layout_marginEnd="@dimen/margin_small"
-                android:layout_gravity="center_vertical|start"
-                android:gravity="center_vertical|start"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FF000000"
+                style="@style/book_detail_book_data_editable_label"
                 android:text="@string/label_finish_read_date" />
-
-
-
             <TextView
                 android:id="@+id/book_detail_finish_read_date"
                 android:layout_width="wrap_content"
@@ -383,7 +199,6 @@
                 android:textSize="@dimen/text_size_normal"
                 android:textColor="#FF000000"
                 android:text="@string/label_no_data" />
-
         </LinearLayout>
 
     </RelativeLayout>

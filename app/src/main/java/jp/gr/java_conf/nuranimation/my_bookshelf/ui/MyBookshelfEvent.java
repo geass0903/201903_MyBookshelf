@@ -1,16 +1,20 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.ui;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.SearchParam;
 import jp.gr.java_conf.nuranimation.my_bookshelf.service.BookService;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.author_list.AuthorListFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.new_books.NewBooksFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.permission.PermissionsFragment;
@@ -146,6 +150,22 @@ public enum MyBookshelfEvent {
             fragmentTransaction.commit();
         }
     },
+    GO_TO_AUTHOR_LIST {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle){
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            AuthorListFragment authorListFragment = new AuthorListFragment();
+            authorListFragment.setArguments(bundle);
+            fragmentTransaction.setCustomAnimations(
+                    R.anim.slide_in_bottom,R.anim.fade_out,
+                    R.anim.fade_in, R.anim.slide_out_bottom);
+            fragmentTransaction.replace(R.id.contents_container, authorListFragment, MainActivity.TAG_AUTHOR_LIST_FRAGMENT);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }
+    },
+
 
     POP_BACK_STACK {
       @Override
@@ -389,6 +409,16 @@ public enum MyBookshelfEvent {
         }
     },
 
+    JUMP_RAKUTEN_BOOKS {
+        @Override
+        public void apply(MainActivity activity, Bundle bundle) {
+            String urlString = bundle.getString(BookDetailFragment.KEY_RAKUTEN_URL);
+            if (!TextUtils.isEmpty(urlString)) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                activity.startActivity(intent);
+            }
+        }
+    },
 
     ALLOWED_ALL_PERMISSIONS {
         @Override

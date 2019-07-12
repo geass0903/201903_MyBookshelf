@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -23,7 +22,7 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
-@SuppressWarnings("unused")
+
 public class BookImageDialogFragment extends DialogFragment {
     private static final String TAG = BookImageDialogFragment.class.getSimpleName();
     private static final boolean D = true;
@@ -57,9 +56,10 @@ public class BookImageDialogFragment extends DialogFragment {
             url = bundle.getString(KEY_IMAGE_URL);
         }
         setCancelable(true);
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(R.layout.fragment_book_image);
 
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(R.layout.view_simpledraweeview);
 
         return builder.create();
     }
@@ -134,42 +134,12 @@ public class BookImageDialogFragment extends DialogFragment {
         }
     };
 
-
-    public static void showBookImageDialog(FragmentActivity activity, Bundle bundle, String tag) {
-        if (D) Log.d(TAG, "showBookImageDialog TAG: " + tag);
-        if (activity != null && bundle != null) {
-            FragmentManager manager = activity.getSupportFragmentManager();
-            BookImageDialogFragment dialog = BookImageDialogFragment.newInstance(bundle);
-            dialog.show(manager, tag);
-        }
-    }
-
     public static void showBookImageDialog(Fragment fragment, Bundle bundle, String tag) {
         if (D) Log.d(TAG, "showBookImageDialog TAG: " + tag);
         if (fragment != null && fragment.getActivity() != null && bundle != null) {
             FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
             BookImageDialogFragment dialog = BookImageDialogFragment.newInstance(bundle);
             dialog.show(manager, tag);
-        }
-    }
-
-    public static void dismissBookImageDialog(FragmentActivity activity, String tag) {
-        if (activity != null) {
-            FragmentManager manager = activity.getSupportFragmentManager();
-            Fragment findFragment = manager.findFragmentByTag(tag);
-            if (findFragment instanceof BookImageDialogFragment) {
-                ((BookImageDialogFragment) findFragment).dismiss();
-            }
-        }
-    }
-
-    public static void dismissBookImageDialog(Fragment fragment, String tag) {
-        if (fragment != null && fragment.getActivity() != null) {
-            FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
-            Fragment findFragment = manager.findFragmentByTag(tag);
-            if (findFragment instanceof BookImageDialogFragment) {
-                ((BookImageDialogFragment) findFragment).dismiss();
-            }
         }
     }
 

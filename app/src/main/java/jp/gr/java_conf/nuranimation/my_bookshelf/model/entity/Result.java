@@ -1,6 +1,5 @@
 package jp.gr.java_conf.nuranimation.my_bookshelf.model.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Result{

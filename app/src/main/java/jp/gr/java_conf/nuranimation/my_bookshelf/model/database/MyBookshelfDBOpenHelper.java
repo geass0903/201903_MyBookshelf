@@ -23,24 +23,24 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "jp.gr.java_conf.nuranimation.MyBookshelf.db";
     private static final int DB_VERSION = 1;
 
-    private static final String TABLE_SHELF_BOOKS   = "shelf_books";
-    private static final String TABLE_AUTHORS       = "authors";
-    private static final String TABLE_SEARCH_BOOKS  = "search_books";
-    private static final String TABLE_NEW_BOOKS     = "new_books";
+    private static final String TABLE_SHELF_BOOKS = "shelf_books";
+    private static final String TABLE_AUTHORS = "authors";
+    private static final String TABLE_SEARCH_BOOKS = "search_books";
+    private static final String TABLE_NEW_BOOKS = "new_books";
 
-    private static final String KEY_ISBN                = "isbn";
-    private static final String KEY_TITLE               = "title";
-    private static final String KEY_AUTHOR              = "author";
-    private static final String KEY_PUBLISHER           = "publisher_name";
-    private static final String KEY_RELEASE_DATE        = "release_date";
-    private static final String KEY_PRICE               = "price";
-    private static final String KEY_RAKUTEN_URL         = "rakuten_url";
-    private static final String KEY_IMAGES              = "images";
-    private static final String KEY_RATING              = "rating";
-    private static final String KEY_READ_STATUS         = "read_status";
-    private static final String KEY_TAGS                = "tags";
-    private static final String KEY_FINISH_READ_DATE    = "finish_read_date";
-    private static final String KEY_REGISTER_DATE       = "register_date";
+    private static final String KEY_ISBN = "isbn";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_AUTHOR = "author";
+    private static final String KEY_PUBLISHER = "publisher_name";
+    private static final String KEY_RELEASE_DATE = "release_date";
+    private static final String KEY_PRICE = "price";
+    private static final String KEY_RAKUTEN_URL = "rakuten_url";
+    private static final String KEY_IMAGES = "images";
+    private static final String KEY_RATING = "rating";
+    private static final String KEY_READ_STATUS = "read_status";
+    private static final String KEY_TAGS = "tags";
+    private static final String KEY_FINISH_READ_DATE = "finish_read_date";
+    private static final String KEY_REGISTER_DATE = "register_date";
 
     private static final String CREATE_TABLE_AUTHOR = "create table " + TABLE_AUTHORS + " ("
             + "_id integer primary key" // id
@@ -97,17 +97,17 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
             + ", " + KEY_REGISTER_DATE + " text"        // register date
             + ");";
 
-    private static final String DROP_TABLE_TABLE_AUTHOR = "drop table " + TABLE_AUTHORS + ";";
-    private static final String DROP_TABLE_SHELF_BOOKS  = "drop table " + TABLE_SHELF_BOOKS + ";";
-    private static final String DROP_TABLE_SEARCH_BOOKS = "drop table " + TABLE_SEARCH_BOOKS+ ";";
-    private static final String DROP_TABLE_NEW_BOOKS    = "drop table " + TABLE_NEW_BOOKS + ";";
+    private static final String DROP_TABLE_TABLE_AUTHOR = "drop table if exists " + TABLE_AUTHORS + ";";
+    private static final String DROP_TABLE_SHELF_BOOKS = "drop table if exists " + TABLE_SHELF_BOOKS + ";";
+    private static final String DROP_TABLE_SEARCH_BOOKS = "drop table if exists " + TABLE_SEARCH_BOOKS + ";";
+    private static final String DROP_TABLE_NEW_BOOKS = "drop table if exists " + TABLE_NEW_BOOKS + ";";
 
     private static final Object mLock = new Object();
     private static MyBookshelfDBOpenHelper mInstance;
 
     @NonNull
     public static MyBookshelfDBOpenHelper getInstance(@NonNull Context context) {
-        synchronized(mLock) {
+        synchronized (mLock) {
             if (mInstance == null) {
                 mInstance = new MyBookshelfDBOpenHelper(context.getApplicationContext());
             }
@@ -115,8 +115,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    private MyBookshelfDBOpenHelper(Context context){
-        super(context,DB_NAME,null,DB_VERSION);
+    private MyBookshelfDBOpenHelper(Context context) {
+        super(context, DB_NAME, null, DB_VERSION);
     }
 
 
@@ -134,9 +134,30 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         // UPDATE
     }
 
-    private void dropTable(final String table){
+
+    private void deleteAllData(final String table) {
         SQLiteDatabase db = this.getWritableDatabase();
-        switch(table){
+        switch (table) {
+            case TABLE_AUTHORS:
+                db.delete(TABLE_AUTHORS, null, null);
+                break;
+            case TABLE_SHELF_BOOKS:
+                db.delete(TABLE_SHELF_BOOKS, null, null);
+                break;
+            case TABLE_SEARCH_BOOKS:
+                db.delete(TABLE_SEARCH_BOOKS, null, null);
+                break;
+            case TABLE_NEW_BOOKS:
+                db.delete(TABLE_NEW_BOOKS, null, null);
+                break;
+        }
+        db.close();
+    }
+
+
+    private void dropTable(final String table) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        switch (table) {
             case TABLE_AUTHORS:
                 db.execSQL(DROP_TABLE_TABLE_AUTHOR);
                 db.execSQL(CREATE_TABLE_AUTHOR);
@@ -191,7 +212,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void registerBooks(final String table, final List<BookData> books){
+    private void registerBooks(final String table, final List<BookData> books) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
 
@@ -212,6 +233,9 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 insertValues.put(KEY_FINISH_READ_DATE, book.getFinishReadDate());   // finish read date
                 insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());        // register date
 
+
+                db.replace(table, "", insertValues);
+
                 String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
                 Cursor c = db.rawQuery(sql, new String[]{book.getISBN()});
                 boolean mov = c.moveToFirst();
@@ -231,7 +255,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    private void unregisterBook(final String table, final BookData book){
+    private void unregisterBook(final String table, final BookData book) {
         if (book != null && !TextUtils.isEmpty(book.getISBN())) {
             SQLiteDatabase db = this.getWritableDatabase();
             String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
@@ -248,10 +272,10 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    private BookData loadBookData(String table, BookData book){
+    private BookData loadBookData(String table, BookData book) {
         BookData result = new BookData();
         result.setView_type(BookData.TYPE_EMPTY);
-        if(book == null || TextUtils.isEmpty(book.getISBN())){
+        if (book == null || TextUtils.isEmpty(book.getISBN())) {
             return result;
         }
         String ISBN = book.getISBN();
@@ -290,7 +314,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                     + KEY_ISBN + " = " + "'" + keyword + "'";
         }
         String sql_order = "";
-        if( !TextUtils.isEmpty(order)){
+        if (!TextUtils.isEmpty(order)) {
             sql_order = order;
         }
 
@@ -323,15 +347,48 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
     }
 
 
-
     /* --- Authors List --- */
-    public void dropTableAuthorsList() {
-        dropTable(TABLE_AUTHORS);
+    public void clearAuthorsList() {
+        deleteAllData(TABLE_AUTHORS);
+    }
+
+    public boolean containsAuthor(String author) {
+        boolean contains = false;
+        if (!TextUtils.isEmpty(author)) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            String sql = "select * from " + TABLE_AUTHORS + " where " + KEY_AUTHOR + " = ?;";
+            Cursor c = db.rawQuery(sql, new String[]{author});
+            boolean mov = c.moveToFirst();
+            if (mov) {
+                if (D) Log.d(TAG, "already registered: " + author);
+                contains = true;
+            }
+            c.close();
+            db.close();
+        }
+        return contains;
+    }
+
+
+    public void unregisterAuthor(String author) {
+        if (!TextUtils.isEmpty(author)) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            String sql = "select * from " + TABLE_AUTHORS + " where " + KEY_AUTHOR + " = ?;";
+            Cursor c = db.rawQuery(sql, new String[]{author});
+            boolean mov = c.moveToFirst();
+            if (mov) {
+                if (D) Log.d(TAG, "delete Author: " + author);
+                String sql_Author = KEY_AUTHOR + " = ?";
+                db.delete(TABLE_AUTHORS, sql_Author, new String[]{author});
+            }
+            c.close();
+            db.close();
+        }
     }
 
     public void registerToAuthorsList(String author) {
         if (!TextUtils.isEmpty(author)) {
-            author = author.replaceAll("[\\x20\\u3000]", ""); // replace Half and Full width space
+//            author = author.replaceAll("[\\x20\\u3000]", ""); // replace Half and Full width space
             SQLiteDatabase db = this.getWritableDatabase();
             String sql = "select * from " + TABLE_AUTHORS + " where " + KEY_AUTHOR + " = ?;";
             Cursor c = db.rawQuery(sql, new String[]{author});
@@ -355,7 +412,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         for (String author : authors) {
             if (!TextUtils.isEmpty(author)) {
-                author = author.replaceAll("[\\x20\\u3000]", ""); // replace Half and Full width space
+//                author = author.replaceAll("[\\x20\\u3000]", ""); // replace Half and Full width space
                 String sql = "select * from " + TABLE_AUTHORS + " where " + KEY_AUTHOR + " = ?;";
                 Cursor c = db.rawQuery(sql, new String[]{author});
                 boolean mov = c.moveToFirst();
@@ -393,8 +450,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
 
     /* --- ShelfBooks --- */
-    public void dropTableShelfBooks(){
-        dropTable(TABLE_SHELF_BOOKS);
+    public void clearShelfBooks(){
+        deleteAllData(TABLE_SHELF_BOOKS);
     }
 
     public void registerToShelfBooks(BookData book) {
@@ -419,8 +476,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
 
     /* --- SearchBooks --- */
-    public void dropTableSearchBooks() {
-        dropTable(TABLE_SEARCH_BOOKS);
+    public void clearSearchBooks() {
+        deleteAllData(TABLE_SEARCH_BOOKS);
     }
 
     public void registerToSearchBooks(BookData book) {
@@ -445,8 +502,8 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
 
 
     /* --- NewBooks --- */
-    public void dropTableNewBooks(){
-        dropTable(TABLE_NEW_BOOKS);
+    public void clearNewBooks(){
+        deleteAllData(TABLE_NEW_BOOKS);
     }
 
     public void registerToNewBooks(BookData book) {

@@ -199,6 +199,7 @@ public class SettingsFragment extends BaseFragment implements NormalDialogFragme
                 break;
         }
         Bundle bundle = new Bundle();
+        bundle.putInt(ProgressDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_BACKUP_PROGRESS_DIALOG);
         bundle.putString(ProgressDialogFragment.KEY_TITLE, title);
         bundle.putBoolean(ProgressDialogFragment.KEY_CANCELABLE, true);
         ProgressDialogFragment.showProgressDialog(this, bundle, TAG_BACKUP_PROGRESS);
@@ -318,6 +319,7 @@ public class SettingsFragment extends BaseFragment implements NormalDialogFragme
         return Auth.getOAuth2Token();
     }
 
+
     private void initSpinner(View view) {
         Spinner mShelfBooksOrderSpinner = view.findViewById(R.id.shelf_books_order_spinner);
         OrderSpinnerArrayAdapter mShelfBooksOrderAdapter = new OrderSpinnerArrayAdapter(getContext(), R.layout.item_order_spinner, getShelfBooksOrderSpinnerList());
@@ -341,6 +343,9 @@ public class SettingsFragment extends BaseFragment implements NormalDialogFragme
     }
 
     private void initButton(View view) {
+        Button mButtonAuthorList = view.findViewById(R.id.settings_button_author_list);
+        mButtonAuthorList.setOnClickListener(mOnClickListener);
+        setColorFilterButtonDrawables(mButtonAuthorList, Color.parseColor("#FFFFFF"));
         mButtonExport = view.findViewById(R.id.settings_button_export);
         mButtonExport.setOnClickListener(mOnClickListener);
         setColorFilterButtonDrawables(mButtonExport, Color.parseColor("#FFFFFF"));
@@ -420,6 +425,9 @@ public class SettingsFragment extends BaseFragment implements NormalDialogFragme
         public void onClick(View v) {
             int id = v.getId();
             switch (id) {
+                case R.id.settings_button_author_list:
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.GO_TO_AUTHOR_LIST, null);
+                    break;
                 case R.id.settings_button_export:
                     Bundle type_export = new Bundle();
                     type_export.putInt(KEY_BACKUP_TYPE, FileBackupThread.TYPE_EXPORT);

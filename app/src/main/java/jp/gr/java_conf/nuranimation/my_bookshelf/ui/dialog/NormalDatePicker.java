@@ -7,13 +7,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 import java.util.Calendar;
 
-@SuppressWarnings("unused")
 public class NormalDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener{
     private static final String TAG = NormalDatePicker.class.getSimpleName();
     private static final boolean D = true;
@@ -28,13 +26,6 @@ public class NormalDatePicker extends DialogFragment implements DatePickerDialog
     }
     private OnBaseDateSetListener mListener;
 
-
-    public static NormalDatePicker newInstance(Bundle bundle){
-        NormalDatePicker instance = new NormalDatePicker();
-        instance.setArguments(bundle);
-        return instance;
-    }
-
     public static NormalDatePicker newInstance(Fragment fragment, Bundle bundle){
         NormalDatePicker instance = new NormalDatePicker();
         instance.setArguments(bundle);
@@ -48,19 +39,20 @@ public class NormalDatePicker extends DialogFragment implements DatePickerDialog
     public void onAttach(Context context){
         super.onAttach(context);
         Fragment targetFragment = this.getTargetFragment();
-        try{
-            if(targetFragment != null){
-                mListener = (OnBaseDateSetListener) targetFragment;
-            }else{
-                Fragment parent = this.getParentFragment();
-                if(parent != null){
-                    mListener = (OnBaseDateSetListener) parent;
-                }else {
+        if (targetFragment instanceof OnBaseDateSetListener) {
+            mListener = (OnBaseDateSetListener) targetFragment;
+        } else {
+            Fragment parentFragment = this.getParentFragment();
+            if (parentFragment instanceof OnBaseDateSetListener) {
+                mListener = (OnBaseDateSetListener) parentFragment;
+            } else {
+                if (context instanceof OnBaseDateSetListener) {
                     mListener = (OnBaseDateSetListener) context;
                 }
             }
-        } catch (UnsupportedOperationException e){
-            throw new UnsupportedOperationException("mListener is not Implementation.");
+        }
+        if (mListener == null) {
+            throw new UnsupportedOperationException("Listener is not Implementation.");
         }
     }
 
@@ -113,15 +105,6 @@ public class NormalDatePicker extends DialogFragment implements DatePickerDialog
             }
         }
         return -1;
-    }
-
-    public static void showNormalDatePicker(FragmentActivity activity, Bundle bundle, String tag) {
-        if (D) Log.d(TAG, "showNormalDatePicker TAG: " + tag);
-        if(activity != null && bundle != null){
-            FragmentManager manager = activity.getSupportFragmentManager();
-            NormalDatePicker datePicker = NormalDatePicker.newInstance(bundle);
-            datePicker.show(manager, tag);
-        }
     }
 
     public static void showNormalDatePicker(Fragment fragment, Bundle bundle, String tag) {

@@ -58,20 +58,24 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
     private static final String TAG = BookDetailFragment.class.getSimpleName();
     private static final boolean D = true;
 
+    public static final String KEY_BOOK_DATA = "BookDetailFragment.KEY_BOOK_DATA";
     public static final String KEY_PARAM_SEARCH_ISBN     = "BookDetailFragment.KEY_PARAM_SEARCH_ISBN";
+    public static final String KEY_RAKUTEN_URL = "BookDetailFragment.KEY_RAKUTEN_URL";
 
     private static final String TAG_DATE_PICKER = "BookDetailFragment.TAG_DATE_PICKER";
     private static final String TAG_CLEAR_DATE_DIALOG = "BookDetailFragment.TAG_CLEAR_DATE_DIALOG";
     private static final String TAG_BOOK_IMAGE = "BookDetailFragment.TAG_BOOK_IMAGE";
     private static final String TAG_REFRESH_BOOK_IMAGE = "BookDetailFragment.TAG_REFRESH_BOOK_IMAGE";
     private static final String TAG_DOWNLOAD_BOOK = "BookDetailFragment.TAG_DOWNLOAD_BOOK";
+    private static final String TAG_RAKUTEN_URL = "BookDetailFragment.TAG_RAKUTEN_URL";
 
 
     private static final int REQUEST_CODE_FINISH_READ_DATE = 101;
     private static final int REQUEST_CODE_REFRESH_BOOK_IMAGE = 111;
     private static final int REQUEST_CODE_DOWNLOAD_BOOK = 112;
+    private static final int REQUEST_CODE_RAKUTEN_URL = 113;
 
-    public static final String KEY_BOOK_DATA = "BookDetailFragment.KEY_BOOK_DATA";
+
 
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
@@ -174,7 +178,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
             String registerDate = CalendarUtils.parseCalendar(Calendar.getInstance());
             book.setRegisterDate(registerDate);
             mDBOpenHelper.registerToShelfBooks(book);
-            Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.toast_success_register), Toast.LENGTH_SHORT).show();
             getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK, null);
         }
         return super.onOptionsItemSelected(item);
@@ -211,6 +215,13 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
                     Bundle bundle = new Bundle();
                     bundle.putString(KEY_PARAM_SEARCH_ISBN, bookData.getISBN());
                     getFragmentListener().onFragmentEvent(MyBookshelfEvent.START_DOWNLOAD_BOOK, bundle);
+                }
+                break;
+            case REQUEST_CODE_RAKUTEN_URL:
+                if (resultCode == DialogInterface.BUTTON_POSITIVE) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_RAKUTEN_URL, bookData.getRakutenUrl());
+                    getFragmentListener().onFragmentEvent(MyBookshelfEvent.JUMP_RAKUTEN_BOOKS, bundle);
                 }
                 break;
         }
@@ -355,6 +366,7 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
                     break;
                 case R.id.book_detail_button_rakutenUrl:
                     if(D) Log.d(TAG,"onClick");
+                    showNormalDialog(REQUEST_CODE_RAKUTEN_URL);
                     break;
             }
         }
@@ -444,6 +456,17 @@ public class BookDetailFragment extends BaseFragment implements NormalDatePicker
                 bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
                 bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                 tag = TAG_DOWNLOAD_BOOK;
+                break;
+            case REQUEST_CODE_RAKUTEN_URL:
+                bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_jump_rakuten_books));
+                String message = getString(R.string.dialog_message_jump_rakuten_books) + "\r\n"
+                        + getString(R.string.dialog_message_jump_out_side);
+                bundle.putString(NormalDialogFragment.KEY_MESSAGE, message);
+                bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+                tag = TAG_RAKUTEN_URL;
+                break;
         }
         NormalDialogFragment.showNormalDialog(this, bundle, tag);
     }

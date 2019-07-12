@@ -253,9 +253,9 @@ public class FileBackupThread extends BaseThread {
             if (isCanceled()) {
                 return Result.BackupError(TYPE_IMPORT, Result.ERROR_CODE_IMPORT_CANCELED, "import canceled");
             }
-            mDBOpenHelper.dropTableShelfBooks();
+            mDBOpenHelper.clearShelfBooks();
             mDBOpenHelper.registerToShelfBooks(books);
-            mDBOpenHelper.dropTableAuthorsList();
+            mDBOpenHelper.clearAuthorsList();
             mDBOpenHelper.registerToAuthorsList(authors);
             return Result.BackupSuccess(TYPE_IMPORT);
         } catch (IOException e) {

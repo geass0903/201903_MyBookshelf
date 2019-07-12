@@ -8,11 +8,34 @@
     android:background="@color/colorBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <!-- Author List -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <include layout="@layout/view_divider" />
+                <TextView
+                    style="@style/settings_divider_label"
+                    android:text="@string/label_author_list" />
+                <include layout="@layout/view_divider" />
+            </LinearLayout>
+            <Button
+                style="@style/settings_button"
+                android:id="@+id/settings_button_author_list"
+                android:background="@drawable/selector_rounded_rectangle_color_primary"
+                android:drawableEnd="@drawable/ic_edit_24dp"
+                android:drawableRight="@drawable/ic_edit_24dp"
+                android:text="@string/label_author_list"/>
+        </LinearLayout>
 
         <!-- ShelfBooks Order -->
         <LinearLayout
@@ -23,38 +46,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/margin_small"
-                    android:textSize="@dimen/text_size_small"
-                    android:textColor="#FF808080"
+                    style="@style/settings_divider_label"
                     android:text="@string/label_shelf_books_order" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
             </LinearLayout>
             <Spinner
-                android:id="@+id/shelf_books_order_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:background="@drawable/selector_rounded_rectangle_color_primary"
-                android:spinnerMode="dialog" />
+                style="@style/settings_spinner"
+                android:id="@+id/shelf_books_order_spinner" />
         </LinearLayout>
 
         <!-- SearchBooks Order -->
@@ -66,39 +66,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/margin_small"
-                    android:textSize="@dimen/text_size_small"
-                    android:textColor="#FF808080"
+                    style="@style/settings_divider_label"
                     android:text="@string/label_search_books_order" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
             </LinearLayout>
             <Spinner
-                android:id="@+id/search_books_order_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:background="@drawable/selector_rounded_rectangle_color_primary"
-                android:spinnerMode="dialog" />
+                style="@style/settings_spinner"
+                android:id="@+id/search_books_order_spinner" />
         </LinearLayout>
+
+
+
 
         <!-- Export/Import -->
         <LinearLayout
@@ -109,78 +89,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/margin_small"
-                    android:textSize="@dimen/text_size_small"
-                    android:textColor="#FF808080"
+                    style="@style/settings_divider_label"
                     android:text="@string/label_export_and_import" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
             </LinearLayout>
             <Button
+                style="@style/settings_button"
                 android:id="@+id/settings_button_export"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingTop="@dimen/padding_normal"
-                android:paddingBottom="@dimen/padding_normal"
-                android:paddingLeft="32dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="@dimen/padding_normal"
-                android:paddingRight="@dimen/padding_normal"
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:drawableEnd="@drawable/ic_export_24dp"
                 android:drawableRight="@drawable/ic_export_24dp"
-                android:drawablePadding="@dimen/padding_small"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FFFFFFFF"
                 android:text="@string/label_export_csv"/>
             <Button
+                style="@style/settings_button"
                 android:id="@+id/settings_button_import"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingTop="@dimen/padding_normal"
-                android:paddingBottom="@dimen/padding_normal"
-                android:paddingLeft="32dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="@dimen/padding_normal"
-                android:paddingRight="@dimen/padding_normal"
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:drawableEnd="@drawable/ic_import_24dp"
                 android:drawableRight="@drawable/ic_import_24dp"
-                android:drawablePadding="@dimen/padding_small"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FFFFFFFF"
                 android:text="@string/label_import_csv"/>
         </LinearLayout>
 
@@ -193,129 +121,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/margin_small"
-                    android:textSize="@dimen/text_size_small"
-                    android:textColor="#FF808080"
+                    style="@style/settings_divider_label"
                     android:text="@string/label_link_up_dropbox" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="2dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/margin_small"
-                    android:background="@color/colorDividerLine" />
+                <include layout="@layout/view_divider" />
             </LinearLayout>
             <Button
+                style="@style/settings_button"
                 android:id="@+id/settings_button_login_dropbox"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingTop="@dimen/padding_normal"
-                android:paddingBottom="@dimen/padding_normal"
-                android:paddingLeft="32dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="@dimen/padding_normal"
-                android:paddingRight="@dimen/padding_normal"
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:drawableEnd="@drawable/ic_link_up_24dp"
                 android:drawableRight="@drawable/ic_link_up_24dp"
-                android:drawablePadding="@dimen/padding_small"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FFFFFFFF"
                 android:text="@string/label_log_in_dropbox" />
             <Button
+                style="@style/settings_button"
                 android:id="@+id/settings_button_logout_dropbox"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingTop="@dimen/padding_normal"
-                android:paddingBottom="@dimen/padding_normal"
-                android:paddingLeft="32dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="@dimen/padding_normal"
-                android:paddingRight="@dimen/padding_normal"
                 android:background="@drawable/selector_rounded_rectangle_color_red"
                 android:drawableEnd="@drawable/ic_link_down_24dp"
                 android:drawableRight="@drawable/ic_link_down_24dp"
-                android:drawablePadding="@dimen/padding_small"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FFFFFFFF"
                 android:text="@string/label_log_out_dropbox" />
             <Button
+                style="@style/settings_button"
                 android:id="@+id/settings_button_backup"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingTop="@dimen/padding_normal"
-                android:paddingBottom="@dimen/padding_normal"
-                android:paddingLeft="32dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="@dimen/padding_normal"
-                android:paddingRight="@dimen/padding_normal"
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:drawableRight="@drawable/ic_backup_24dp"
                 android:drawableEnd="@drawable/ic_backup_24dp"
-                android:drawablePadding="@dimen/padding_small"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FFFFFFFF"
                 android:text="@string/label_backup" />
             <Button
+                style="@style/settings_button"
                 android:id="@+id/settings_button_restore"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginRight="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingTop="@dimen/padding_normal"
-                android:paddingBottom="@dimen/padding_normal"
-                android:paddingLeft="32dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="@dimen/padding_normal"
-                android:paddingRight="@dimen/padding_normal"
                 android:background="@drawable/selector_rounded_rectangle_color_primary"
                 android:drawableRight="@drawable/ic_restore_24dp"
                 android:drawableEnd="@drawable/ic_restore_24dp"
-                android:drawablePadding="@dimen/padding_small"
-                android:textSize="@dimen/text_size_normal"
-                android:textColor="#FFFFFFFF"
                 android:text="@string/label_restore" />
         </LinearLayout>
 

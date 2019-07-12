@@ -36,10 +36,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksRecyclerViewAdapter;
 
 
-public class SearchBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener{
+public class SearchBooksFragment extends BaseFragment implements BooksRecyclerViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener{
     private static final String TAG = SearchBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -62,7 +62,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     private static final int REQUEST_CODE_SEARCH_PROGRESS_DIALOG    = 3;
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
-    private BooksListViewAdapter mSearchBooksViewAdapter;
+    private BooksRecyclerViewAdapter mSearchBooksViewAdapter;
     private SearchView mSearchView;
     private LinearLayoutManager mLayoutManager;
     private List<BookData> mSearchBooks;
@@ -83,7 +83,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_search_books, container, false);
+        return inflater.inflate(R.layout.view_recyclerview, container, false);
     }
 
 
@@ -112,9 +112,9 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                 mSearchBooks = loadSearchBooks();
             }
         }
-        mSearchBooksViewAdapter = new BooksListViewAdapter(getContext(), mSearchBooks, BooksListViewAdapter.LIST_TYPE_SEARCH_BOOKS);
+        mSearchBooksViewAdapter = new BooksRecyclerViewAdapter(getContext(), mSearchBooks, BooksRecyclerViewAdapter.LIST_TYPE_SEARCH_BOOKS);
         mSearchBooksViewAdapter.setClickListener(this);
-        RecyclerView mRecyclerView = view.findViewById(R.id.fragment_search_books_recyclerview);
+        RecyclerView mRecyclerView = view.findViewById(R.id.view_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mSearchBooksViewAdapter);
     }
@@ -158,7 +158,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     }
 
     @Override
-    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(BooksRecyclerViewAdapter adapter, int position, BookData data) {
         if(isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
@@ -186,7 +186,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     }
 
     @Override
-    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(BooksRecyclerViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
@@ -240,7 +240,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                         book.setReadStatus(BookData.STATUS_NONE);
                         mDBOpenHelper.registerToShelfBooks(book);
                         mSearchBooksViewAdapter.refreshBook(position_register);
-                        Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.toast_success_register), Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case REQUEST_CODE_UNREGISTER_BOOK:
@@ -249,7 +249,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
                     if (book_unregister != null) {
                         mDBOpenHelper.unregisterFromShelfBooks(book_unregister);
                         mSearchBooksViewAdapter.refreshBook(position_unregister);
-                        Toast.makeText(getContext(), getString(R.string.toast_success_unregister_book), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.toast_success_unregister), Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
@@ -314,7 +314,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
 
 
         if(page == 1){
-            mDBOpenHelper.dropTableSearchBooks();
+            mDBOpenHelper.clearSearchBooks();
             mSearchBooksViewAdapter.clearBooksData();
             hasResultData = false;
             hasButtonLoadNext = false;
@@ -364,6 +364,11 @@ public class SearchBooksFragment extends BaseFragment implements BooksListViewAd
     }
 
     public void cancelSearch(){
+        if(hasButtonLoadNext){
+            BookData footer = new BookData();
+            footer.setView_type(BookData.TYPE_BUTTON_LOAD);
+            mSearchBooksViewAdapter.setFooter(footer);
+        }
         ProgressDialogFragment.dismissProgressDialog(this, TAG_SEARCH_PROGRESS_DIALOG);
     }
 

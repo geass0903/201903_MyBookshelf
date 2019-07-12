@@ -117,7 +117,7 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
                 break;
             case STATE_NEW_BOOKS_RELOAD_INCOMPLETE:
                 if (result.isSuccess()) {
-                    mDBOpenHelper.dropTableNewBooks();
+                    mDBOpenHelper.clearNewBooks();
                     mDBOpenHelper.registerToNewBooks(result.getBooks());
                 }
                 setServiceState(STATE_NEW_BOOKS_RELOAD_COMPLETE);
@@ -267,6 +267,7 @@ public class BookService extends BaseService implements BaseThread.ThreadListene
         if (fileBackupThread != null) {
             fileBackupThread.cancel();
         }
+        setServiceState(STATE_NONE);
     }
 
 

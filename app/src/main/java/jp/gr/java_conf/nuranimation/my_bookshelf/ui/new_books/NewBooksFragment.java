@@ -37,10 +37,10 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.book_detail.BookDetailFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.ProgressDialogFragment;
-import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksListViewAdapter;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.util.BooksRecyclerViewAdapter;
 
 
-public class NewBooksFragment extends BaseFragment implements BooksListViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener {
+public class NewBooksFragment extends BaseFragment implements BooksRecyclerViewAdapter.OnBookClickListener, NormalDialogFragment.OnNormalDialogListener, ProgressDialogFragment.OnProgressDialogListener {
     private static final String TAG = NewBooksFragment.class.getSimpleName();
     private static final boolean D = true;
 
@@ -59,7 +59,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     private static final int REQUEST_CODE_RELOAD_PROGRESS_DIALOG = 103;
 
     private MyBookshelfDBOpenHelper mDBOpenHelper;
-    private BooksListViewAdapter mNewBooksViewAdapter;
+    private BooksRecyclerViewAdapter mNewBooksViewAdapter;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
     private List<BookData> mNewBooks;
@@ -75,7 +75,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_new_books, container, false);
+        return inflater.inflate(R.layout.view_recyclerview, container, false);
     }
 
     @Override
@@ -95,9 +95,9 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
         if (mNewBooks == null) {
             mNewBooks = mDBOpenHelper.loadNewBooks();
         }
-        mNewBooksViewAdapter = new BooksListViewAdapter(getContext(), mNewBooks, BooksListViewAdapter.LIST_TYPE_NEW_BOOKS);
+        mNewBooksViewAdapter = new BooksRecyclerViewAdapter(getContext(), mNewBooks, BooksRecyclerViewAdapter.LIST_TYPE_NEW_BOOKS);
         mNewBooksViewAdapter.setClickListener(this);
-        mRecyclerView = view.findViewById(R.id.fragment_new_books_recyclerview);
+        mRecyclerView = view.findViewById(R.id.view_recyclerview);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mNewBooksViewAdapter);
     }
@@ -150,7 +150,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     }
 
     @Override
-    public void onBookClick(BooksListViewAdapter adapter, int position, BookData data) {
+    public void onBookClick(BooksRecyclerViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
@@ -169,7 +169,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
     }
 
     @Override
-    public void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data) {
+    public void onBookLongClick(BooksRecyclerViewAdapter adapter, int position, BookData data) {
         if (isClickable()) {
             waitClickable(500);
             int view_type = adapter.getItemViewType(position);
@@ -222,7 +222,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                         book.setReadStatus(BookData.STATUS_NONE);
                         mDBOpenHelper.registerToShelfBooks(book);
                         mNewBooksViewAdapter.refreshBook(position_register);
-                        Toast.makeText(getContext(), getString(R.string.toast_success_register_book), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.toast_success_register), Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case REQUEST_CODE_UNREGISTER_BOOK:
@@ -231,7 +231,7 @@ public class NewBooksFragment extends BaseFragment implements BooksListViewAdapt
                     if (book_unregister != null) {
                         mDBOpenHelper.unregisterFromShelfBooks(book_unregister);
                         mNewBooksViewAdapter.refreshBook(position_unregister);
-                        Toast.makeText(getContext(), getString(R.string.toast_success_unregister_book), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.toast_success_unregister), Toast.LENGTH_SHORT).show();
                     }
                     break;
             }

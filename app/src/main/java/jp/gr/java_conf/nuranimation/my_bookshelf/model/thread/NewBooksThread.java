@@ -113,6 +113,7 @@ public class NewBooksThread extends BaseThread {
                     if (isNewBook(book)) {
                         String book_author = book.getAuthor();
                         book_author = book_author.replaceAll("[\\x20\\u3000]", "");
+                        author = author.replaceAll("[\\x20\\u3000]", "");
                         if (book_author.contains(author)) {
                             if (D) Log.d(TAG, "author: " + author + " add: " + book.getTitle());
                             books.add(book);

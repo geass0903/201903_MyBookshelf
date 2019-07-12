@@ -12,8 +12,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
@@ -25,7 +29,7 @@ import jp.gr.java_conf.nuranimation.my_bookshelf.model.entity.BookData;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.utils.BookDataUtils;
 
 
-public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+public class BooksRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int LIST_TYPE_SHELF_BOOKS   = 1;
     public static final int LIST_TYPE_SEARCH_BOOKS  = 2;
@@ -40,25 +44,14 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private int list_type;
 
-    public class LoadViewHolder extends RecyclerView.ViewHolder {
-        LoadViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-    }
-
-    public class LoadingViewHolder extends RecyclerView.ViewHolder {
-        LoadingViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-    }
 
     public interface OnBookClickListener{
-        void onBookClick(BooksListViewAdapter adapter, int position, BookData data);
-        void onBookLongClick(BooksListViewAdapter adapter, int position, BookData data);
+        void onBookClick(BooksRecyclerViewAdapter adapter, int position, BookData data);
+        void onBookLongClick(BooksRecyclerViewAdapter adapter, int position, BookData data);
     }
 
 
-    public BooksListViewAdapter(Context context, List<BookData> list, int list_type) {
+    public BooksRecyclerViewAdapter(Context context, List<BookData> list, int list_type) {
         this.mContext = context;
         this.list = list;
         this.list_type = list_type;
@@ -93,17 +86,17 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         View inflate;
         switch (viewType){
             case BookData.TYPE_BOOK:
-                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_book, viewGroup, false);
+                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_book, viewGroup, false);
                 inflate.setOnClickListener(this);
                 inflate.setOnLongClickListener(this);
                 return new BooksViewHolder(inflate);
             case BookData.TYPE_BUTTON_LOAD:
-                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_load_next,viewGroup,false);
+                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_load_next,viewGroup,false);
                 inflate.setOnClickListener(this);
                 inflate.setOnLongClickListener(this);
                 return new LoadViewHolder(inflate);
             case BookData.TYPE_VIEW_LOADING:
-                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_books_loading,viewGroup,false);
+                inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_loading,viewGroup,false);
                 return new LoadingViewHolder(inflate);
         }
         // Error
@@ -220,22 +213,22 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
         ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
                 .setCacheChoice(ImageRequest.CacheChoice.SMALL)
                 .build();
-        holder.getBookImageView().setController(
+        holder.mBookImageView.setController(
                 Fresco.newDraweeControllerBuilder()
-                        .setOldController(holder.getBookImageView().getController())
+                        .setOldController(holder.mBookImageView.getController())
                         .setImageRequest(request)
                         .build());
-        holder.getTitleView().setText(book.getTitle());
-        holder.getAuthorView().setText(book.getAuthor());
-        holder.getPublisherView().setText(book.getPublisher());
-        holder.getSalesDateView().setText(book.getSalesDate());
-        holder.getItemPriceView().setText(book.getItemPrice());
-        holder.getRatingView().setRating(BookDataUtils.convertRating(book.getRating()));
+        holder.mTitleView.setText(book.getTitle());
+        holder.mAuthorView.setText(book.getAuthor());
+        holder.mPublisherView.setText(book.getPublisher());
+        holder.mSalesDateView.setText(book.getSalesDate());
+        holder.mPriceView.setText(book.getItemPrice());
+        holder.mRatingBar.setRating(BookDataUtils.convertRating(book.getRating()));
 
         Drawable read_status_image = getReadStatusImage(mContext, book.getReadStatus());
-        holder.getReadStatusImageView().setImageDrawable(read_status_image);
+        holder.mReadStatusImageView.setImageDrawable(read_status_image);
         String read_status_text = getReadStatusText(mContext, book.getReadStatus());
-        holder.getReadStatusTextView().setText(read_status_text);
+        holder.mReadStatusTextView.setText(read_status_text);
     }
 
 
@@ -315,5 +308,41 @@ public class BooksListViewAdapter extends RecyclerView.Adapter<RecyclerView.View
 
 
 
+    public static class LoadViewHolder extends RecyclerView.ViewHolder {
+        LoadViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    public static class LoadingViewHolder extends RecyclerView.ViewHolder {
+        LoadingViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    public static class BooksViewHolder extends RecyclerView.ViewHolder {
+        private SimpleDraweeView mBookImageView;
+        private TextView mTitleView;
+        private TextView mAuthorView;
+        private TextView mPublisherView;
+        private TextView mSalesDateView;
+        private TextView mPriceView;
+        private TextView mReadStatusTextView;
+        private ImageView mReadStatusImageView;
+        private RatingBar mRatingBar;
+
+        BooksViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mBookImageView = itemView.findViewById(R.id.item_book_image);
+            mTitleView = itemView.findViewById(R.id.item_book_title);
+            mAuthorView = itemView.findViewById(R.id.item_book_author);
+            mPublisherView = itemView.findViewById(R.id.item_book_publisher);
+            mSalesDateView = itemView.findViewById(R.id.item_book_sales_date);
+            mPriceView = itemView.findViewById(R.id.item_book_price);
+            mReadStatusTextView = itemView.findViewById(R.id.item_book_read_status_text);
+            mReadStatusImageView = itemView.findViewById(R.id.item_book_read_status_image);
+            mRatingBar = itemView.findViewById(R.id.item_book_rating);
+        }
+    }
 
 }
