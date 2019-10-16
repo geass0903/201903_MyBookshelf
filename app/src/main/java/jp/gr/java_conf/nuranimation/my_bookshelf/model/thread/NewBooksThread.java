@@ -234,7 +234,7 @@ public class NewBooksThread extends BaseThread {
 
     private boolean isNewBook(BookData book){
         Calendar baseDate = Calendar.getInstance();
-        baseDate.add(Calendar.DAY_OF_MONTH, -14);
+        baseDate.add(Calendar.MONTH,-1);
         Calendar salesDate = CalendarUtils.parseDateString(book.getSalesDate());
         if(salesDate != null){
             return salesDate.compareTo(baseDate) >= 0;

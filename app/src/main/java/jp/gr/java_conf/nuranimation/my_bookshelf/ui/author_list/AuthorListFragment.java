@@ -18,13 +18,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.gr.java_conf.nuranimation.my_bookshelf.R;
 import jp.gr.java_conf.nuranimation.my_bookshelf.model.database.MyBookshelfDBOpenHelper;
+import jp.gr.java_conf.nuranimation.my_bookshelf.ui.MyBookshelfEvent;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.base.BaseFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.RegisterAuthorDialogFragment;
 import jp.gr.java_conf.nuranimation.my_bookshelf.ui.dialog.NormalDialogFragment;
@@ -36,9 +36,11 @@ public class AuthorListFragment extends BaseFragment implements AuthorRecyclerVi
 
     private static final String TAG_UNREGISTER_AUTHOR = "AuthorListFragment.TAG_UNREGISTER_AUTHOR";
     private static final String TAG_EDIT_AUTHOR = "AuthorListFragment.TAG_EDIT_AUTHOR";
+    private static final String TAG_ADD_AUTHOR = "AuthorListFragment.TAG_ADD_AUTHOR";
 
     private static final int REQUEST_CODE_UNREGISTER_AUTHOR = 1;
     private static final int REQUEST_CODE_EDIT_AUTHOR = 2;
+    private static final int REQUEST_CODE_ADD_AUTHOR = 3;
 
     private static final String KEY_LAYOUT_MANAGER = "AuthorListFragment.KEY_LAYOUT_MANAGER";
     private static final String KEY_POSITION = "AuthorListFragment.KEY_POSITION";
@@ -78,11 +80,7 @@ public class AuthorListFragment extends BaseFragment implements AuthorRecyclerVi
                 mLayoutManager.onRestoreInstanceState(mListState);
             }
         }
-
-        if (mAuthorList == null) {
-            mAuthorList = mDBOpenHelper.loadAuthorsList();
-        }
-
+        mAuthorList = mDBOpenHelper.loadAuthorsList();
         mAuthorsViewAdapter = new AuthorRecyclerViewAdapter(mAuthorList);
         mAuthorsViewAdapter.setClickListener(this);
         RecyclerView mRecyclerView = view.findViewById(R.id.view_recyclerview);
@@ -133,8 +131,19 @@ public class AuthorListFragment extends BaseFragment implements AuthorRecyclerVi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_author_list_save:
+                mDBOpenHelper.clearAuthorsList();
+                mDBOpenHelper.registerToAuthorsList(mAuthorList);
+                getFragmentListener().onFragmentEvent(MyBookshelfEvent.POP_BACK_STACK,null);
                 break;
             case R.id.menu_author_list_add:
+                waitClickable(500);
+                Bundle bundle = new Bundle();
+                bundle.putString(RegisterAuthorDialogFragment.KEY_TITLE, getString(R.string.dialog_title_add_author));
+                bundle.putStringArrayList(RegisterAuthorDialogFragment.KEY_AUTHOR_LIST, (ArrayList<String>) mAuthorList);
+                bundle.putString(RegisterAuthorDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                bundle.putString(RegisterAuthorDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                bundle.putInt(RegisterAuthorDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_ADD_AUTHOR);
+                RegisterAuthorDialogFragment.showRegisterAuthorDialog(this, bundle, TAG_ADD_AUTHOR);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -166,19 +175,19 @@ public class AuthorListFragment extends BaseFragment implements AuthorRecyclerVi
         if (D) Log.d(TAG, "onLongClick() : " + author);
         if (isClickable()) {
             waitClickable(500);
-            Bundle param = new Bundle();
-            param.putInt(KEY_POSITION, position);
-            param.putString(KEY_AUTHOR, author);
-            Bundle bundle = new Bundle();
-            bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_author));
-            bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_author));
-            bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-            bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-            bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_AUTHOR);
-            bundle.putBundle(NormalDialogFragment.KEY_PARAMS, param);
-            bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
-            NormalDialogFragment.showNormalDialog(this, bundle, TAG_UNREGISTER_AUTHOR);
-        }
+
+        }Bundle param = new Bundle();
+        param.putInt(KEY_POSITION, position);
+        param.putString(KEY_AUTHOR, author);
+        Bundle bundle = new Bundle();
+        bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_author));
+        bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_author));
+        bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+        bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+        bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_UNREGISTER_AUTHOR);
+        bundle.putBundle(NormalDialogFragment.KEY_PARAMS, param);
+        bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+        NormalDialogFragment.showNormalDialog(this, bundle, TAG_UNREGISTER_AUTHOR);
     }
 
     @Override

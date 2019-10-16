@@ -74,6 +74,7 @@ public class BookImageDialogFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
+
         bookImageView = getDialog().findViewById(R.id.book_image);
         bookImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,11 +84,13 @@ public class BookImageDialogFragment extends DialogFragment {
         });
         String urlString = BookDataUtils.parseUrlString(url, BookDataUtils.IMAGE_TYPE_ORIGINAL);
         Uri uri = Uri.parse(urlString);
+
         DraweeController controller = Fresco.newDraweeControllerBuilder()
                 .setControllerListener(mControllerListener)
                 .setUri(uri)
                 .build();
         bookImageView.setController(controller);
+
     }
 
 

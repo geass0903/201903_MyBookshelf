@@ -234,7 +234,7 @@ public class MyBookshelfDBOpenHelper extends SQLiteOpenHelper {
                 insertValues.put(KEY_REGISTER_DATE, book.getRegisterDate());        // register date
 
 
-                db.replace(table, "", insertValues);
+//                db.replace(table, "", insertValues);
 
                 String sql = "select * from " + table + " where " + KEY_ISBN + " = ?;";
                 Cursor c = db.rawQuery(sql, new String[]{book.getISBN()});

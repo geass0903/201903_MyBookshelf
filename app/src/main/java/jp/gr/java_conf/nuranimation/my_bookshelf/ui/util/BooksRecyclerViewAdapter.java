@@ -238,43 +238,43 @@ public class BooksRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
         if (status == null) {
             read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
             if (read_status_image != null) {
-                read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.CLEAR);
+                read_status_image.mutate().setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.CLEAR);
             }
         } else switch (status) {
             case BookData.STATUS_INTERESTED:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_favorites, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FFDD0000"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.mutate().setColorFilter(Color.parseColor("#FFDD0000"), PorterDuff.Mode.SRC_ATOP);
                 }
                 break;
             case BookData.STATUS_UNREAD:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FFDDDD00"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.mutate().setColorFilter(Color.parseColor("#FFDDDD00"), PorterDuff.Mode.SRC_ATOP);
                 }
                 break;
             case BookData.STATUS_READING:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FF00DD00"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.mutate().setColorFilter(Color.parseColor("#FF00DD00"), PorterDuff.Mode.SRC_ATOP);
                 }
                 break;
             case BookData.STATUS_ALREADY_READ:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FF0000DD"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.mutate().setColorFilter(Color.parseColor("#FF0000DD"), PorterDuff.Mode.SRC_ATOP);
                 }
                 break;
             case BookData.STATUS_NONE:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#FF808080"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.mutate().setColorFilter(Color.parseColor("#FF808080"), PorterDuff.Mode.SRC_ATOP);
                 }
                 break;
             default:
                 read_status_image = ResourcesCompat.getDrawable(res, R.drawable.ic_circle, null);
                 if (read_status_image != null) {
-                    read_status_image.setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
+                    read_status_image.mutate().setColorFilter(Color.parseColor("#00000000"), PorterDuff.Mode.SRC_ATOP);
                 }
         }
         return read_status_image;
