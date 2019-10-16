@@ -198,17 +198,7 @@ public class SearchBooksFragment extends BaseFragment implements BooksRecyclerVi
                 BookData book = new BookData(data);
                 bundle_book.putParcelable(KEY_BOOK_DATA, book);
                 BookData registered = mDBOpenHelper.loadBookDataFromShelfBooks(data);
-                if(registered.getView_type() == BookData.TYPE_BOOK){
-                    // unregistered. register Dialog
-                    bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_register_book));
-                    bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_register_book));
-                    bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
-                    bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
-                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK);
-                    bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
-                    bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
-                    tag = TAG_REGISTER_BOOK;
-                } else {
+                if (registered.getView_type() == BookData.TYPE_BOOK) {
                     // registered. delete Dialog
                     bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_unregister_book));
                     bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_unregister_book));
@@ -218,6 +208,16 @@ public class SearchBooksFragment extends BaseFragment implements BooksRecyclerVi
                     bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
                     bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
                     tag = TAG_UNREGISTER_BOOK;
+                } else {
+                    // unregistered. register Dialog
+                    bundle.putString(NormalDialogFragment.KEY_TITLE, getString(R.string.dialog_title_register_book));
+                    bundle.putString(NormalDialogFragment.KEY_MESSAGE, getString(R.string.dialog_message_register_book));
+                    bundle.putString(NormalDialogFragment.KEY_POSITIVE_LABEL, getString(R.string.dialog_button_label_positive));
+                    bundle.putString(NormalDialogFragment.KEY_NEGATIVE_LABEL, getString(R.string.dialog_button_label_negative));
+                    bundle.putInt(NormalDialogFragment.KEY_REQUEST_CODE, REQUEST_CODE_REGISTER_BOOK);
+                    bundle.putBundle(NormalDialogFragment.KEY_PARAMS, bundle_book);
+                    bundle.putBoolean(NormalDialogFragment.KEY_CANCELABLE, true);
+                    tag = TAG_REGISTER_BOOK;
                 }
                 NormalDialogFragment.showNormalDialog(this, bundle, tag);
             }
